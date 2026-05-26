@@ -1,0 +1,52 @@
+.qasm-display {
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #f8f8f8;
+}
+
+.qasm-header {
+  padding: 10px 15px;
+  background-color: #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qasm-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.qasm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.qasm-actions button {
+  padding: 5px 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.qasm-actions button:hover {
+  background-color: #45a049;
+}
+
+.qasm-code {
+  margin: 0;
+  padding: 15px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  font-size: 14px;
+  overflow-x: auto;
+  line-height: 1.5;
+  max-height: 300px;
+  overflow-y: auto;
+  border-top: 1px solid #ddd;
+}

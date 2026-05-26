@@ -1,0 +1,48 @@
+.qubit-context-menu {
+  position: fixed;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  min-width: 160px;
+  z-index: 1000;
+  padding: 4px 0;
+}
+
+.context-menu-header {
+  padding: 8px 12px;
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  font-size: 14px;
+}
+
+.context-menu-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+}
+
+.context-menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.context-menu-item-danger {
+  color: #dc2626;
+}
+
+.context-menu-item-danger:hover {
+  background-color: #fee2e2;
+}
+
+.context-menu-divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 4px 0;
+}

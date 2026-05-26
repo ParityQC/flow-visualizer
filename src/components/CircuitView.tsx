@@ -1,0 +1,279 @@
+/**
+ * handles the view of the GUI and feeds into CircuitBuilder. Label and Gate placement happens here.
+ */
+import { GateComponent } from './GateComponent';
+import './CircuitView.css';
+import { InlineMath } from 'react-katex';
+import 'katex/dist/katex.min.css';
+import { Gate } from '../models/Gates';
+import { Circuit } from '../models/Circuit';
+import { lineHeight, momentWidth, padding, qubitLabelWidth } from './LayoutConstants';
+import { useMemo, useState } from 'react';
+import { QubitLabelDisplay } from '../utils/QubitLabelDisplay';
+import {
+  computeCircuitRenderingData,
+  PositionedLabel,
+  RenderConfig,
+} from '../utils/QubitLabelDisplayUtils';
+import { GatePreview } from './CircuitBuilder';
+import { QubitContextMenu } from './QubitContextMenu';
+import { getInitialState, useLabelVisibility } from '../utils/LabelVisibility';
+
+/** The key to be used within `DataTransfer.setData` to signal that a gates is moved. */
+export const mimeMoveGate = 'application/x-move-gate';
+interface CircuitViewProps {
+  circuit: Circuit;
+  onGateContextMenu?: (_gate: Gate, _momentIndex: number) => void;
+  gatePreview?: GatePreview | null;
+}
+
+interface QubitMenuState {
+  qubitIndex: number;
+  position: { x: number; y: number }; // menu appears at position
+}
+
+export function CircuitView({ circuit, onGateContextMenu, gatePreview }: CircuitViewProps) {
+  const maxUsed = circuit.maxUsedQubitIndex();
+  const baseline = 5;
+  const numQubits = Math.max(baseline, maxUsed + 1);
+  const numMoments = Math.max(12, Array.from(circuit.moments()).length);
+
+  const [qubitMenu, setQubitMenu] = useState<QubitMenuState | null>(null);
+
+  // warning goes away once rendered
+  const { initialLabels, labelChanges, momentOffsets } = useMemo(() => {
+    const config: RenderConfig = {
+      padding,
+      lineHeight,
+      momentWidth,
+      qubitLabelWidth,
+    };
+
+    const result = computeCircuitRenderingData(circuit, config);
+    return {
+      initialLabels: result.initialLabels,
+      labelChanges: result.labelChanges,
+      momentOffsets: result.momentOffsets,
+    };
+  }, [circuit]);
+  const previewGate = useMemo(() => {
+    console.log(gatePreview?.controlQubit);
+    if (!gatePreview) return null;
+    if (gatePreview.controlQubit === null) return null;
+
+    if (gatePreview.targetType.numTargets === 2) {
+      return new Gate({
+        targetType: gatePreview.targetType,
+        controls: [],
+        targets: [gatePreview.targetQubit, gatePreview.controlQubit!],
+      });
+    } else {
+      return new Gate({
+        targetType: gatePreview.targetType,
+        controls: [gatePreview.controlQubit],
+        targets: [gatePreview.targetQubit],
+      });
+    }
+  }, [gatePreview]);
+
+  const totalOffset = useMemo(() => {
+    let total = 0;
+    momentOffsets.forEach((data) => {
+      total = Math.max(total, data.cumulativeOffset + data.maxOffset);
+    });
+    return total;
+  }, [momentOffsets]);
+
+  const canvasWidth = padding + qubitLabelWidth + numMoments * momentWidth + totalOffset;
+  const canvasHeight = padding * 2 + numQubits * lineHeight;
+
+  const getGateContainerTop = (gate: Gate): number => {
+    const allQubits = Array.from(gate.qubits());
+    const minQubit = Math.min(...allQubits);
+
+    return minQubit * lineHeight + 10;
+  };
+
+  const handleQubitRightClick = (e: React.MouseEvent, qubitIndex: number) => {
+    e.preventDefault();
+    setQubitMenu({
+      qubitIndex,
+      position: { x: e.clientX, y: e.clientY },
+    });
+  };
+
+  const closeQubitMenu = () => {
+    setQubitMenu(null);
+  };
+  const { isLabelXVisible, isLabelZVisible } = useLabelVisibility();
+
+  return (
+    <div className="circuit-box">
+      <div
+        className="circuit-canvas"
+        style={{
+          position: 'relative',
+          height: `${canvasHeight}px`,
+          width: `${canvasWidth}px`,
+        }}
+      >
+        <div className="circuit-grid">
+          {Array.from({ length: numQubits }).map((_, qubitIndex) =>
+            Array.from({ length: numMoments }).map((_, momentIndex) => {
+              const offsetData = momentOffsets.get(momentIndex);
+              const cumulativeOffset = offsetData?.cumulativeOffset || 0;
+              return (
+                <div
+                  key={`grid-${qubitIndex}-${momentIndex}`}
+                  className="circuit-cell"
+                  style={{
+                    top: `${padding + qubitIndex * lineHeight}px`,
+                    left: `${padding + qubitLabelWidth + momentIndex * momentWidth + cumulativeOffset}px`,
+                    width: `${momentWidth}px`,
+                    height: `${lineHeight}px`,
+                  }}
+                />
+              );
+            })
+          )}
+        </div>
+        <div className="gate-area">
+          {initialLabels.map((position: PositionedLabel) => (
+            <div
+              key={`initial-label-${position.key}`}
+              style={{
+                position: 'absolute',
+                top: `${position.top}px`,
+                left: `15px`,
+                zIndex: 5,
+              }}
+            >
+              <QubitLabelDisplay labels={position.labels} />
+            </div>
+          ))}
+          {Array.from(circuit.moments()).map((moment, momentIndex) => {
+            const offsetData = momentOffsets.get(momentIndex);
+            const gateOffsets = offsetData?.gateOffsets || new Map();
+            const cumulativeOffset = offsetData?.cumulativeOffset || 0;
+
+            const gateElements = Array.from(moment.gates()).map((gate, gateIndex) => {
+              const gateKey = `gate-${momentIndex}-${gateIndex}`;
+              const gateOffset = gateOffsets.get(gateKey) || 0;
+
+              const handleDragStart: React.DragEventHandler<HTMLDivElement> = (e) => {
+                e.dataTransfer.setData(mimeMoveGate, '1');
+                e.dataTransfer.effectAllowed = 'move';
+              };
+
+              return (
+                <div
+                  key={gateKey}
+                  style={{
+                    position: 'absolute',
+                    top: `${getGateContainerTop(gate)}px`,
+                    left: `${padding + qubitLabelWidth + momentIndex * momentWidth + cumulativeOffset + gateOffset}px`,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    cursor: 'grab',
+                    userSelect: 'none',
+                  }}
+                  draggable
+                  onDragStart={handleDragStart}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    if (onGateContextMenu) onGateContextMenu(gate, momentIndex);
+                  }}
+                >
+                  <GateComponent gate={gate} />
+                </div>
+              );
+            });
+
+            const labelElements = labelChanges
+              .filter((pos) => pos.momentIndex === momentIndex)
+              .map((position) => (
+                <div
+                  key={`label-${position.momentIndex}-${position.key}`}
+                  style={{
+                    position: 'absolute',
+                    top: `${position.top}px`,
+                    left: `${position.left}px`, // correct positions already computed
+                    pointerEvents: 'none',
+                    zIndex: 5,
+                  }}
+                >
+                  <QubitLabelDisplay labels={position.labels} />
+                </div>
+              ));
+
+            return (
+              <>
+                {gateElements}
+                {labelElements}
+              </>
+            );
+          })}
+          {gatePreview && previewGate && (
+            <div
+              style={{
+                position: 'absolute',
+                top: `${getGateContainerTop(previewGate)}px`,
+                left: `${padding + qubitLabelWidth + gatePreview.momentIndex * momentWidth + (momentOffsets.get(gatePreview.momentIndex)?.cumulativeOffset || 0)}px`,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                opacity: 0.5,
+                pointerEvents: 'none',
+                zIndex: 10,
+              }}
+            >
+              <GateComponent gate={previewGate} />
+            </div>
+          )}
+        </div>
+
+        <div className="qubit-wires-area">
+          {Array.from({ length: numQubits }).map((_, qubitIndex) => {
+            return (
+              <div
+                key={qubitIndex}
+                className="qubit-wire"
+                style={{
+                  height: `${lineHeight}px`,
+                  top: `${padding + qubitIndex * lineHeight}px`,
+                  left: `${qubitLabelWidth}px`,
+                  right: `${padding}px`,
+                  borderBottom: '2px solid blanchedalmond',
+                }}
+              >
+                <span
+                  className="qubit-label"
+                  style={{
+                    top: `${lineHeight / 2}px`,
+                    width: `${qubitLabelWidth}px`,
+                    left: `-${qubitLabelWidth * 0.75}px`,
+                    cursor: 'context-menu',
+                  }}
+                  onContextMenu={(e) => handleQubitRightClick(e, qubitIndex)}
+                >
+                  <InlineMath math={`q_{${qubitIndex}}`} />
+                  <span className="initial-state">
+                    {getInitialState(isLabelXVisible(qubitIndex), isLabelZVisible(qubitIndex))}
+                  </span>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        {qubitMenu && (
+          <QubitContextMenu
+            qubitIndex={qubitMenu.qubitIndex}
+            position={qubitMenu.position}
+            onClose={closeQubitMenu}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
