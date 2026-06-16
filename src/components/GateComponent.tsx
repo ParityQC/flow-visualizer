@@ -2,7 +2,7 @@
  * Gate Rendering happens here.
  */
 import './GateComponent.css';
-import { InlineMath } from 'react-katex';
+import { InlineMath } from './InlineMath';
 import { Gate } from '../models/Gates';
 import { lineHeight } from './LayoutConstants';
 

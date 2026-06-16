@@ -3,7 +3,7 @@
  */
 import { GateComponent } from './GateComponent';
 import './CircuitView.css';
-import { InlineMath } from 'react-katex';
+import { InlineMath } from './InlineMath';
 import 'katex/dist/katex.min.css';
 import { Gate } from '../models/Gates';
 import { Circuit } from '../models/Circuit';

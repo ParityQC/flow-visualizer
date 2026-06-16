@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import FlowFormalism from '../assets/FlowFormalism.png';
 import LabelUpdates from '../assets/LabelUpdates.png';
 import CnotLabels from '../assets/CnotLabels.png';
-import { InlineMath } from 'react-katex';
+import { InlineMath } from './InlineMath';
 
 export const MathHelp: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);

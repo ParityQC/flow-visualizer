@@ -2,7 +2,7 @@
  * Handles the creation of gates when the drag starts
  */
 import React from 'react';
-import { InlineMath } from 'react-katex';
+import { InlineMath } from './InlineMath';
 import './ToolBox.css';
 import {
   HTargetType,
@@ -181,14 +181,14 @@ export function Toolbar() {
         >
           <InlineMath math="S" />
         </div>
-        {/* S† Gate */}
+        {/* Sdg Gate */}
         <div
           className="palette-gate z-gate"
           draggable={true}
           onDragStart={(e) => handleDragStart(e, sdggate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="S†" />
+          <InlineMath math="S^\dagger" />
         </div>
 
         {/* Rz Gate */}

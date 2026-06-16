@@ -2,7 +2,7 @@
  *Handles initialzations the resulting visibilities of the labels.
  */
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { InlineMath } from 'react-katex';
+import { InlineMath } from '../components/InlineMath';
 
 interface LabelVisibilityState {
   showPhysX: boolean;
