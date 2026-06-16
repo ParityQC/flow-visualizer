@@ -63,10 +63,10 @@ export const MathHelp: React.FC = () => {
                 </a>
               </p>
               <p>
-                The blue labels with the brackets <InlineMath math="\textcolor{#2563eb}{⟨i⟩}" /> denote
-                the logical Pauli X Operator <InlineMath>X_i</InlineMath> and the red labels without
-                brackets <InlineMath math="\textcolor{#dc2626}{i}" /> denote the logical Pauli Z
-                Operator <InlineMath>Z_i</InlineMath>.
+                The blue labels with the brackets <InlineMath math="\textcolor{#2563eb}{⟨i⟩}" />{' '}
+                denote the logical Pauli X Operator <InlineMath>X_i</InlineMath> and the red labels
+                without brackets <InlineMath math="\textcolor{#dc2626}{i}" /> denote the logical
+                Pauli Z Operator <InlineMath>Z_i</InlineMath>.
                 <br />
                 <InlineMath> X_1 </InlineMath> corresponds to{' '}
                 <InlineMath math="\textcolor{#2563eb}{⟨1⟩}" />; <InlineMath> Z_1 </InlineMath>{' '}
@@ -112,11 +112,7 @@ export const MathHelp: React.FC = () => {
                     <br />
                     <InlineMath math="Z^\dagger Z_1Z=Z_1" />
                   </p>
-                  <img
-                    className="math-help-gate-img"
-                    src={CnotLabels}
-                    alt="CNOT Label Updates"
-                  />
+                  <img className="math-help-gate-img" src={CnotLabels} alt="CNOT Label Updates" />
                   <p>
                     {' '}
                     <InlineMath math="CNOT^\dagger X_1CNOT = X_1" /> <br />
@@ -192,8 +188,8 @@ export const MathHelp: React.FC = () => {
                   {' '}
                   <InlineMath math="X_i" /> and <InlineMath math="X_j" /> (resp.{' '}
                   <InlineMath math="Z_i" /> and <InlineMath math="Z_j" />) commute:{' '}
-                  <InlineMath math="{\textcolor{#2563eb}⟨12⟩}=\textcolor{#2563eb}{⟨21⟩}" /> {'('}resp.{' '}
-                  <InlineMath math="{\textcolor{#dc2626}12}=\textcolor{#dc2626}{21}" />
+                  <InlineMath math="{\textcolor{#2563eb}⟨12⟩}=\textcolor{#2563eb}{⟨21⟩}" /> {'('}
+                  resp. <InlineMath math="{\textcolor{#dc2626}12}=\textcolor{#dc2626}{21}" />
                   {')'}
                 </li>
                 <li>
@@ -202,11 +198,7 @@ export const MathHelp: React.FC = () => {
                   <InlineMath math="{\textcolor{#dc2626}112}=\textcolor{#dc2626}{2}" />
                 </li>
               </ul>
-              <img
-                className="math-help-formalism-img"
-                src={FlowFormalism}
-                alt="Figure 1"
-              />
+              <img className="math-help-formalism-img" src={FlowFormalism} alt="Figure 1" />
             </div>
           </div>
         </div>

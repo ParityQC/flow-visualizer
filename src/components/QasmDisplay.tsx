@@ -12,10 +12,7 @@ interface QasmDisplayProps {
   circuit: Circuit;
 }
 
-type Status =
-  | { kind: 'idle' }
-  | { kind: 'copied' }
-  | { kind: 'error'; message: string };
+type Status = { kind: 'idle' } | { kind: 'copied' } | { kind: 'error'; message: string };
 
 const STATUS_TIMEOUT_MS = 2000;
 

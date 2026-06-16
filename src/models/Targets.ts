@@ -152,10 +152,7 @@ export class YTargetType implements TargetType {
   }
 
   computeLabels(labels: XZLabelPair) {
-    return new XZLabelPair(
-      labels.physX.clone().addToPhase(2),
-      labels.physZ.clone().addToPhase(2)
-    );
+    return new XZLabelPair(labels.physX.clone().addToPhase(2), labels.physZ.clone().addToPhase(2));
   }
 }
 
@@ -219,10 +216,7 @@ export class SqrtXTargetType implements TargetType {
 
   computeLabels(labels: XZLabelPair) {
     const h1 = new XZLabelPair(labels.physZ.clone(), labels.physX.clone());
-    const s1 = new XZLabelPair(
-      combineLabels(h1.physX, h1.physZ).addToPhase(3),
-      h1.physZ.clone()
-    );
+    const s1 = new XZLabelPair(combineLabels(h1.physX, h1.physZ).addToPhase(3), h1.physZ.clone());
     return new XZLabelPair(s1.physZ.clone(), s1.physX.clone());
   }
 }

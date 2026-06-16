@@ -135,7 +135,7 @@ export class LabelTracker {
     return Array.from(momentLabels.keys()).sort((a, b) => a - b);
   }
 
-  getLabelsAtMomentBeforeGate(momentIndex: number): QubitToXZLabelPair | undefined {    
+  getLabelsAtMomentBeforeGate(momentIndex: number): QubitToXZLabelPair | undefined {
     return this.labelledMoments.get(momentIndex);
   }
 
@@ -154,7 +154,11 @@ export class LabelTracker {
   }
 
   /** Places the cloned XZLabelPair before the given location. */
-  private setLabelsBeforeMoment(momentIndex: number, qubitIndex: number, labels: XZLabelPair): void {
+  private setLabelsBeforeMoment(
+    momentIndex: number,
+    qubitIndex: number,
+    labels: XZLabelPair
+  ): void {
     if (!this.labelledMoments.has(momentIndex)) {
       this.labelledMoments.set(momentIndex, new Map<number, XZLabelPair>());
     }
@@ -195,7 +199,7 @@ export class LabelTracker {
       this.setLabelsAfterMoment(momentIndex, qubits[0], labelsAfter1);
       this.setLabelsAfterMoment(momentIndex, qubits[1], labelsAfter2);
     } else {
-      throw Error("applyGate only supports 1 or 2 qubits.");
+      throw Error('applyGate only supports 1 or 2 qubits.');
     }
   }
 
