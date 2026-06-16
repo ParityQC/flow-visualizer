@@ -1,5 +1,5 @@
 {
-  "name": "ParityQC Flow GUI",
+  "name": "@parityqc/flow-gui",
   "private": true,
   "version": "0.0.0",
   "type": "module",
