@@ -1,0 +1,41 @@
+{
+  "name": "Flow GUI",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22.17.0"
+    }
+  },
+  // Forward Vite's default dev server port
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh && npm install",
+  "remoteEnv": {
+    "HISTFILE": "/commandhistory/.bash_history",
+    "PROMPT_COMMAND": "history -a"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "mounts": [
+    {
+      "source": "bash-history-flow-gui",
+      "target": "/commandhistory",
+      "type": "volume"
+    }
+  ]
+}

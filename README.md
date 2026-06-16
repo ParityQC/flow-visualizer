@@ -13,13 +13,21 @@ Anette Messinger, Katharina Ludwig, Valentin Stauber, and Reinhard Stahn.
 
 ## Development
 
-TODO(rainij): might want to use devcontainer instead of nvm.
+The recommended way to develop is using the included [Dev
+Container](https://containers.dev/). Open the repository in VS Code and choose
+**Dev Containers: Reopen in Container** from the command palette. This installs
+a specific node version and runs `npm install` automatically, then opens the
+Vite dev server in your browser.
 
-Node version is pinned in `.nvmrc`. Install
-[NVM](https://github.com/nvm-sh/nvm), then:
+If you are not satisfied with the container config, just use it as a template
+and create your custom config under `.devcontainer/local/` (gitignored). vscode
+will ask you which one to use. Also note that other IDEs also support the
+devcontainer standard and that there is a
+[cli](https://github.com/devcontainers/cli).
+
+To develop without the container, install Node 22.17.0, then:
 
 ```shell
-nvm use            # uses the version from .nvmrc
 npm install
 npm run dev        # Vite dev server (default http://localhost:5173)
 ```
