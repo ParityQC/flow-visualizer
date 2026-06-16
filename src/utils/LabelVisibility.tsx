@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * React context for per-qubit label visibility (toggle X/Z labels globally
  * or per qubit, plus the implied initial-state notation).
