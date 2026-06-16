@@ -142,7 +142,7 @@ export class LabelTracker {
   /**
    * Initializes trivial labels ⟨j⟩j for each qubit j.
    */
-  private initializeFromCircuit(circuit: Circuit): this {
+  initializeFromCircuit(circuit: Circuit): this {
     this.labelledMoments.clear();
     const numQubit = circuit.maxUsedQubitIndex();
 
@@ -167,7 +167,7 @@ export class LabelTracker {
     this.setLabelsBeforeMoment(momentIndex + 1, qubitIndex, labels);
   }
 
-  private getLabelsBeforeGate(momentIndex: number, qubitIndex: number): XZLabelPair | undefined {
+  getLabelsBeforeGate(momentIndex: number, qubitIndex: number): XZLabelPair | undefined {
     const momentLabels = this.labelledMoments.get(momentIndex);
     if (!momentLabels) return undefined;
     return momentLabels.get(qubitIndex);
