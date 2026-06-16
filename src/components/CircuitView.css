@@ -61,16 +61,3 @@
   height: 100%;
 }
 
-.clean-up-circuit-button:hover {
-  background-color: #2c5aa0;
-}
-
-.clean-up-circuit-button:active {
-  background-color: #1c3a70;
-}
-
-.clean-up-circuit-button::before {
-  content: '🧹';
-  margin-right: 10px;
-  height: 10px;
-}

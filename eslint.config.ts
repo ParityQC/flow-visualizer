@@ -54,7 +54,11 @@ export default tseslint.config(
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }],
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
     },
   }
 );

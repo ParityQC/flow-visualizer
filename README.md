@@ -1,50 +1,61 @@
-# Project Description
+# Parity Flow Circuit GUI
 
-The aim is to create a web-based GUI of Quantum Circuits to realize the parity
-flow formalism, see [arxiv](https://arxiv.org/pdf/2505.09468v1) There will be a
-drag and drop system for Clifford Gates and Rotations. For the prototype I will
-be focusing on CNOT's, R_z Gates, and only on the Z labels (for now).
-Furthermore the live QASM code will be displayed and you will be able to export
-it or even import your own qasm file to realize it with the tool.
+A web-based GUI for building Clifford+rotation quantum circuits and visualizing
+the [parity flow formalism](https://doi.org/10.1103/6xlb-l92j). Drag and drop
+gates onto the circuit grid to let logical Pauli labels propagate through each
+moment.
+
+## Credits
+
+The original prototype implementation was provided by Maximilian Markl during
+his internship at [ParityQC](https://parityqc.com) (2025/2026), supervised by
+Anette Messinger, Katharina Ludwig, Valentin Stauber, and Reinhard Stahn.
 
 ## Development
 
-Download and install NVM (Node Version Manager:[GitHub](https://github.com/nvm-sh/nvm?tab=readme-ov-file)) in order to set up Node.js. The following command installs the current version of node. For the most up to date version head to the README linked above.
+TODO(rainij): might want to use devcontainer instead of nvm.
 
-In unix/macOS/windows WSL run
-
-```shell
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-```
-
-Use project's Node.js version:
+Node version is pinned in `.nvmrc`. Install
+[NVM](https://github.com/nvm-sh/nvm), then:
 
 ```shell
-nvm use
-```
-
-This will automatically use the version specified in the `.nvmrc` file.
-
-Verify installation:
-
-```shell
-node --version
-npm --version
-```
-
-Install dependencies
-
-```shell
+nvm use            # uses the version from .nvmrc
 npm install
+npm run dev        # Vite dev server (default http://localhost:5173)
 ```
 
-To start the development server do
+Other scripts:
 
 ```shell
-npm run dev
+npm run build           # production build
+npm run lint            # ESLint
+npm run format          # Prettier (write)
+npm run format:check    # Prettier (check only)
+npx vitest run          # tests (single run)
+npm test                # tests (watch mode)
 ```
 
-and a browser window with the GUI will open.
+## Architecture
 
-If that does not work, copy the address shown in the terminal, and open it in
-your browser.
+Three-layer immutable data model in `src/models/`:
+
+- **`Targets.ts`** — gate types (`XTargetType`, `RzTargetType`,
+  `ISWAPTargetType`, …); each knows its arity and how to transform an
+  `XZLabelPair` via `calculateLabels`.
+- **`Gates.ts`** — wraps a `TargetType` with control/target qubit
+  indices.
+- **`Moments.ts`** / **`Circuit.ts`** — ordered sets of
+  non-overlapping gates; a circuit is an ordered list of moments.
+
+Label propagation lives in `src/utils/labelTracking.ts`: the
+`LabelTracker` walks the circuit and stores per-moment per-qubit
+`XZLabelPair`s. `src/utils/labelTrackingUtils.ts` holds the pure
+anticommutation/simplification math.
+
+UI tree is rooted at
+[`CircuitBuilder`](src/components/CircuitBuilder.tsx). It owns the
+`Circuit` and orchestrates drag-and-drop, label rendering, the
+QASM panel, and the example-circuit selector.
+
+QASM serialization is in `src/utils/QasmConverter.ts` and is
+**export-only** — there is currently no import path.

@@ -1,10 +1,11 @@
 /**
- * Gate Rendering happens here.
+ * Renders a single gate cell (single-qubit box, controlled-gate stem,
+ * SWAP/iSWAP/CNOT marks) for a given `Gate`.
  */
 import './GateComponent.css';
 import { InlineMath } from './InlineMath';
 import { Gate } from '../models/Gates';
-import { lineHeight } from './LayoutConstants';
+import { lineHeight } from '../utils/LayoutConstants';
 
 interface GateProps {
   gate: Gate;

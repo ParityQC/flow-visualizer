@@ -1,17 +1,29 @@
-/**
- * Lowest level data structure. Made up of name, number of Targets, number of Parameters, and two methods
- */
 import { XZLabelPair } from '../utils/labelTracking';
 import { combineLabels } from '../utils/labelTrackingUtils';
 
+/**
+ * A target type stands for a fundamental gate like X or Z. Actual `Gate`
+ * instances can essentially be created by adding zero or more control qubits
+ * and assigning actual qubits to act on.
+ */
 export interface TargetType {
   readonly name: string;
   readonly numTargets: number;
   readonly numParams: number;
+
   clone(): TargetType;
-  calculateLabels(_labels: XZLabelPair): XZLabelPair;
-  // function overloading possible in typescript
-  calculateLabels(_labels1: XZLabelPair, _labels2: XZLabelPair): XZLabelPair;
+
+  // TODO: not great to have different signatures for single- vs two-qubit
+  // gates. Also not great that the call-side as to manually adjust in case
+  // controls are present.
+
+  /** Compute the action of the corresponding gate with 0 controls. Only
+   * implemented for 1-target-gates. */
+  computeLabels(_labels: XZLabelPair): XZLabelPair;
+
+  /** Compute the action of the corresponding gate with 0 controls. Only
+   * implemented for 2-target-gates. */
+  computeLabels(_labels1: XZLabelPair, _labels2: XZLabelPair): XZLabelPair;
 }
 
 export class XTargetType implements TargetType {
@@ -27,8 +39,8 @@ export class XTargetType implements TargetType {
   clone() {
     return new XTargetType();
   }
-  calculateLabels(labels: XZLabelPair) {
-    return new XZLabelPair(labels._PhysX.clone(), labels._PhysZ.clone().addToPhase(2));
+  computeLabels(labels: XZLabelPair) {
+    return new XZLabelPair(labels.physX.clone(), labels.physZ.clone().addToPhase(2));
   }
 }
 
@@ -46,7 +58,7 @@ export class RzTargetType implements TargetType {
     return new RzTargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
+  computeLabels(labels: XZLabelPair) {
     return labels;
   }
 }
@@ -64,7 +76,7 @@ export class RxTargetType implements TargetType {
     return new RxTargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
+  computeLabels(labels: XZLabelPair) {
     return labels;
   }
 }
@@ -82,7 +94,7 @@ export class RyTargetType implements TargetType {
     return new RyTargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
+  computeLabels(labels: XZLabelPair) {
     return labels;
   }
 }
@@ -101,8 +113,8 @@ export class HTargetType implements TargetType {
     return new HTargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
-    return new XZLabelPair(labels._PhysZ.clone(), labels._PhysX.clone());
+  computeLabels(labels: XZLabelPair) {
+    return new XZLabelPair(labels.physZ.clone(), labels.physX.clone());
   }
 }
 
@@ -120,8 +132,8 @@ export class ZTargetType implements TargetType {
     return new ZTargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
-    return new XZLabelPair(labels._PhysX.clone().addToPhase(2), labels._PhysZ.clone());
+  computeLabels(labels: XZLabelPair) {
+    return new XZLabelPair(labels.physX.clone().addToPhase(2), labels.physZ.clone());
   }
 }
 
@@ -139,10 +151,10 @@ export class YTargetType implements TargetType {
     return new YTargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
+  computeLabels(labels: XZLabelPair) {
     return new XZLabelPair(
-      labels._PhysX.clone().addToPhase(2),
-      labels._PhysZ.clone().addToPhase(2)
+      labels.physX.clone().addToPhase(2),
+      labels.physZ.clone().addToPhase(2)
     );
   }
 }
@@ -161,10 +173,10 @@ export class STargetType implements TargetType {
     return new STargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
+  computeLabels(labels: XZLabelPair) {
     return new XZLabelPair(
-      combineLabels(labels._PhysX, labels._PhysZ).addToPhase(3),
-      labels._PhysZ.clone()
+      combineLabels(labels.physX, labels.physZ).addToPhase(3),
+      labels.physZ.clone()
     );
   }
 }
@@ -183,10 +195,10 @@ export class SdgTargetType implements TargetType {
     return new SdgTargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
+  computeLabels(labels: XZLabelPair) {
     return new XZLabelPair(
-      combineLabels(labels._PhysX, labels._PhysZ).addToPhase(1),
-      labels._PhysZ.clone()
+      combineLabels(labels.physX, labels.physZ).addToPhase(1),
+      labels.physZ.clone()
     );
   }
 }
@@ -205,13 +217,13 @@ export class SqrtXTargetType implements TargetType {
     return new SqrtXTargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
-    const h1 = new XZLabelPair(labels._PhysZ.clone(), labels._PhysX.clone());
+  computeLabels(labels: XZLabelPair) {
+    const h1 = new XZLabelPair(labels.physZ.clone(), labels.physX.clone());
     const s1 = new XZLabelPair(
-      combineLabels(h1._PhysX, h1._PhysZ).addToPhase(3),
-      h1._PhysZ.clone()
+      combineLabels(h1.physX, h1.physZ).addToPhase(3),
+      h1.physZ.clone()
     );
-    return new XZLabelPair(s1._PhysZ.clone(), s1._PhysX.clone());
+    return new XZLabelPair(s1.physZ.clone(), s1.physX.clone());
   }
 }
 
@@ -229,8 +241,8 @@ export class SqrtYTargetType implements TargetType {
     return new SqrtYTargetType();
   }
 
-  calculateLabels(labels: XZLabelPair) {
-    return new XZLabelPair(labels._PhysZ.clone(), labels._PhysX.clone().addToPhase(2));
+  computeLabels(labels: XZLabelPair) {
+    return new XZLabelPair(labels.physZ.clone(), labels.physX.clone().addToPhase(2));
   }
 }
 
@@ -248,8 +260,8 @@ export class SWAPTargetType implements TargetType {
     return new SWAPTargetType();
   }
   // double function usage because of overloading
-  calculateLabels(_labels: XZLabelPair): XZLabelPair;
-  calculateLabels(
+  computeLabels(_labels: XZLabelPair): XZLabelPair;
+  computeLabels(
     labels1: XZLabelPair,
     labels2?: XZLabelPair
   ): XZLabelPair | { labelsAfter1: XZLabelPair; labelsAfter2: XZLabelPair } {
@@ -257,8 +269,8 @@ export class SWAPTargetType implements TargetType {
       throw new Error('SWAP gate requires two qubit labels');
     }
     return {
-      labelsAfter1: new XZLabelPair(labels2._PhysX.clone(), labels2._PhysZ.clone()),
-      labelsAfter2: new XZLabelPair(labels1._PhysX.clone(), labels1._PhysZ.clone()),
+      labelsAfter1: new XZLabelPair(labels2.physX.clone(), labels2.physZ.clone()),
+      labelsAfter2: new XZLabelPair(labels1.physX.clone(), labels1.physZ.clone()),
     };
   }
 }
@@ -277,8 +289,8 @@ export class ISWAPTargetType implements TargetType {
     return new ISWAPTargetType();
   }
 
-  calculateLabels(_labels: XZLabelPair): XZLabelPair;
-  calculateLabels(
+  computeLabels(_labels: XZLabelPair): XZLabelPair;
+  computeLabels(
     labels1: XZLabelPair,
     labels2?: XZLabelPair
   ): XZLabelPair | { labelsAfter1: XZLabelPair; labelsAfter2: XZLabelPair } {
@@ -286,16 +298,42 @@ export class ISWAPTargetType implements TargetType {
       throw new Error('iSWAP gate requires two qubit labels');
     }
     const X_1 = combineLabels(
-      combineLabels(labels2._PhysX, labels1._PhysZ),
-      labels2._PhysZ
+      combineLabels(labels2.physX, labels1.physZ),
+      labels2.physZ
     ).addToPhase(3);
     const X_2 = combineLabels(
-      combineLabels(labels1._PhysX, labels1._PhysZ),
-      labels2._PhysZ
+      combineLabels(labels1.physX, labels1.physZ),
+      labels2.physZ
     ).addToPhase(3);
     return {
-      labelsAfter1: new XZLabelPair(X_1, labels2._PhysZ),
-      labelsAfter2: new XZLabelPair(X_2, labels1._PhysZ),
+      labelsAfter1: new XZLabelPair(X_1, labels2.physZ),
+      labelsAfter2: new XZLabelPair(X_2, labels1.physZ),
     };
   }
+}
+
+const targetTypeClasses = [
+  XTargetType,
+  YTargetType,
+  ZTargetType,
+  HTargetType,
+  STargetType,
+  SdgTargetType,
+  SqrtXTargetType,
+  SqrtYTargetType,
+  RxTargetType,
+  RyTargetType,
+  RzTargetType,
+  SWAPTargetType,
+  ISWAPTargetType,
+] as const;
+
+const targetTypeFactories: Record<string, () => TargetType> = Object.fromEntries(
+  targetTypeClasses.map((Cls) => [new Cls().name, () => new Cls()])
+);
+
+export function instantiateTargetType(name: string): TargetType {
+  const factory = targetTypeFactories[name];
+  if (!factory) throw new Error(`Unknown target type: ${name}`);
+  return factory();
 }

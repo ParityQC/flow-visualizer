@@ -7,8 +7,8 @@ import {
   emptyCircuit,
   testCircuit,
   twineChain,
-  _1DHeisenberg,
-  _1DHeisenbergAuxiliary,
+  oneDHeisenberg,
+  oneDHeisenbergAuxiliary,
 } from '../utils/exampleCircuits';
 import './CircuitSelector.css';
 import { useLabelVisibility } from '../utils/LabelVisibility';
@@ -39,12 +39,12 @@ const circuitOptions: CircuitOption[] = [
   {
     name: '1D Heisenberg',
     description: 'Heisenberg model simulation',
-    circuit: _1DHeisenberg,
+    circuit: oneDHeisenberg,
   },
   {
     name: '1D Heisenberg Auxiliary',
     description: 'Heisenberg model with auxiliary qubit',
-    circuit: _1DHeisenbergAuxiliary,
+    circuit: oneDHeisenbergAuxiliary,
     initAuxQubits: [3],
   },
 ];

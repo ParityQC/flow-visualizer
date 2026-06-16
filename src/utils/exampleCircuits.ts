@@ -101,7 +101,7 @@ export const twineChain = new Circuit([
   new Moment([cnot(0, 1)]),
 ]);
 
-export const _1DHeisenberg = new Circuit([
+export const oneDHeisenberg = new Circuit([
   new Moment([cnot(1, 2)]),
   new Moment([rz(1), rx(2)]),
   new Moment([h(1)]),
@@ -112,7 +112,7 @@ export const _1DHeisenberg = new Circuit([
   new Moment([sdg(1), s(2)]),
 ]);
 
-export const _1DHeisenbergAuxiliary = new Circuit([
+export const oneDHeisenbergAuxiliary = new Circuit([
   new Moment([cnot(2, 1), s(3)]),
   new Moment([cnot(1, 3)]),
   new Moment([cnot(3, 2)]),

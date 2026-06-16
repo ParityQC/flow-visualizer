@@ -1,5 +1,6 @@
 /**
- * calculation of labels with anticommutation rules
+ * Pure label arithmetic: combining Pauli operators, anticommutation
+ * tracking, and the X·X = Z·Z = I cancellations.
  */
 import { XZLabelPair, Label, SinglePauli } from './labelTracking';
 
@@ -15,7 +16,7 @@ export function simplifyOperators(operators: SinglePauli[]): SinglePauli[] {
 
   for (const op of operators) {
     const existingIndex = result.findIndex(
-      (existing) => existing._type === op._type && existing._name === op._name
+      (existing) => existing.type === op.type && existing.qubit === op.qubit
     );
     if (existingIndex !== -1) {
       result.splice(existingIndex, 1);
@@ -25,11 +26,11 @@ export function simplifyOperators(operators: SinglePauli[]): SinglePauli[] {
   }
 
   return result.sort((a, b) => {
-    if (a._type !== b._type) {
-      return a._type === 'X' ? -1 : 1;
+    if (a.type !== b.type) {
+      return a.type === 'X' ? -1 : 1;
     }
-    const qa = parseInt(a._name, 10);
-    const qb = parseInt(b._name, 10);
+    const qa = parseInt(a.qubit, 10);
+    const qb = parseInt(b.qubit, 10);
     return qa - qb;
   });
 }
@@ -53,7 +54,7 @@ export function simplifyWithAnticommutation(operators: SinglePauli[]): {
       const op1 = simplified[i];
       const op2 = simplified[j];
       // only anticommute if Z labels are to the left and X labels are to the right
-      if (op1._name === op2._name && op1._type === 'Z' && op2._type === 'X') {
+      if (op1.qubit === op2.qubit && op1.type === 'Z' && op2.type === 'X') {
         [simplified[i], simplified[j]] = [simplified[j], simplified[i]];
         extraPhase = (extraPhase + 2) % 4;
       }
@@ -64,8 +65,9 @@ export function simplifyWithAnticommutation(operators: SinglePauli[]): {
 }
 
 /**
- * calculates label corresponding to product of operator of label 1 and operator of label 2
- * corresponds to add second label after first label and then reordering and adapting phase if necessary (anticommuting)
+ * Compute label corresponding to product of operator of label 1 and operator of
+ * label 2 corresponds to add second label after first label and then reordering
+ * and adapting phase if necessary (anticommuting)
  */
 export function combineLabels(label1: Label, label2: Label): Label {
   const combinedOperators = [...label1.operators, ...label2.operators];
@@ -79,12 +81,12 @@ export function labelsAfterCX(
 ): { control: XZLabelPair; target: XZLabelPair } {
   return {
     control: new XZLabelPair(
-      combineLabels(controlLabels._PhysX, targetLabels._PhysX),
-      controlLabels._PhysZ.clone()
+      combineLabels(controlLabels.physX, targetLabels.physX),
+      controlLabels.physZ.clone()
     ),
     target: new XZLabelPair(
-      targetLabels._PhysX.clone(),
-      combineLabels(targetLabels._PhysZ, controlLabels._PhysZ)
+      targetLabels.physX.clone(),
+      combineLabels(targetLabels.physZ, controlLabels.physZ)
     ),
   };
 }
@@ -95,12 +97,12 @@ export function labelsAfterCZ(
 ): { control: XZLabelPair; target: XZLabelPair } {
   return {
     control: new XZLabelPair(
-      combineLabels(controlLabels._PhysX, targetLabels._PhysZ),
-      controlLabels._PhysZ.clone()
+      combineLabels(controlLabels.physX, targetLabels.physZ),
+      controlLabels.physZ.clone()
     ),
     target: new XZLabelPair(
-      combineLabels(targetLabels._PhysX, controlLabels._PhysZ),
-      targetLabels._PhysZ.clone()
+      combineLabels(targetLabels.physX, controlLabels.physZ),
+      targetLabels.physZ.clone()
     ),
   };
 }

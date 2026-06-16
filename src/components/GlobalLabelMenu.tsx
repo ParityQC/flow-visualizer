@@ -1,5 +1,5 @@
 /**
- * Handles Global Label Menu: Global Label Visibility settings are set here.
+ * Dropdown that toggles global visibility of X and Z Pauli labels.
  */
 import { useState } from 'react';
 import { useLabelVisibility } from '../utils/LabelVisibility';

@@ -7,8 +7,8 @@ import { InlineMath } from './InlineMath';
 import 'katex/dist/katex.min.css';
 import { Gate } from '../models/Gates';
 import { Circuit } from '../models/Circuit';
-import { lineHeight, momentWidth, padding, qubitLabelWidth } from './LayoutConstants';
-import { useMemo, useState } from 'react';
+import { lineHeight, momentWidth, padding, qubitLabelWidth } from '../utils/LayoutConstants';
+import { Fragment, useMemo, useState } from 'react';
 import { QubitLabelDisplay } from '../utils/QubitLabelDisplay';
 import {
   computeCircuitRenderingData,
@@ -40,7 +40,6 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
 
   const [qubitMenu, setQubitMenu] = useState<QubitMenuState | null>(null);
 
-  // warning goes away once rendered
   const { initialLabels, labelChanges, momentOffsets } = useMemo(() => {
     const config: RenderConfig = {
       padding,
@@ -207,10 +206,10 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
               ));
 
             return (
-              <>
+              <Fragment key={`moment-${momentIndex}`}>
                 {gateElements}
                 {labelElements}
-              </>
+              </Fragment>
             );
           })}
           {gatePreview && previewGate && (

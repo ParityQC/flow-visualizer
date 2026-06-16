@@ -50,3 +50,19 @@
   overflow-y: auto;
   border-top: 1px solid #ddd;
 }
+
+.qasm-banner {
+  padding: 8px 15px;
+  font-size: 13px;
+  border-top: 1px solid #ddd;
+}
+
+.qasm-banner-success {
+  background-color: #e6f4ea;
+  color: #1e6b34;
+}
+
+.qasm-banner-error {
+  background-color: #fdecea;
+  color: #a4231b;
+}

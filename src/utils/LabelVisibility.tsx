@@ -1,5 +1,6 @@
 /**
- *Handles initialzations the resulting visibilities of the labels.
+ * React context for per-qubit label visibility (toggle X/Z labels globally
+ * or per qubit, plus the implied initial-state notation).
  */
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { InlineMath } from '../components/InlineMath';

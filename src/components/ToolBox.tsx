@@ -1,5 +1,6 @@
 /**
- * Handles the creation of gates when the drag starts
+ * Gate palette. Initiates a drag, attaching a JSON-serialized
+ * `GateDragPayload` under `mimeGateType` for the drop handler to read.
  */
 import React from 'react';
 import { InlineMath } from './InlineMath';
@@ -20,7 +21,15 @@ import {
   ZTargetType,
 } from '../models/Targets';
 import { Gate } from '../models/Gates';
-export let toolBoxCurrentGate: Gate | null = null;
+
+/** MIME key for the JSON-serialized gate template carried during a palette drag. */
+export const mimeGateType = 'application/gate-type';
+
+export interface GateDragPayload {
+  targetType: string;
+  controls: number[];
+  targets: number[];
+}
 
 export function Toolbar() {
   const xgate = new Gate({
@@ -121,14 +130,12 @@ export function Toolbar() {
       }
     }, 0);
 
-    toolBoxCurrentGate = gate;
-
-    const gateData = {
+    const payload: GateDragPayload = {
       targetType: gate.targetType.name,
       controls: Array.from(gate.controls),
       targets: Array.from(gate.targets),
     };
-    e.dataTransfer.setData('application/gate-type', JSON.stringify(gateData));
+    e.dataTransfer.setData(mimeGateType, JSON.stringify(payload));
     e.dataTransfer.effectAllowed = 'copy';
   };
 

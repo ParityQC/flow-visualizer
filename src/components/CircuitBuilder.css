@@ -21,3 +21,35 @@
   object-fit: contain;
   pointer-events: none;
 }
+
+.circuit-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.circuit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-left: 10px;
+  width: fit-content;
+}
+
+.circuit-action-button {
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  padding: 8px 16px;
+}
+
+.circuit-action-button:hover {
+  background-color: #e0e0e0;
+}
+
+.circuit-title {
+  font-family: sans-serif;
+  text-align: center;
+  color: rgb(214, 0, 46);
+}
