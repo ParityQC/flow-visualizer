@@ -25,7 +25,7 @@ will ask you which one to use. Also note that other IDEs also support the
 devcontainer standard and that there is a
 [cli](https://github.com/devcontainers/cli).
 
-To develop without the container, install Node 22.17.0, then:
+To develop without the container, install Node manually, then:
 
 ```shell
 npm install
