@@ -1,0 +1,42 @@
+.math-help-trigger {
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  max-height: 20px;
+  padding: 0 8px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-raised);
+}
+
+.math-help-modal {
+  position: relative;
+  background-color: var(--color-surface);
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  max-width: 1800px;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.math-help-gate-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto 20px auto;
+}
+
+.math-help-gate-img {
+  width: 15%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.math-help-formalism-img {
+  width: 50%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}

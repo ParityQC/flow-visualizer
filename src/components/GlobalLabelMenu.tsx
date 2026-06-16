@@ -28,7 +28,7 @@ export function GlobalLabelMenu() {
             role="presentation"
           />
           <div className="global-label-dropdown">
-            <div className="dropdown-header">Global Label Visibility</div>
+            <div className="label-menu-header">Global Label Visibility</div>
             <button className="dropdown-item" onClick={togglePhysX}>
               <span className="checkbox">{state.showPhysX ? '☑' : '☐'}</span>
               Show all X labels

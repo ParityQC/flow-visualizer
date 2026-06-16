@@ -4,15 +4,15 @@
 
 .global-label-menu-button {
   cursor: pointer;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: #f0f0f0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-raised);
   padding: 8px 16px;
   width: 100%;
 }
 
 .global-label-menu-button:hover {
-  background-color: #e0e0e0;
+  background-color: var(--color-raised-hover);
 }
 
 .menu-backdrop {
@@ -29,20 +29,20 @@
   top: 100%;
   left: 0;
   margin-top: 4px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-dropdown);
   min-width: 200px;
   z-index: 100;
   padding: 4px 0;
 }
 
-.dropdown-header {
+.label-menu-header {
   padding: 8px 12px;
   font-weight: bold;
-  border-bottom: 1px solid #eee;
-  color: #333;
+  border-bottom: 1px solid var(--color-border-divider);
+  color: var(--color-text);
 }
 
 .dropdown-item {
@@ -55,9 +55,9 @@
   background: none;
   cursor: pointer;
   text-align: left;
-  font-size: 14px;
+  font-size: var(--font-size-base);
 }
 
 .dropdown-item:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-raised);
 }

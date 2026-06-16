@@ -8,6 +8,8 @@ import FlowFormalism from '../assets/FlowFormalism.png';
 import LabelUpdates from '../assets/LabelUpdates.png';
 import CnotLabels from '../assets/CnotLabels.png';
 import { InlineMath } from './InlineMath';
+import './HelpButton.css';
+import './MathHelp.css';
 
 export const MathHelp: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,78 +24,22 @@ export const MathHelp: React.FC = () => {
       return () => document.removeEventListener('keydown', handleEscape);
     }
   }, [isOpen]);
+
   return (
     <>
-      <button
-        onClick={() => setIsOpen(true)}
-        style={{
-          cursor: 'pointer',
-          borderRadius: '4px',
-          border: '1px solid #ccc',
-          backgroundColor: '#f0f0f0',
-          maxHeight: '20px',
-          position: 'fixed',
-          bottom: '60px',
-          right: '20px',
-        }}
-      >
+      <button className="math-help-trigger" onClick={() => setIsOpen(true)}>
         Math Background
       </button>
 
       {isOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1000,
-          }}
-        >
+        <div className="help-modal-overlay">
           <button
+            className="help-modal-close-overlay"
             onClick={() => setIsOpen(false)}
             aria-label="Close dialog"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              width: '100%',
-              height: '100%',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'default',
-            }}
           />
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: '24px',
-              borderRadius: '8px',
-              maxWidth: '1800px',
-              maxHeight: '90vh',
-              overflow: 'auto',
-              position: 'relative',
-            }}
-          >
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                border: 'none',
-                background: 'none',
-                fontSize: '20px',
-                cursor: 'pointer',
-              }}
-            >
+          <div className="math-help-modal">
+            <button className="help-modal-close" onClick={() => setIsOpen(false)}>
               ✕
             </button>
 
@@ -143,21 +89,9 @@ export const MathHelp: React.FC = () => {
               <h4 style={{ textAlign: 'center' }}>Gate-Specific Label Updates</h4>
               <p>Different quantum gates update the qubit labels dynamically as they operate:</p>
               <ul style={{ display: 'inline-block', textAlign: 'left' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    width: '100%',
-                    margin: '0 auto 20px auto',
-                  }}
-                >
+                <div className="math-help-gate-row">
                   <img
-                    style={{
-                      width: '15%',
-                      height: 'auto',
-                      margin: '0 auto',
-                    }}
+                    className="math-help-gate-img"
                     src={LabelUpdates}
                     alt="single-qubit label updates"
                   />
@@ -179,12 +113,7 @@ export const MathHelp: React.FC = () => {
                     <InlineMath math="Z^\dagger Z_1Z=Z_1" />
                   </p>
                   <img
-                    style={{
-                      width: '15%',
-                      height: 'auto',
-
-                      margin: '0 auto',
-                    }}
+                    className="math-help-gate-img"
                     src={CnotLabels}
                     alt="CNOT Label Updates"
                   />
@@ -224,7 +153,7 @@ export const MathHelp: React.FC = () => {
                 <br />
                 Note that{' '}
                 <InlineMath
-                  math="X_1Z_1 = i^3Y_1 \;\&\; X_2Z_2 = i^3Y_2 \implies 
+                  math="X_1Z_1 = i^3Y_1 \;\&\; X_2Z_2 = i^3Y_2 \implies
                 {\textcolor{#2563eb}{⟨12⟩}}{\textcolor{#dc2626}{12}} \mapsto X_1Z_1X_2Z_2 = i^3Y_1i^3Y_2 = -Y_1Y_2 "
                 />
                 . <br />
@@ -239,8 +168,8 @@ export const MathHelp: React.FC = () => {
                 <InlineMath math="Y=i*X*Z" /> form. For example, an <InlineMath math="R_Y" />{' '}
                 rotation after the second CNOT on the first qubit <br /> would get interpreted as{' '}
                 <InlineMath
-                  math="i\ast {\textcolor{#dc2626}{12}} \ast {\textcolor{#2563eb}{\langle 1\rangle}} 
-                {\textcolor{#dc2626}{2}} = i \cdot (-1) {\textcolor{#2563eb}{\langle 1\rangle}} {\textcolor{#dc2626}{122}} 
+                  math="i\ast {\textcolor{#dc2626}{12}} \ast {\textcolor{#2563eb}{\langle 1\rangle}}
+                {\textcolor{#dc2626}{2}} = i \cdot (-1) {\textcolor{#2563eb}{\langle 1\rangle}} {\textcolor{#dc2626}{122}}
                 = i^3 {\textcolor{#2563eb}{\langle 1 \rangle}} {\textcolor{#dc2626}{1}}"
                 />
                 , i.e. <InlineMath math="\bar{R}_{-Y_1}" />.<br />
@@ -274,12 +203,7 @@ export const MathHelp: React.FC = () => {
                 </li>
               </ul>
               <img
-                style={{
-                  width: '50%',
-                  height: 'auto',
-                  display: 'block',
-                  margin: '0 auto',
-                }}
+                className="math-help-formalism-img"
                 src={FlowFormalism}
                 alt="Figure 1"
               />

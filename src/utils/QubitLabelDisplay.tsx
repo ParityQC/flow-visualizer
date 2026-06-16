@@ -4,27 +4,12 @@
  */
 import { Label, XZLabelPair, SinglePauli } from './labelTracking';
 import { useLabelVisibility } from './LabelVisibility';
+import './QubitLabelDisplay.css';
 
 interface QubitLabelDisplayProps {
   labels: XZLabelPair;
 }
 
-const labelStyle = {
-  display: 'flex',
-  flexDirection: 'column' as const,
-  gap: '4px',
-  borderRadius: '6px',
-  fontFamily: 'monospace',
-  alignItems: 'center',
-};
-
-const rowStyle = {
-  display: 'flex',
-  gap: '4px',
-  alignItems: 'center',
-  minHeight: '18px',
-};
-const tokenStyle = { fontSize: '12px', fontFamily: 'monospace', fontWeight: 600 };
 const values = ['', 'i', '-', '-i'];
 
 export function QubitLabelDisplay({ labels }: QubitLabelDisplayProps) {
@@ -52,51 +37,44 @@ export function QubitLabelDisplay({ labels }: QubitLabelDisplayProps) {
     const allFiltered = label.operators.length > 0 && visibleOperators.length === 0;
 
     return (
-      <div
-        style={{
-          ...rowStyle,
-          visibility: isVisible ? 'visible' : 'hidden',
-        }}
-      >
-        {<span style={{ color: '#6b7280' }}>{values[label.phase]}</span>}
+      <div className="label-row" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
+        <span className="label-phase">{values[label.phase]}</span>
         {allFiltered ? (
-          <span style={{ visibility: 'hidden' }}>I</span> // if filtered
+          <span style={{ visibility: 'hidden' }}>I</span>
         ) : (
-          <>
-            <div style={{ display: 'flex', gap: '2px' }}>
-              {visibleOperators.length > 0 ? (
-                <>
-                  {xOperators.length > 0 && (
-                    <span style={{ ...tokenStyle, color: '#2563eb' }}>
-                      ⟨
-                      {xOperators.map((op: SinglePauli, i: number) => (
-                        <span key={`x-${i}`}>
-                          {op.qubit}
-                          {i < xOperators.length - 1 ? ',' : ''}
-                        </span>
-                      ))}
-                      ⟩
-                    </span>
-                  )}
-                  {zOperators.map((op: SinglePauli, i: number) => (
-                    <span key={`z-${i}`} style={{ ...tokenStyle, color: '#dc2626' }}>
-                      {op.qubit}
-                      {i < zOperators.length - 1 ? ',' : ''}
-                    </span>
-                  ))}
-                </>
-              ) : (
-                <span style={{ color: '#888' }}>I</span>
-              )}
-            </div>
-          </>
+          <div className="label-tokens">
+            {visibleOperators.length > 0 ? (
+              <>
+                {xOperators.length > 0 && (
+                  <span className="label-token label-token-x">
+                    ⟨
+                    {xOperators.map((op: SinglePauli, i: number) => (
+                      <span key={`x-${i}`}>
+                        {op.qubit}
+                        {i < xOperators.length - 1 ? ',' : ''}
+                      </span>
+                    ))}
+                    ⟩
+                  </span>
+                )}
+                {zOperators.map((op: SinglePauli, i: number) => (
+                  <span key={`z-${i}`} className="label-token label-token-z">
+                    {op.qubit}
+                    {i < zOperators.length - 1 ? ',' : ''}
+                  </span>
+                ))}
+              </>
+            ) : (
+              <span className="label-identity">I</span>
+            )}
+          </div>
         )}
       </div>
     );
   };
 
   return (
-    <div style={labelStyle}>
+    <div className="qubit-label-display">
       {renderLabel(labels.physX, state.showPhysX)}
       {renderLabel(labels.physZ, state.showPhysZ)}
     </div>

@@ -1,0 +1,42 @@
+.qubit-label-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  align-items: center;
+}
+
+.label-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  min-height: 18px;
+}
+
+.label-phase {
+  color: var(--color-text-faint);
+}
+
+.label-identity {
+  color: #888;
+}
+
+.label-tokens {
+  display: flex;
+  gap: 2px;
+}
+
+.label-token {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.label-token-x {
+  color: var(--color-x-label);
+}
+
+.label-token-z {
+  color: var(--color-z-label);
+}

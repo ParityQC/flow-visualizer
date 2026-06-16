@@ -5,9 +5,9 @@
   max-height: 20px;
   padding: 0 8px;
   cursor: pointer;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: #f0f0f0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-raised);
 }
 
 .help-modal-overlay {
@@ -32,9 +32,9 @@
 
 .help-modal {
   position: relative;
-  background-color: white;
+  background-color: var(--color-surface);
   padding: 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   max-width: 600px;
   max-height: 80vh;
   overflow: auto;
@@ -46,6 +46,6 @@
   right: 8px;
   border: none;
   background: none;
-  font-size: 20px;
+  font-size: var(--font-size-lg);
   cursor: pointer;
 }
