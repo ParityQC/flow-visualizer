@@ -23,7 +23,7 @@ Use project's Node.js version:
 nvm use
 ```
 
-This will automatically use the version specified in the `.nvrmc` file.
+This will automatically use the version specified in the `.nvmrc` file.
 
 Verify installation:
 

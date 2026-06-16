@@ -121,8 +121,6 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
 
           setCircuit(circuit.shallowCopy());
         }
-      } else {
-        console.log('Invalid second qubit position. Cancelling Gate placement.');
       }
 
       setPendingGate(null);
@@ -208,7 +206,6 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (pendingGate && e.key === 'Escape') {
         e.preventDefault();
-        console.log('CNOT placement canceled with Escape key.');
         setPendingGate(null);
       }
     },

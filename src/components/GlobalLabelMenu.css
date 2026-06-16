@@ -22,7 +22,6 @@
   bottom: 0;
   right: 0;
   z-index: 99;
-  visibility: 'hidden';
 }
 
 .global-label-dropdown {

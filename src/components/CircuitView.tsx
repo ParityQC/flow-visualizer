@@ -57,7 +57,6 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
     };
   }, [circuit]);
   const previewGate = useMemo(() => {
-    console.log(gatePreview?.controlQubit);
     if (!gatePreview) return null;
     if (gatePreview.controlQubit === null) return null;
 

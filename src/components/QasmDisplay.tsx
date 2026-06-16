@@ -1,7 +1,6 @@
 /**
  * Handles the QASM window visuals.
  */
-import { useRef } from 'react';
 import { Circuit } from '../models/Circuit';
 import { circuitToQasm } from '../utils/QasmConverter';
 
@@ -11,7 +10,6 @@ interface QasmDisplayProps {
 
 export function QasmDisplay({ circuit }: QasmDisplayProps) {
   const qasmCode = circuitToQasm(circuit);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const copyToClipboard = () => {
     navigator.clipboard
@@ -40,12 +38,6 @@ export function QasmDisplay({ circuit }: QasmDisplayProps) {
         </div>
       </div>
       <pre className="qasm-code">{qasmCode}</pre>
-      <input
-        type="file"
-        ref={fileInputRef}
-        accept=".qasm, text/plain"
-        style={{ display: 'none' }}
-      />
     </div>
   );
 }

@@ -27,9 +27,9 @@ export class Label {
     private _operators: SinglePauli[],
     private _phase: number
   ) {
-    const simplfied = simplifyWithAnticommutation(this._operators);
-    this._phase = (this.phase + simplfied.extraPhase) % 4;
-    this._operators = simplfied.operators;
+    const simplified = simplifyWithAnticommutation(this._operators);
+    this._phase = (this.phase + simplified.extraPhase) % 4;
+    this._operators = simplified.operators;
   }
   equals(other: Label): boolean {
     if (this.phase !== other._phase) return false;

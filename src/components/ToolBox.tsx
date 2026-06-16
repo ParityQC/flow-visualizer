@@ -105,7 +105,6 @@ export function Toolbar() {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, gate: Gate) => {
     const target = e.currentTarget;
     if (gate.isControlled() && gate.targetType.name === 'X') {
-      console.log('cnot drag active');
       const dragImage = document.createElement('div');
       dragImage.innerHTML = '⊕';
 
