@@ -1,5 +1,7 @@
 .circuit-builder {
   display: flex;
+  gap: 8px;
+  padding: 8px;
   height: 100%;
   width: 100%;
   overflow: hidden;
@@ -7,11 +9,18 @@
 }
 
 .circuit-container {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 0;
   min-width: 0;
   height: 100%;
   position: relative;
   overflow: hidden;
+}
+
+.circuit-grid-wrapper {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .circuit-header {

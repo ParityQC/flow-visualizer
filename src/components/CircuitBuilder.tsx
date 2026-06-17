@@ -260,6 +260,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
 
         {/*eslint-disable-next-line */}
         <div
+          className="circuit-grid-wrapper"
           ref={gridRef}
           onDrop={handleGateDrop}
           onDragOver={handleDragOver}

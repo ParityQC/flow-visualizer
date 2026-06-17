@@ -36,7 +36,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
   const maxUsed = circuit.maxUsedQubitIndex();
   const baseline = 5;
   const numQubits = Math.max(baseline, maxUsed + 1);
-  const numMoments = Math.max(12, Array.from(circuit.moments()).length);
+  const numMoments = Math.max(Array.from(circuit.moments()).length + 3, 3);
 
   const [qubitMenu, setQubitMenu] = useState<QubitMenuState | null>(null);
 
@@ -113,6 +113,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
           position: 'relative',
           height: `${canvasHeight}px`,
           width: `${canvasWidth}px`,
+          minWidth: '100%',
         }}
       >
         <div className="circuit-grid">
