@@ -1,8 +1,8 @@
 .circuit-box {
   border: 1px solid var(--color-border-wire);
   background-color: var(--color-bg);
-  width: 60%;
-  margin: 20px auto;
+  width: 100%;
+  margin: 20px 0;
   min-height: 300px;
   overflow-x: auto;
   box-sizing: border-box;
