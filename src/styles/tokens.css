@@ -57,9 +57,19 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+}
+
 body {
+  height: 100%;
   font-family: var(--font-sans);
   margin: 0;
+}
+
+#root,
+.App {
+  height: 100%;
 }
 
 /* ── Shared button base ──────────────────────────────────────── */
