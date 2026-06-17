@@ -72,7 +72,7 @@ export function CircuitSelector({ onSelect, currentCircuitName }: CircuitSelecto
   return (
     <div className="circuit-selector">
       <button className="btn circuit-selector-button" onClick={() => setIsOpen(!isOpen)}>
-        <span>Load Circuit</span>
+        <span>Load Example Circuit</span>
         <span className="dropdown-arrow">{isOpen ? '▲' : '▼'}</span>
       </button>
 

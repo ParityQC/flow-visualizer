@@ -58,8 +58,8 @@ export const HelpButton: React.FC = () => {
               <h3>Features</h3>
               <p>To remove gates, right click on them.</p>
               <p>
-                To choose a hardcoded Circuit, select one from the &quot;Load Circuit&quot; button
-                located at the top left of the page.
+                To choose a hardcoded Circuit, select one from the &quot;Load Example Circuit&quot;
+                button located at the top left of the page.
               </p>
               <p>
                 If more qubits are needed drop a gate below the last qubit and the gate is

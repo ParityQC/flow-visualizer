@@ -1,6 +1,7 @@
 .circuit-selector {
   position: relative;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .circuit-selector-button {

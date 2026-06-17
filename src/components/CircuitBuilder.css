@@ -23,22 +23,19 @@
   min-height: 0;
 }
 
-.circuit-header {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding: 4px 16px;
-}
-
 .circuit-title {
-  grid-column: 2;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  font-size: var(--font-size-lg);
   color: var(--color-brand);
 }
 
 .corner-logo {
-  grid-column: 3;
-  justify-self: end;
-  height: 40px;
+  height: 32px;
   width: auto;
   object-fit: contain;
   pointer-events: none;
@@ -61,12 +58,14 @@
 .circuit-top-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px 0;
+  gap: 12px;
+  padding: 8px 16px;
 }
 
 .circuit-top-bar-end {
   display: flex;
+  align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 

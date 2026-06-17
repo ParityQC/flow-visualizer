@@ -248,14 +248,12 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
       <div className="circuit-container">
         <div className="circuit-top-bar">
           <CircuitSelector onSelect={handleCircuitSelect} />
+          <h1 className="circuit-title">Parity Flow Circuit</h1>
           <div className="circuit-top-bar-end">
             <MathHelp />
             <HelpButton />
+            <img className="corner-logo" src={logo} alt="ParityQC" />
           </div>
-        </div>
-        <div className="circuit-header">
-          <img className="corner-logo" src={logo} alt="Parity Flow" />
-          <h1 className="circuit-title">Parity Flow Circuit</h1>
         </div>
 
         {/*eslint-disable-next-line */}
