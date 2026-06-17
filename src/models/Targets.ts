@@ -8,6 +8,7 @@ import { combineLabels } from '../utils/labelTrackingUtils';
  */
 export interface TargetType {
   readonly name: string;
+  readonly latexName: string;
   readonly numTargets: number;
   readonly numParams: number;
 
@@ -30,6 +31,9 @@ export class XTargetType implements TargetType {
   get name() {
     return 'X';
   }
+  get latexName() {
+    return this.name;
+  }
   get numTargets() {
     return 1;
   }
@@ -47,6 +51,9 @@ export class XTargetType implements TargetType {
 export class RzTargetType implements TargetType {
   get name() {
     return 'Rz';
+  }
+  get latexName() {
+    return 'R_z';
   }
   get numTargets() {
     return 1;
@@ -66,6 +73,9 @@ export class RxTargetType implements TargetType {
   get name() {
     return 'Rx';
   }
+  get latexName() {
+    return 'R_x';
+  }
   get numTargets() {
     return 1;
   }
@@ -83,6 +93,9 @@ export class RxTargetType implements TargetType {
 export class RyTargetType implements TargetType {
   get name() {
     return 'Ry';
+  }
+  get latexName() {
+    return 'R_y';
   }
   get numTargets() {
     return 1;
@@ -103,6 +116,9 @@ export class HTargetType implements TargetType {
   get name() {
     return 'H';
   }
+  get latexName() {
+    return this.name;
+  }
   get numTargets() {
     return 1;
   }
@@ -121,6 +137,9 @@ export class HTargetType implements TargetType {
 export class ZTargetType implements TargetType {
   get name() {
     return 'Z';
+  }
+  get latexName() {
+    return this.name;
   }
   get numTargets() {
     return 1;
@@ -141,6 +160,9 @@ export class YTargetType implements TargetType {
   get name() {
     return 'Y';
   }
+  get latexName() {
+    return this.name;
+  }
   get numTargets() {
     return 1;
   }
@@ -159,6 +181,9 @@ export class YTargetType implements TargetType {
 export class STargetType implements TargetType {
   get name() {
     return 'S';
+  }
+  get latexName() {
+    return this.name;
   }
   get numTargets() {
     return 1;
@@ -182,6 +207,9 @@ export class SdgTargetType implements TargetType {
   get name() {
     return 'SDG';
   }
+  get latexName() {
+    return 'S^\\dagger';
+  }
   get numTargets() {
     return 1;
   }
@@ -204,6 +232,9 @@ export class SqrtXTargetType implements TargetType {
   get name() {
     return 'SX';
   }
+  get latexName() {
+    return this.name;
+  }
   get numTargets() {
     return 1;
   }
@@ -225,6 +256,9 @@ export class SqrtYTargetType implements TargetType {
   get name() {
     return 'SY';
   }
+  get latexName() {
+    return this.name;
+  }
   get numTargets() {
     return 1;
   }
@@ -243,6 +277,9 @@ export class SqrtYTargetType implements TargetType {
 export class SWAPTargetType implements TargetType {
   get name() {
     return 'SWAP';
+  }
+  get latexName() {
+    return this.name;
   }
   get numTargets() {
     return 2;
@@ -272,6 +309,9 @@ export class SWAPTargetType implements TargetType {
 export class ISWAPTargetType implements TargetType {
   get name() {
     return 'iSWAP';
+  }
+  get latexName() {
+    return this.name;
   }
   get numTargets() {
     return 2;

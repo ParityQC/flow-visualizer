@@ -159,7 +159,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, xgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="X" />
+          <InlineMath math={xgate.targetType.latexName} />
         </div>
         {/* SqrtX Gate */}
         <div
@@ -168,7 +168,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, sqrtxgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="SX" />
+          <InlineMath math={sqrtxgate.targetType.latexName} />
         </div>
         {/* Z Gate */}
         <div
@@ -177,7 +177,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, zgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="Z" />
+          <InlineMath math={zgate.targetType.latexName} />
         </div>
         {/* S Gate */}
         <div
@@ -186,7 +186,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, sgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="S" />
+          <InlineMath math={sgate.targetType.latexName} />
         </div>
         {/* Sdg Gate */}
         <div
@@ -195,7 +195,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, sdggate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="S^\dagger" />
+          <InlineMath math={sdggate.targetType.latexName} />
         </div>
 
         {/* Rz Gate */}
@@ -205,7 +205,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, rzgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="R_z" />
+          <InlineMath math={rzgate.targetType.latexName} />
         </div>
         {/* Rx Gate */}
         <div
@@ -214,7 +214,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, rxgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="R_x" />
+          <InlineMath math={rxgate.targetType.latexName} />
         </div>
         {/* Ry Gate */}
         <div
@@ -223,7 +223,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, rygate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="R_y" />
+          <InlineMath math={rygate.targetType.latexName} />
         </div>
         {/* H Gate */}
         <div
@@ -232,7 +232,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, hgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="H" />
+          <InlineMath math={hgate.targetType.latexName} />
         </div>
         {/* Y Gate */}
         <div
@@ -241,7 +241,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, ygate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="Y" />
+          <InlineMath math={ygate.targetType.latexName} />
         </div>
         {/* SqrtY Gate */}
         <div
@@ -250,7 +250,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, sqrtygate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="SY" />
+          <InlineMath math={sqrtygate.targetType.latexName} />
         </div>
         {/* CZ Gate */}
         <div

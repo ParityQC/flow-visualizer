@@ -14,7 +14,7 @@ interface GateProps {
 export function GateComponent({ gate }: GateProps) {
   // Single qubit gates
   if (gate.numControls === 0 && gate.targetType.numTargets === 1) {
-    const gateLabel = gate.targetType.name;
+    const gateLabel = gate.targetType.latexName;
     return (
       <div className="gate-wrapper-single">
         <div className="gate-box">
