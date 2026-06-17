@@ -1,7 +1,9 @@
 .toolbar {
   padding: 10px;
-  background-color: var(--color-bg);
+  background-color: var(--color-raised-hover);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .toolbar h3 {
