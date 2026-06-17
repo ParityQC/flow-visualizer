@@ -252,7 +252,9 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
           <div className="circuit-top-bar-end">
             <MathHelp />
             <HelpButton />
-            <img className="corner-logo" src={logo} alt="ParityQC" />
+            <a href="https://parityqc.com" target="_blank" rel="noopener noreferrer">
+              <img className="corner-logo" src={logo} alt="ParityQC" />
+            </a>
           </div>
         </div>
 
