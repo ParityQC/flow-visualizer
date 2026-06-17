@@ -40,7 +40,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
 
   const [qubitMenu, setQubitMenu] = useState<QubitMenuState | null>(null);
 
-  const { initialLabels, labelChanges, momentOffsets } = useMemo(() => {
+  const { initialLabels, labelChangesByMoment, momentOffsets } = useMemo(() => {
     const config: RenderConfig = {
       padding,
       lineHeight,
@@ -49,9 +49,17 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
     };
 
     const result = computeCircuitRenderingData(circuit, config);
+
+    const labelChangesByMoment = new Map<number, PositionedLabel[]>();
+    for (const lc of result.labelChanges) {
+      const arr = labelChangesByMoment.get(lc.momentIndex) ?? [];
+      arr.push(lc);
+      labelChangesByMoment.set(lc.momentIndex, arr);
+    }
+
     return {
       initialLabels: result.initialLabels,
-      labelChanges: result.labelChanges,
+      labelChangesByMoment,
       momentOffsets: result.momentOffsets,
     };
   }, [circuit]);
@@ -189,8 +197,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
               );
             });
 
-            const labelElements = labelChanges
-              .filter((pos) => pos.momentIndex === momentIndex)
+            const labelElements = (labelChangesByMoment.get(momentIndex) ?? [])
               .map((position) => (
                 <div
                   key={`label-${position.momentIndex}-${position.key}`}
