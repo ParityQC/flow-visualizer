@@ -197,21 +197,20 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
               );
             });
 
-            const labelElements = (labelChangesByMoment.get(momentIndex) ?? [])
-              .map((position) => (
-                <div
-                  key={`label-${position.momentIndex}-${position.key}`}
-                  style={{
-                    position: 'absolute',
-                    top: `${position.top}px`,
-                    left: `${position.left}px`, // correct positions already computed
-                    pointerEvents: 'none',
-                    zIndex: 5,
-                  }}
-                >
-                  <QubitLabelDisplay labels={position.labels} />
-                </div>
-              ));
+            const labelElements = (labelChangesByMoment.get(momentIndex) ?? []).map((position) => (
+              <div
+                key={`label-${position.momentIndex}-${position.key}`}
+                style={{
+                  position: 'absolute',
+                  top: `${position.top}px`,
+                  left: `${position.left}px`, // correct positions already computed
+                  pointerEvents: 'none',
+                  zIndex: 5,
+                }}
+              >
+                <QubitLabelDisplay labels={position.labels} />
+              </div>
+            ));
 
             return (
               <Fragment key={`moment-${momentIndex}`}>

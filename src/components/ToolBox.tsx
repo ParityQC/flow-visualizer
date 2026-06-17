@@ -294,4 +294,3 @@ export function Toolbar() {
     </div>
   );
 }
-
