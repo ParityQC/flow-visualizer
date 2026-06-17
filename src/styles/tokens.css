@@ -72,6 +72,36 @@ body {
   height: 100%;
 }
 
+/* ── Shared panel primitives ─────────────────────────────────── */
+.panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.panel-header {
+  background-color: var(--color-raised-hover);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border-divider);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.panel-label {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.panel-body {
+  background-color: var(--color-bg);
+  padding: 10px;
+}
+
 /* ── Shared button base ──────────────────────────────────────── */
 .btn {
   cursor: pointer;

@@ -50,11 +50,7 @@
 .circuit-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-  background-color: var(--color-raised-hover);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  gap: 8px;
 }
 
 .circuit-top-bar {

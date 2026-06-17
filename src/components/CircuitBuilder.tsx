@@ -234,14 +234,19 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
       <div className="circuit-sidebar">
         <Toolbar />
 
-        <div className="circuit-actions">
-          <GlobalLabelMenu />
-          <button className="btn" onClick={handleParallelizeGates}>
-            Compact Circuit
-          </button>
-          <button className="btn btn-danger" onClick={handleDeleteCircuit}>
-            Delete Circuit
-          </button>
+        <div className="panel">
+          <div className="panel-header">
+            <span className="panel-label">Circuit Actions</span>
+          </div>
+          <div className="panel-body circuit-actions">
+            <GlobalLabelMenu />
+            <button className="btn" onClick={handleParallelizeGates}>
+              Compact Circuit
+            </button>
+            <button className="btn btn-danger" onClick={handleDeleteCircuit}>
+              Delete Circuit
+            </button>
+          </div>
         </div>
       </div>
 

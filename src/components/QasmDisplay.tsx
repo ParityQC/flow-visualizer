@@ -69,9 +69,9 @@ export function QasmDisplay({ circuit }: QasmDisplayProps) {
         : null;
 
   return (
-    <div className="qasm-display">
-      <div className="qasm-header">
-        <h3>QASM Code</h3>
+    <div className="qasm-display panel">
+      <div className="panel-header">
+        <p className="panel-label">QASM Code</p>
         <div className="qasm-actions">
           <button className="btn" onClick={copyToClipboard}>Copy to Clipboard</button>
           <button className="btn" onClick={downloadQasm}>Download QASM</button>

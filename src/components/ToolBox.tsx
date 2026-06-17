@@ -149,9 +149,11 @@ export function Toolbar() {
   };
 
   return (
-    <div className="toolbar">
-      <h3>Gate Palette</h3>
-      <div className="gate-palette">
+    <div className="toolbar panel">
+      <div className="panel-header">
+        <span className="panel-label">Gate Palette</span>
+      </div>
+      <div className="gate-palette panel-body">
         {/* X Gate */}
         <div
           className="palette-gate x-gate"
@@ -292,3 +294,4 @@ export function Toolbar() {
     </div>
   );
 }
+
