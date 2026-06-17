@@ -36,16 +36,16 @@
   width: fit-content;
 }
 
-.circuit-action-button {
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-raised);
-  padding: 8px 16px;
+.circuit-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 0;
 }
 
-.circuit-action-button:hover {
-  background-color: var(--color-raised-hover);
+.circuit-top-bar-end {
+  display: flex;
+  gap: 8px;
 }
 
 .circuit-title {

@@ -236,19 +236,23 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
 
         <div className="circuit-actions">
           <GlobalLabelMenu />
-          <button className="circuit-action-button" onClick={handleParallelizeGates}>
+          <button className="btn" onClick={handleParallelizeGates}>
             Compact Circuit
           </button>
-          <button className="circuit-action-button" onClick={handleDeleteCircuit}>
+          <button className="btn btn-danger" onClick={handleDeleteCircuit}>
             Delete Circuit
           </button>
         </div>
       </div>
 
       <div className="circuit-container">
-        <CircuitSelector onSelect={handleCircuitSelect} />
-        <HelpButton />
-        <MathHelp />
+        <div className="circuit-top-bar">
+          <CircuitSelector onSelect={handleCircuitSelect} />
+          <div className="circuit-top-bar-end">
+            <MathHelp />
+            <HelpButton />
+          </div>
+        </div>
         <div className="circuit-header">
           <img className="corner-logo" src={logo} alt="Parity Flow" />
           <h1 className="circuit-title">Parity Flow Circuit</h1>

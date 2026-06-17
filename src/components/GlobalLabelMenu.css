@@ -3,16 +3,7 @@
 }
 
 .global-label-menu-button {
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-raised);
-  padding: 8px 16px;
   width: 100%;
-}
-
-.global-label-menu-button:hover {
-  background-color: var(--color-raised-hover);
 }
 
 .menu-backdrop {

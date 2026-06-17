@@ -18,7 +18,7 @@ export const HelpButton: React.FC = () => {
 
   return (
     <>
-      <button className="help-trigger-button" onClick={() => setIsOpen(true)}>
+      <button className="btn" onClick={() => setIsOpen(true)}>
         Help
       </button>
 

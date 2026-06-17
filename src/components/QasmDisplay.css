@@ -10,8 +10,8 @@
   padding: 10px 15px;
   background-color: var(--color-raised-hover);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .qasm-header h3 {
@@ -21,22 +21,10 @@
 
 .qasm-actions {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.qasm-actions button {
-  padding: 5px 10px;
-  background-color: var(--color-success);
-  color: var(--color-surface);
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: var(--font-size-base);
-}
-
-.qasm-actions button:hover {
-  background-color: var(--color-success-hover);
-}
 
 .qasm-code {
   margin: 0;

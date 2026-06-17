@@ -27,7 +27,7 @@ export const MathHelp: React.FC = () => {
 
   return (
     <>
-      <button className="math-help-trigger" onClick={() => setIsOpen(true)}>
+      <button className="btn" onClick={() => setIsOpen(true)}>
         Math Background
       </button>
 

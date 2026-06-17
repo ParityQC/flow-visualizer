@@ -61,3 +61,27 @@ body {
   font-family: var(--font-sans);
   margin: 0;
 }
+
+/* ── Shared button base ──────────────────────────────────────── */
+.btn {
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-raised);
+  padding: 8px 16px;
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  line-height: 1.25;
+  white-space: nowrap;
+  transition: background-color 0.1s;
+}
+
+.btn:hover {
+  background-color: var(--color-raised-hover);
+}
+
+.btn-danger:hover {
+  background-color: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}

@@ -12,7 +12,7 @@ export function GlobalLabelMenu() {
   return (
     <div className="global-label-menu">
       <button
-        className="global-label-menu-button"
+        className="btn global-label-menu-button"
         onClick={() => setIsOpen(!isOpen)}
         title="Label visibility settings"
       >
