@@ -31,7 +31,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
   // first (sets pendingGate), control/second qubit is placed on the next click.
   const [pendingGate, setPendingGate] = useState<pendingGate | null>(null);
 
-  const { resetVisibilityState } = useLabelVisibility();
+  const { resetVisibilityState, setAuxLabelX } = useLabelVisibility();
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   const [gatePreview, setGatePreview] = useState<GatePreview | null>(null);
@@ -225,8 +225,10 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
     resetVisibilityState();
   }, [circuit, resetVisibilityState]);
 
-  const handleCircuitSelect = (newCircuit: Circuit) => {
+  const handleCircuitSelect = (newCircuit: Circuit, initAuxQubits?: number[]) => {
+    resetVisibilityState();
     setCircuit(newCircuit.shallowCopy());
+    initAuxQubits?.forEach((q) => setAuxLabelX(q, false));
   };
 
   return (

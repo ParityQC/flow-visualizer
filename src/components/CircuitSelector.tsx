@@ -11,7 +11,6 @@ import {
   oneDHeisenbergAuxiliary,
 } from '../utils/exampleCircuits';
 import './CircuitSelector.css';
-import { useLabelVisibility } from '../utils/LabelVisibility';
 
 interface CircuitOption {
   name: string;
@@ -50,22 +49,15 @@ const circuitOptions: CircuitOption[] = [
 ];
 
 interface CircuitSelectorProps {
-  onSelect: (_circuit: Circuit) => void;
+  onSelect: (_circuit: Circuit, _initAuxQubits?: number[]) => void;
   currentCircuitName?: string;
 }
 
 export function CircuitSelector({ onSelect, currentCircuitName }: CircuitSelectorProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { initAuxLabelX } = useLabelVisibility();
 
   const handleSelect = (option: CircuitOption) => {
-    onSelect(option.circuit);
-    if (option.initAuxQubits) {
-      option.initAuxQubits.forEach((qubit) => {
-        initAuxLabelX(qubit);
-      });
-    }
-
+    onSelect(option.circuit, option.initAuxQubits);
     setIsOpen(false);
   };
 
