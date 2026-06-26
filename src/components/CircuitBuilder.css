@@ -45,6 +45,12 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.toolbar {
+  flex: 0 1 auto;
 }
 
 .circuit-actions {
