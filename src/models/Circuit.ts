@@ -1,6 +1,3 @@
-/**
- * Highest Level of the data structure containing gates, moments, and ciruits
- */
 import { Gate } from './Gates';
 import { Moment } from './Moments';
 
@@ -72,7 +69,11 @@ export class Circuit {
     return totalRemoved;
   }
 
-  // separate rules for iswap, so I does not get blocked
+  // TODO: why does iSWAP not allow to have other gates in between?
+  /**
+   * iSWAP forbids any single-qubit gate sitting between its two targets in
+   * the same moment, and vice versa. Other combinations are free to coexist.
+   */
   public hasConflictingGates(moment: Moment, gate: Gate): boolean {
     // If placing an iSWAP, check if any single qubit gate is between its targets
     if (gate.targetType.numTargets === 2 && gate.targetType.name === 'iSWAP') {

@@ -1,9 +1,9 @@
 .qubit-context-menu {
   position: fixed;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-dropdown);
   min-width: 160px;
   z-index: 1000;
   padding: 4px 0;
@@ -12,9 +12,9 @@
 .context-menu-header {
   padding: 8px 12px;
   font-weight: bold;
-  border-bottom: 1px solid #eee;
-  color: #333;
-  font-size: 14px;
+  border-bottom: 1px solid var(--color-border-divider);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
 }
 
 .context-menu-item {
@@ -25,24 +25,24 @@
   background: none;
   cursor: pointer;
   text-align: left;
-  font-size: 14px;
-  color: #333;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
 }
 
 .context-menu-item:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-raised);
 }
 
 .context-menu-item-danger {
-  color: #dc2626;
+  color: var(--color-z-label);
 }
 
 .context-menu-item-danger:hover {
-  background-color: #fee2e2;
+  background-color: var(--color-error-bg);
 }
 
 .context-menu-divider {
   height: 1px;
-  background-color: #eee;
+  background-color: var(--color-border-divider);
   margin: 4px 0;
 }

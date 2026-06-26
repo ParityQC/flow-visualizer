@@ -19,7 +19,7 @@ export function circuitToQasm(circuit: Circuit): string {
     }
 
     if (gateName === 'iSWAP') {
-      customGateDefs += `gate iSwap q0, q1 {
+      customGateDefs += `gate iswap q0, q1 {
   s q0;
   s q1;
   h q0;
@@ -76,5 +76,7 @@ function gateToQasm(gate: Gate): string {
   } else if (!gate.isControlled() && gate.isSingleTarget()) {
     return `${targetType.name.toLowerCase()} q[${gate.targets[0]}];`;
   }
-  return `// Unsupported gate at targets: ${gate.targets.join(', ')}`;
+  throw new Error(
+    `QASM conversion: unsupported gate "${gate.targetType.name}" at targets ${gate.targets.join(', ')}`
+  );
 }

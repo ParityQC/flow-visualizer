@@ -7,11 +7,10 @@ import {
   emptyCircuit,
   testCircuit,
   twineChain,
-  _1DHeisenberg,
-  _1DHeisenbergAuxiliary,
+  oneDHeisenberg,
+  oneDHeisenbergAuxiliary,
 } from '../utils/exampleCircuits';
 import './CircuitSelector.css';
-import { useLabelVisibility } from '../utils/LabelVisibility';
 
 interface CircuitOption {
   name: string;
@@ -39,40 +38,33 @@ const circuitOptions: CircuitOption[] = [
   {
     name: '1D Heisenberg',
     description: 'Heisenberg model simulation',
-    circuit: _1DHeisenberg,
+    circuit: oneDHeisenberg,
   },
   {
     name: '1D Heisenberg Auxiliary',
     description: 'Heisenberg model with auxiliary qubit',
-    circuit: _1DHeisenbergAuxiliary,
+    circuit: oneDHeisenbergAuxiliary,
     initAuxQubits: [3],
   },
 ];
 
 interface CircuitSelectorProps {
-  onSelect: (_circuit: Circuit) => void;
+  onSelect: (_circuit: Circuit, _initAuxQubits?: number[]) => void;
   currentCircuitName?: string;
 }
 
 export function CircuitSelector({ onSelect, currentCircuitName }: CircuitSelectorProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { initAuxLabelX } = useLabelVisibility();
 
   const handleSelect = (option: CircuitOption) => {
-    onSelect(option.circuit);
-    if (option.initAuxQubits) {
-      option.initAuxQubits.forEach((qubit) => {
-        initAuxLabelX(qubit);
-      });
-    }
-
+    onSelect(option.circuit, option.initAuxQubits);
     setIsOpen(false);
   };
 
   return (
     <div className="circuit-selector">
-      <button className="circuit-selector-button" onClick={() => setIsOpen(!isOpen)}>
-        <span>Load Circuit</span>
+      <button className="btn circuit-selector-button" onClick={() => setIsOpen(!isOpen)}>
+        <span>Load Example Circuit</span>
         <span className="dropdown-arrow">{isOpen ? '▲' : '▼'}</span>
       </button>
 

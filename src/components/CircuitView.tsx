@@ -3,12 +3,12 @@
  */
 import { GateComponent } from './GateComponent';
 import './CircuitView.css';
-import { InlineMath } from 'react-katex';
+import { InlineMath } from './InlineMath';
 import 'katex/dist/katex.min.css';
 import { Gate } from '../models/Gates';
 import { Circuit } from '../models/Circuit';
-import { lineHeight, momentWidth, padding, qubitLabelWidth } from './LayoutConstants';
-import { useMemo, useState } from 'react';
+import { lineHeight, momentWidth, padding, qubitLabelWidth } from '../utils/LayoutConstants';
+import { Fragment, useMemo, useState } from 'react';
 import { QubitLabelDisplay } from '../utils/QubitLabelDisplay';
 import {
   computeCircuitRenderingData,
@@ -36,12 +36,11 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
   const maxUsed = circuit.maxUsedQubitIndex();
   const baseline = 5;
   const numQubits = Math.max(baseline, maxUsed + 1);
-  const numMoments = Math.max(12, Array.from(circuit.moments()).length);
+  const numMoments = Math.max(Array.from(circuit.moments()).length + 3, 3);
 
   const [qubitMenu, setQubitMenu] = useState<QubitMenuState | null>(null);
 
-  // warning goes away once rendered
-  const { initialLabels, labelChanges, momentOffsets } = useMemo(() => {
+  const { initialLabels, labelChangesByMoment, momentOffsets } = useMemo(() => {
     const config: RenderConfig = {
       padding,
       lineHeight,
@@ -50,14 +49,21 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
     };
 
     const result = computeCircuitRenderingData(circuit, config);
+
+    const labelChangesByMoment = new Map<number, PositionedLabel[]>();
+    for (const lc of result.labelChanges) {
+      const arr = labelChangesByMoment.get(lc.momentIndex) ?? [];
+      arr.push(lc);
+      labelChangesByMoment.set(lc.momentIndex, arr);
+    }
+
     return {
       initialLabels: result.initialLabels,
-      labelChanges: result.labelChanges,
+      labelChangesByMoment,
       momentOffsets: result.momentOffsets,
     };
   }, [circuit]);
   const previewGate = useMemo(() => {
-    console.log(gatePreview?.controlQubit);
     if (!gatePreview) return null;
     if (gatePreview.controlQubit === null) return null;
 
@@ -115,6 +121,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
           position: 'relative',
           height: `${canvasHeight}px`,
           width: `${canvasWidth}px`,
+          minWidth: '100%',
         }}
       >
         <div className="circuit-grid">
@@ -190,28 +197,26 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
               );
             });
 
-            const labelElements = labelChanges
-              .filter((pos) => pos.momentIndex === momentIndex)
-              .map((position) => (
-                <div
-                  key={`label-${position.momentIndex}-${position.key}`}
-                  style={{
-                    position: 'absolute',
-                    top: `${position.top}px`,
-                    left: `${position.left}px`, // correct positions already computed
-                    pointerEvents: 'none',
-                    zIndex: 5,
-                  }}
-                >
-                  <QubitLabelDisplay labels={position.labels} />
-                </div>
-              ));
+            const labelElements = (labelChangesByMoment.get(momentIndex) ?? []).map((position) => (
+              <div
+                key={`label-${position.momentIndex}-${position.key}`}
+                style={{
+                  position: 'absolute',
+                  top: `${position.top}px`,
+                  left: `${position.left}px`, // correct positions already computed
+                  pointerEvents: 'none',
+                  zIndex: 5,
+                }}
+              >
+                <QubitLabelDisplay labels={position.labels} />
+              </div>
+            ));
 
             return (
-              <>
+              <Fragment key={`moment-${momentIndex}`}>
                 {gateElements}
                 {labelElements}
-              </>
+              </Fragment>
             );
           })}
           {gatePreview && previewGate && (

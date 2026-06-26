@@ -12,7 +12,7 @@ interface QubitContextMenuProps {
 }
 
 export function QubitContextMenu({ qubitIndex, position, onClose }: QubitContextMenuProps) {
-  const { initAuxLabelX, initAuxLabelZ, isLabelXVisible, isLabelZVisible } = useLabelVisibility();
+  const { setAuxLabelX, setAuxLabelZ, isLabelXVisible, isLabelZVisible } = useLabelVisibility();
 
   // Close on Escape key
   useEffect(() => {
@@ -56,13 +56,13 @@ export function QubitContextMenu({ qubitIndex, position, onClose }: QubitContext
         className="context-menu-item"
         onClick={() => {
           if (isLabelZVisible(qubitIndex)) {
-            initAuxLabelX(qubitIndex);
-            onClose();
+            setAuxLabelX(qubitIndex, !isLabelXVisible(qubitIndex));
           } else {
-            initAuxLabelX(qubitIndex);
-            initAuxLabelZ(qubitIndex);
-            onClose();
+            // Currently |0⟩: transition to |+⟩
+            setAuxLabelX(qubitIndex, false);
+            setAuxLabelZ(qubitIndex, true);
           }
+          onClose();
         }}
       >
         Toggle X<sub>{qubitIndex}</sub>
@@ -72,13 +72,13 @@ export function QubitContextMenu({ qubitIndex, position, onClose }: QubitContext
         className="context-menu-item"
         onClick={() => {
           if (isLabelXVisible(qubitIndex)) {
-            initAuxLabelZ(qubitIndex);
-            onClose();
+            setAuxLabelZ(qubitIndex, !isLabelZVisible(qubitIndex));
           } else {
-            initAuxLabelZ(qubitIndex);
-            initAuxLabelX(qubitIndex);
-            onClose();
+            // Currently |+⟩: transition to |0⟩
+            setAuxLabelZ(qubitIndex, false);
+            setAuxLabelX(qubitIndex, true);
           }
+          onClose();
         }}
       >
         Toggle Z<sub>{qubitIndex}</sub>

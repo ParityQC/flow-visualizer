@@ -1,8 +1,9 @@
 /**
- * Handles the creation of gates when the drag starts
+ * Gate palette. Initiates a drag, attaching a JSON-serialized
+ * `GateDragPayload` under `mimeGateType` for the drop handler to read.
  */
 import React from 'react';
-import { InlineMath } from 'react-katex';
+import { InlineMath } from './InlineMath';
 import './ToolBox.css';
 import {
   HTargetType,
@@ -20,7 +21,15 @@ import {
   ZTargetType,
 } from '../models/Targets';
 import { Gate } from '../models/Gates';
-export let toolBoxCurrentGate: Gate | null = null;
+
+/** MIME key for the JSON-serialized gate template carried during a palette drag. */
+export const mimeGateType = 'application/gate-type';
+
+export interface GateDragPayload {
+  targetType: string;
+  controls: number[];
+  targets: number[];
+}
 
 export function Toolbar() {
   const xgate = new Gate({
@@ -105,7 +114,6 @@ export function Toolbar() {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, gate: Gate) => {
     const target = e.currentTarget;
     if (gate.isControlled() && gate.targetType.name === 'X') {
-      console.log('cnot drag active');
       const dragImage = document.createElement('div');
       dragImage.innerHTML = '⊕';
 
@@ -122,14 +130,12 @@ export function Toolbar() {
       }
     }, 0);
 
-    toolBoxCurrentGate = gate;
-
-    const gateData = {
+    const payload: GateDragPayload = {
       targetType: gate.targetType.name,
       controls: Array.from(gate.controls),
       targets: Array.from(gate.targets),
     };
-    e.dataTransfer.setData('application/gate-type', JSON.stringify(gateData));
+    e.dataTransfer.setData(mimeGateType, JSON.stringify(payload));
     e.dataTransfer.effectAllowed = 'copy';
   };
 
@@ -143,9 +149,11 @@ export function Toolbar() {
   };
 
   return (
-    <div className="toolbar">
-      <h3>Gate Palette</h3>
-      <div className="gate-palette">
+    <div className="toolbar panel">
+      <div className="panel-header">
+        <span className="panel-label">Gate Palette</span>
+      </div>
+      <div className="gate-palette panel-body">
         {/* X Gate */}
         <div
           className="palette-gate x-gate"
@@ -153,7 +161,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, xgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="X" />
+          <InlineMath math={xgate.targetType.latexName} />
         </div>
         {/* SqrtX Gate */}
         <div
@@ -162,7 +170,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, sqrtxgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="SX" />
+          <InlineMath math={sqrtxgate.targetType.latexName} />
         </div>
         {/* Z Gate */}
         <div
@@ -171,7 +179,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, zgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="Z" />
+          <InlineMath math={zgate.targetType.latexName} />
         </div>
         {/* S Gate */}
         <div
@@ -180,16 +188,16 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, sgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="S" />
+          <InlineMath math={sgate.targetType.latexName} />
         </div>
-        {/* S† Gate */}
+        {/* Sdg Gate */}
         <div
           className="palette-gate z-gate"
           draggable={true}
           onDragStart={(e) => handleDragStart(e, sdggate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="S†" />
+          <InlineMath math={sdggate.targetType.latexName} />
         </div>
 
         {/* Rz Gate */}
@@ -199,7 +207,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, rzgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="R_z" />
+          <InlineMath math={rzgate.targetType.latexName} />
         </div>
         {/* Rx Gate */}
         <div
@@ -208,7 +216,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, rxgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="R_x" />
+          <InlineMath math={rxgate.targetType.latexName} />
         </div>
         {/* Ry Gate */}
         <div
@@ -217,7 +225,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, rygate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="R_y" />
+          <InlineMath math={rygate.targetType.latexName} />
         </div>
         {/* H Gate */}
         <div
@@ -226,7 +234,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, hgate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="H" />
+          <InlineMath math={hgate.targetType.latexName} />
         </div>
         {/* Y Gate */}
         <div
@@ -235,7 +243,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, ygate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="Y" />
+          <InlineMath math={ygate.targetType.latexName} />
         </div>
         {/* SqrtY Gate */}
         <div
@@ -244,7 +252,7 @@ export function Toolbar() {
           onDragStart={(e) => handleDragStart(e, sqrtygate)}
           onDragEnd={handleDragEnd}
         >
-          <InlineMath math="SY" />
+          <InlineMath math={sqrtygate.targetType.latexName} />
         </div>
         {/* CZ Gate */}
         <div

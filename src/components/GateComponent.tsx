@@ -1,10 +1,11 @@
 /**
- * Gate Rendering happens here.
+ * Renders a single gate cell (single-qubit box, controlled-gate stem,
+ * SWAP/iSWAP/CNOT marks) for a given `Gate`.
  */
 import './GateComponent.css';
-import { InlineMath } from 'react-katex';
+import { InlineMath } from './InlineMath';
 import { Gate } from '../models/Gates';
-import { lineHeight } from './LayoutConstants';
+import { lineHeight } from '../utils/LayoutConstants';
 
 interface GateProps {
   gate: Gate;
@@ -13,7 +14,7 @@ interface GateProps {
 export function GateComponent({ gate }: GateProps) {
   // Single qubit gates
   if (gate.numControls === 0 && gate.targetType.numTargets === 1) {
-    const gateLabel = gate.targetType.name;
+    const gateLabel = gate.targetType.latexName;
     return (
       <div className="gate-wrapper-single">
         <div className="gate-box">

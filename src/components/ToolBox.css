@@ -1,31 +1,22 @@
-.toolbar {
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-}
-
-.toolbar h3 {
-  margin: 0 0 10px 0;
-  text-align: center;
-}
-
 .gate-palette {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
+  align-content: start;
 }
 
 .palette-gate {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
-  background-color: white;
-  border: 2px solid #ccc;
-  border-radius: 6px;
+  padding: 8px 4px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   cursor: grab;
-  min-width: 50px;
+  min-width: 62px;
   min-height: 40px;
+  font-size: 0.82em;
   transition:
     transform 0.1s,
     box-shadow 0.1s;

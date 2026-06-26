@@ -1,8 +1,10 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
- *Handles initialzations the resulting visibilities of the labels.
+ * React context for per-qubit label visibility (toggle X/Z labels globally
+ * or per qubit, plus the implied initial-state notation).
  */
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { InlineMath } from 'react-katex';
+import { InlineMath } from '../components/InlineMath';
 
 interface LabelVisibilityState {
   showPhysX: boolean;
@@ -18,8 +20,8 @@ interface LabelVisibilityContextType {
   state: LabelVisibilityState;
   togglePhysX: () => void; // global toggle
   togglePhysZ: () => void; // global toggle
-  initAuxLabelX: (_qubitIndex: number) => void; // initializes label on qubitIndex with |+>
-  initAuxLabelZ: (_qubitIndex: number) => void; // initializes label on qubitIndex with |0>
+  setAuxLabelX: (_qubitIndex: number, _visible: boolean) => void;
+  setAuxLabelZ: (_qubitIndex: number, _visible: boolean) => void;
   isLabelXVisible: (_qubitIndex: number) => boolean;
   isLabelZVisible: (_qubitIndex: number) => boolean;
   resetVisibilityState: () => void;
@@ -50,19 +52,19 @@ export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const initAuxLabelX = useCallback((qubitIndex: number) => {
+  const setAuxLabelX = useCallback((qubitIndex: number, visible: boolean) => {
     setState((prev) => {
       const newMap = new Map(prev.initAuxVisibility);
       const current = newMap.get(qubitIndex) || { showX: true, showZ: true };
-      newMap.set(qubitIndex, { ...current, showX: !current.showX });
+      newMap.set(qubitIndex, { ...current, showX: visible });
       return { ...prev, initAuxVisibility: newMap };
     });
   }, []);
-  const initAuxLabelZ = useCallback((qubitIndex: number) => {
+  const setAuxLabelZ = useCallback((qubitIndex: number, visible: boolean) => {
     setState((prev) => {
       const newMap = new Map(prev.initAuxVisibility);
       const current = newMap.get(qubitIndex) || { showX: true, showZ: true };
-      newMap.set(qubitIndex, { ...current, showZ: !current.showZ });
+      newMap.set(qubitIndex, { ...current, showZ: visible });
       return { ...prev, initAuxVisibility: newMap };
     });
   }, []);
@@ -90,8 +92,8 @@ export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
         state,
         togglePhysX,
         togglePhysZ,
-        initAuxLabelX,
-        initAuxLabelZ,
+        setAuxLabelX,
+        setAuxLabelZ,
         isLabelXVisible,
         isLabelZVisible,
         resetVisibilityState,

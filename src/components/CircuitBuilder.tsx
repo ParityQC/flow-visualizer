@@ -1,9 +1,11 @@
 /**
- * Controls the GUI. Builds the Circuit and connects all different components here.
+ * Top-level stateful component. Owns the `Circuit` and orchestrates
+ * drag-and-drop, two-step controlled/two-qubit placement, the QASM
+ * panel, and the example-circuit selector.
  */
 import { CircuitView, mimeMoveGate } from './CircuitView';
 import React, { useState, useCallback, useRef } from 'react';
-import { Toolbar, toolBoxCurrentGate } from './ToolBox';
+import { mimeGateType, Toolbar, GateDragPayload } from './ToolBox';
 import { Circuit } from '../models/Circuit';
 import { Moment } from '../models/Moments';
 import { Gate } from '../models/Gates';
@@ -16,7 +18,7 @@ import {
 } from '../utils/gridMapping';
 import logo from '../assets/parityqc_4c_pos.png';
 import { QasmDisplay } from './QasmDisplay';
-import { TargetType } from '../models/Targets';
+import { instantiateTargetType, TargetType } from '../models/Targets';
 import HelpButton from './HelpButton';
 import { useLabelVisibility } from '../utils/LabelVisibility';
 import { GlobalLabelMenu } from './GlobalLabelMenu';
@@ -24,12 +26,12 @@ import { CircuitSelector } from './CircuitSelector';
 import MathHelp from './MathHelp';
 
 export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } = {}) {
-  // possible to initialize with given circuit
   const [circuit, setCircuit] = useState<Circuit>(() => initialCircuit ?? new Circuit());
-  //new state for cnot: pending state invoked after setting target and ends when setting control
+  // Two-step placement state for controlled/two-qubit gates: target is dropped
+  // first (sets pendingGate), control/second qubit is placed on the next click.
   const [pendingGate, setPendingGate] = useState<pendingGate | null>(null);
 
-  const { resetVisibilityState } = useLabelVisibility();
+  const { resetVisibilityState, setAuxLabelX } = useLabelVisibility();
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   const [gatePreview, setGatePreview] = useState<GatePreview | null>(null);
@@ -111,7 +113,6 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
           });
           const moment = circuit.getOrInsertMoment(pendingGate.momentIndex);
 
-          // Check for conflicts - if there are, move to next moment
           if (circuit.hasConflictingGates(moment, doubleTargetGate)) {
             targetMomentIndex = pendingGate.momentIndex + 1;
           }
@@ -121,8 +122,6 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
 
           setCircuit(circuit.shallowCopy());
         }
-      } else {
-        console.log('Invalid second qubit position. Cancelling Gate placement.');
       }
 
       setPendingGate(null);
@@ -148,26 +147,27 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
         if (!clickIndices) throw Error('unexpected');
         const [sourceMoment, sourceGate] = getMomentAndGate(circuit, clickIndices);
 
-        gate = sourceGate.clone_shifted(dropIndices.qubitIndex - clickIndices.qubitIndex);
+        gate = sourceGate.cloneShifted(dropIndices.qubitIndex - clickIndices.qubitIndex);
         if (gate.controls.some((q) => q < 0) || gate.targets.some((q) => q < 0)) return;
         sourceMoment.removeGate(sourceGate);
       } else {
-        const oldGate = toolBoxCurrentGate;
-        if (!oldGate) throw Error('unexpected');
+        const payloadJson = e.dataTransfer.getData(mimeGateType);
+        if (!payloadJson) throw Error('drop without gate payload');
+        const payload = JSON.parse(payloadJson) as GateDragPayload;
+        const targetType = instantiateTargetType(payload.targetType);
+        const isControlled = payload.controls.length === 1 && payload.targets.length === 1;
 
-        if (oldGate.isControlled() || oldGate.targetType.numTargets === 2) {
+        if (isControlled || targetType.numTargets === 2) {
           setPendingGate({
             momentIndex,
             targetQubit: qubitIndex,
-            targetType: oldGate.targetType,
+            targetType,
           });
           return;
         }
 
-        if (!(oldGate.isSingleTarget() && !oldGate.isControlled())) throw Error('unexpected');
-
         gate = new Gate({
-          targetType: oldGate.targetType,
+          targetType,
           controls: [],
           targets: [qubitIndex],
         });
@@ -175,7 +175,6 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
       let targetMomentIndex = momentIndex;
       const moment = circuit.getOrInsertMoment(momentIndex);
 
-      // Check for conflicts
       if (circuit.hasConflictingGates(moment, gate)) {
         targetMomentIndex = momentIndex + 1;
       }
@@ -208,7 +207,6 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (pendingGate && e.key === 'Escape') {
         e.preventDefault();
-        console.log('CNOT placement canceled with Escape key.');
         setPendingGate(null);
       }
     },
@@ -227,72 +225,49 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
     resetVisibilityState();
   }, [circuit, resetVisibilityState]);
 
-  const handleCircuitSelect = (newCircuit: Circuit) => {
+  const handleCircuitSelect = (newCircuit: Circuit, initAuxQubits?: number[]) => {
+    resetVisibilityState();
     setCircuit(newCircuit.shallowCopy());
+    initAuxQubits?.forEach((q) => setAuxLabelX(q, false));
   };
 
   return (
     <div className="circuit-builder">
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
-        }}
-      >
+      <div className="circuit-sidebar">
         <Toolbar />
 
-        <div
-          className="circuit-actions"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '10px',
-            marginLeft: '10px',
-            width: 'fit-content',
-          }}
-        >
-          <GlobalLabelMenu />
-          <button
-            onClick={handleParallelizeGates}
-            style={{
-              cursor: 'pointer',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              backgroundColor: '#f0f0f0',
-              padding: '8px 16px',
-            }}
-          >
-            Compact Circuit
-          </button>
-          <button
-            onClick={handleDeleteCircuit}
-            style={{
-              cursor: 'pointer',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              backgroundColor: '#f0f0f0',
-              padding: '8px 16px',
-            }}
-          >
-            Delete Circuit
-          </button>
+        <div className="panel">
+          <div className="panel-header">
+            <span className="panel-label">Circuit Actions</span>
+          </div>
+          <div className="panel-body circuit-actions">
+            <GlobalLabelMenu />
+            <button className="btn" onClick={handleParallelizeGates}>
+              Compact Circuit
+            </button>
+            <button className="btn btn-danger" onClick={handleDeleteCircuit}>
+              Delete Circuit
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="circuit-container">
-        <CircuitSelector onSelect={handleCircuitSelect} />
-        <HelpButton />
-        <MathHelp />
-        <div className="circuit-header">
-          <img className="corner-logo" src={logo} alt="Parity Flow" />
-          <h1 style={{ fontFamily: 'sans-serif', textAlign: 'center', color: 'rgb(214,0,46)' }}>
-            Parity Flow Circuit
-          </h1>
+        <div className="circuit-top-bar">
+          <CircuitSelector onSelect={handleCircuitSelect} />
+          <h1 className="circuit-title">Parity Flow Circuit</h1>
+          <div className="circuit-top-bar-end">
+            <MathHelp />
+            <HelpButton />
+            <a href="https://parityqc.com" target="_blank" rel="noopener noreferrer">
+              <img className="corner-logo" src={logo} alt="ParityQC" />
+            </a>
+          </div>
         </div>
 
         {/*eslint-disable-next-line */}
         <div
+          className="circuit-grid-wrapper"
           ref={gridRef}
           onDrop={handleGateDrop}
           onDragOver={handleDragOver}

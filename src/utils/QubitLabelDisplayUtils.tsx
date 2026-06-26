@@ -3,7 +3,13 @@
  */
 import { Circuit } from '../models/Circuit';
 import { XZLabelPair, LabelTracker } from './labelTracking';
-import { qubitLabelWidth } from '../components/LayoutConstants';
+import {
+  qubitLabelWidth,
+  labelLeftPadding,
+  labelTopOffset,
+  gateOverlapOffset,
+  iswapGateOverlapOffset,
+} from './LayoutConstants';
 
 export interface PositionedLabel {
   key: string;
@@ -66,7 +72,9 @@ export function computeMomentOffsets(circuit: Circuit): Map<number, MomentOffset
       }
 
       const offsetPx =
-        gate.targetType.name === 'iSWAP' ? thisGateOccupancy * 20 : thisGateOccupancy * 10;
+        gate.targetType.name === 'iSWAP'
+          ? thisGateOccupancy * iswapGateOverlapOffset
+          : thisGateOccupancy * gateOverlapOffset;
       gateOffsets.set(gateKey, offsetPx);
       if (thisGateOccupancy > 1) {
         maxOffsetInMoment = Math.max(maxOffsetInMoment, offsetPx);
@@ -129,7 +137,7 @@ export function computeInitialLabelPos(
       qubitIndex,
       momentIndex: -1,
       labels,
-      top: -padding + qubitIndex * lineHeight + 10, // add 10 for offset of increasing lineheight from 50 to 60
+      top: -padding + qubitIndex * lineHeight + labelTopOffset,
       left: padding,
     });
   }
@@ -168,10 +176,15 @@ export function computeLabelChangePositions(
           qubitIndex: qubit,
           momentIndex: moment,
           labels: currentLabel,
-          top: -padding + qubit * lineHeight + 10,
-          // cumulativeOffset + maxOffset so all labels align with righternmost CNOT
+          top: -padding + qubit * lineHeight + labelTopOffset,
+          // cumulativeOffset + maxOffset so all labels align with rightmost CNOT
           left:
-            padding + qubitLabelWidth + momentWidth * moment + 22 + cumulativeOffset + maxOffset, // 22 left to have it at a comfortable distance to the right from the gate boxes
+            padding +
+            qubitLabelWidth +
+            momentWidth * moment +
+            labelLeftPadding +
+            cumulativeOffset +
+            maxOffset,
         });
       }
     }

@@ -1,6 +1,3 @@
-/**
- * Handles one time step in a circuit.
- */
 import { Gate } from './Gates';
 
 /**

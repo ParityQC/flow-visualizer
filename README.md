@@ -1,50 +1,53 @@
-# Project Description
+# Parity Flow Circuit GUI
 
-The aim is to create a web-based GUI of Quantum Circuits to realize the parity
-flow formalism, see [arxiv](https://arxiv.org/pdf/2505.09468v1) There will be a
-drag and drop system for Clifford Gates and Rotations. For the prototype I will
-be focusing on CNOT's, R_z Gates, and only on the Z labels (for now).
-Furthermore the live QASM code will be displayed and you will be able to export
-it or even import your own qasm file to realize it with the tool.
+A web-based GUI for building Clifford+rotation quantum circuits and visualizing
+the [parity flow formalism](https://doi.org/10.1103/6xlb-l92j). Drag and drop
+gates onto the circuit grid to let logical Pauli labels propagate through each
+moment.
+
+## Credits
+
+The original prototype implementation was provided by Maximilian Markl during
+his internship at [ParityQC](https://parityqc.com) (2025/2026), supervised by
+Anette Messinger, Katharina Ludwig, Valentin Stauber, and Reinhard Stahn.
 
 ## Development
 
-Download and install NVM (Node Version Manager:[GitHub](https://github.com/nvm-sh/nvm?tab=readme-ov-file)) in order to set up Node.js. The following command installs the current version of node. For the most up to date version head to the README linked above.
+The recommended way to develop is using the included [Dev
+Container](https://containers.dev/). Open the repository in VS Code and choose
+**Dev Containers: Reopen in Container** from the command palette. This installs
+a specific node version and runs `npm install` automatically, then opens the
+Vite dev server in your browser.
 
-In unix/macOS/windows WSL run
+If you are not satisfied with the container config, just use it as a template
+and create your custom config under `.devcontainer/local/` (gitignored). vscode
+will ask you which one to use. Also note that other IDEs also support the
+devcontainer standard and that there is a
+[cli](https://github.com/devcontainers/cli).
 
-```shell
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-```
-
-Use project's Node.js version:
-
-```shell
-nvm use
-```
-
-This will automatically use the version specified in the `.nvrmc` file.
-
-Verify installation:
-
-```shell
-node --version
-npm --version
-```
-
-Install dependencies
+To develop without the container, install Node manually, then:
 
 ```shell
 npm install
+npm run dev        # Vite dev server (default http://localhost:5173)
 ```
 
-To start the development server do
+Other scripts:
 
 ```shell
-npm run dev
+npm run build           # production build
+npm run lint            # ESLint
+npm run format          # Prettier (write)
+npm run format:check    # Prettier (check only)
+npx vitest run          # tests (single run)
+npm test                # tests (watch mode)
 ```
 
-and a browser window with the GUI will open.
+## Architecture
 
-If that does not work, copy the address shown in the terminal, and open it in
-your browser.
+The data model (`src/models/`) is a three-layer immutable hierarchy: gate types
+know their arity and label-update rules, gates bind a type to qubit indices, and
+moments/circuit group non-overlapping gates in time. Label propagation
+(`src/utils/`) walks the circuit forward and stores per-qubit X/Z label pairs at
+each moment. The React UI is rooted at `CircuitBuilder`, which owns the circuit
+state and orchestrates drag-and-drop, label rendering, and QASM export.

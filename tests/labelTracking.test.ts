@@ -101,7 +101,7 @@ describe('Label Tracking', () => {
     const xLabels = new LabelTracker(circuit);
     const labelsAtMoment2 = xLabels.getLabelsAtMomentBeforeGate(2);
     const labelsQubit1Moment2 = labelsAtMoment2?.get(1);
-    expect(labelsQubit1Moment2?._PhysZ.phase).toBe(0);
+    expect(labelsQubit1Moment2?.physZ.phase).toBe(0);
   });
 
   it('should correctly cancel out double labels for CNOTs', () => {
@@ -120,8 +120,8 @@ describe('Label Tracking', () => {
 
     const expected1 = [new SinglePauli('Z', '1')];
     const expected2 = [new SinglePauli('X', '2')];
-    expect(labelsQubit1Moment2?._PhysZ.operators).toStrictEqual(expected1);
-    expect(labelsQubit2Moment2?._PhysX.operators).toStrictEqual(expected2);
+    expect(labelsQubit1Moment2?.physZ.operators).toStrictEqual(expected1);
+    expect(labelsQubit2Moment2?.physX.operators).toStrictEqual(expected2);
   });
 
   it('should also cancel phases in CNOT', () => {
@@ -138,7 +138,7 @@ describe('Label Tracking', () => {
     const labels = new LabelTracker(circuit);
     const labelsMoment2 = labels.getLabelsAtMomentBeforeGate(2);
     const labelsQubit1Moment2 = labelsMoment2?.get(1);
-    expect(labelsQubit1Moment2?._PhysZ.phase).toBe(0);
+    expect(labelsQubit1Moment2?.physZ.phase).toBe(0);
   });
 });
 

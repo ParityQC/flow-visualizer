@@ -11,10 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+.vscode
 .idea
 .DS_Store
 *.suo
@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 /.devcontainer/local
+
+# Coding agents
+CLAUDE.md

@@ -1,6 +1,3 @@
-/**
- * Handles gates and their methods. consists of TargetTypes and what qubits they are on.
- */
 import { TargetType } from './Targets';
 import { XZLabelPair } from '../utils/labelTracking';
 import { combineLabels } from '../utils/labelTrackingUtils';
@@ -8,8 +5,8 @@ import { combineLabels } from '../utils/labelTrackingUtils';
 /**
  * A gate is characterized by its target type, the control qubits and the target qubits.
  *
- * For example a CNOT gate has target type "X-Gate", one control and one target qubit.
- * */
+ * For example a CNOT gate has target type "X-Gate", one control, and one target qubit.
+ */
 export class Gate implements QubitIterable {
   readonly _targetType: TargetType;
   readonly _controls: number[];
@@ -73,7 +70,7 @@ export class Gate implements QubitIterable {
     return this._targets.length;
   }
 
-  clone_shifted(offset: number): Gate {
+  cloneShifted(offset: number): Gate {
     return new Gate({
       targetType: this.targetType,
       controls: this.controls.map((c) => c + offset),
@@ -121,7 +118,7 @@ export class Gate implements QubitIterable {
     return this.targets.length === 1;
   }
 
-  calculateLabels(
+  computeLabels(
     labels1: XZLabelPair,
     labels2?: XZLabelPair
   ): XZLabelPair | { labelsAfter1: XZLabelPair; labelsAfter2: XZLabelPair } {
@@ -134,24 +131,24 @@ export class Gate implements QubitIterable {
         // CX
         return {
           labelsAfter1: new XZLabelPair(
-            combineLabels(controlLabels._PhysX, targetLabels._PhysX),
-            controlLabels._PhysZ.clone()
+            combineLabels(controlLabels.physX, targetLabels.physX),
+            controlLabels.physZ.clone()
           ),
           labelsAfter2: new XZLabelPair(
-            targetLabels._PhysX.clone(),
-            combineLabels(controlLabels._PhysZ, targetLabels._PhysZ)
+            targetLabels.physX.clone(),
+            combineLabels(controlLabels.physZ, targetLabels.physZ)
           ),
         };
       } else if (this.targetType.name === 'Z') {
         // CZ
         return {
           labelsAfter1: new XZLabelPair(
-            combineLabels(controlLabels._PhysX, targetLabels._PhysZ),
-            controlLabels._PhysZ.clone()
+            combineLabels(controlLabels.physX, targetLabels.physZ),
+            controlLabels.physZ.clone()
           ),
           labelsAfter2: new XZLabelPair(
-            combineLabels(targetLabels._PhysX, controlLabels._PhysZ),
-            targetLabels._PhysZ.clone()
+            combineLabels(targetLabels.physX, controlLabels.physZ),
+            targetLabels.physZ.clone()
           ),
         };
       } else {
@@ -159,10 +156,10 @@ export class Gate implements QubitIterable {
       }
     } else if (this.targetType.numTargets === 2 && labels2 !== undefined) {
       // (i)SWAP
-      return this.targetType.calculateLabels(labels1, labels2);
+      return this.targetType.computeLabels(labels1, labels2);
     } else if (this.targetType.numTargets === 1) {
       // single qubit gates
-      return this.targetType.calculateLabels(labels1);
+      return this.targetType.computeLabels(labels1);
     } else {
       throw new Error(
         'second input label missing or calculateLabels not implemented for this gate type'

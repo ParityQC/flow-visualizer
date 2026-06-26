@@ -1,23 +1,74 @@
 .circuit-builder {
   display: flex;
+  gap: 8px;
+  padding: 8px;
   height: 100%;
   width: 100%;
-  font-family: sans-serif;
+  overflow: hidden;
+  font-family: var(--font-sans);
 }
 
 .circuit-container {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
   height: 100%;
   position: relative;
+  overflow: hidden;
+}
+
+.circuit-grid-wrapper {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.circuit-title {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-brand);
 }
 
 .corner-logo {
-  position: absolute;
-  right: 50px;
-  top: 10%;
-  transform: translateY(-50%);
-  width: 150px;
-  height: 150px;
+  height: 32px;
+  width: auto;
   object-fit: contain;
   pointer-events: none;
+}
+
+.circuit-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.toolbar {
+  flex: 0 1 auto;
+}
+
+.circuit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.circuit-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+}
+
+.circuit-top-bar-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }

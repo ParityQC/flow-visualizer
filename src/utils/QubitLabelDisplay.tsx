@@ -1,42 +1,28 @@
 /**
- * Handles the rendering of the labels, color and whether the labels should be rendered above or below the qubit
- * */
+ * Renders the X and Z Pauli labels for one qubit at one moment.
+ * X labels are blue and bracketed; Z labels are red and plain.
+ */
 import { Label, XZLabelPair, SinglePauli } from './labelTracking';
 import { useLabelVisibility } from './LabelVisibility';
+import './QubitLabelDisplay.css';
 
 interface QubitLabelDisplayProps {
   labels: XZLabelPair;
 }
 
-const labelStyle = {
-  display: 'flex',
-  flexDirection: 'column' as const,
-  gap: '4px',
-  borderRadius: '6px',
-  fontFamily: 'monospace',
-  alignItems: 'center',
-};
-
-const rowStyle = {
-  display: 'flex',
-  gap: '4px',
-  alignItems: 'center',
-  minHeight: '18px',
-};
-const tokenStyle = { fontSize: '12px', fontFamily: 'monospace', fontWeight: 600 };
 const values = ['', 'i', '-', '-i'];
 
 export function QubitLabelDisplay({ labels }: QubitLabelDisplayProps) {
   const { state, isLabelXVisible, isLabelZVisible } = useLabelVisibility();
 
   const isOperatorVisible = (op: SinglePauli): boolean => {
-    const qubitIndex = parseInt(op._name, 10);
+    const qubitIndex = parseInt(op.qubit, 10);
     if (isNaN(qubitIndex)) return true;
 
-    if (op._type === 'X') {
+    if (op.type === 'X') {
       return isLabelXVisible(qubitIndex);
     }
-    if (op._type === 'Z') {
+    if (op.type === 'Z') {
       return isLabelZVisible(qubitIndex);
     }
     return true;
@@ -45,60 +31,52 @@ export function QubitLabelDisplay({ labels }: QubitLabelDisplayProps) {
   const renderLabel = (label: Label, isVisible: boolean) => {
     const visibleOperators = label.operators.filter(isOperatorVisible);
 
-    const xOperators = visibleOperators.filter((op: SinglePauli) => op._type === 'X');
-    const zOperators = visibleOperators.filter((op: SinglePauli) => op._type === 'Z');
+    const xOperators = visibleOperators.filter((op: SinglePauli) => op.type === 'X');
+    const zOperators = visibleOperators.filter((op: SinglePauli) => op.type === 'Z');
 
     const allFiltered = label.operators.length > 0 && visibleOperators.length === 0;
 
     return (
-      <div
-        style={{
-          ...rowStyle,
-          visibility: isVisible ? 'visible' : 'hidden',
-        }}
-      >
-        {<span style={{ color: '#6b7280' }}>{values[label.phase]}</span>}
+      <div className="label-row" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
+        <span className="label-phase">{values[label.phase]}</span>
         {allFiltered ? (
-          <span style={{ visibility: 'hidden' }}>I</span> // if filtered
+          <span style={{ visibility: 'hidden' }}>I</span>
         ) : (
-          <>
-            <div style={{ display: 'flex', gap: '2px' }}>
-              {visibleOperators.length > 0 ? (
-                <>
-                  {xOperators.length > 0 && (
-                    <span style={{ ...tokenStyle, color: '#2563eb' }}>
-                      ⟨
-                      {xOperators.map((op: SinglePauli, i: number) => (
-                        <span key={`x-${i}`}>
-                          {op._name}
-                          {i < xOperators.length - 1 ? ',' : ''}
-                        </span>
-                      ))}
-                      ⟩
-                    </span>
-                  )}
-                  {!xOperators && <span style={{ ...tokenStyle, visibility: 'hidden' }}>⟨</span>}
-                  {zOperators.map((op: SinglePauli, i: number) => (
-                    <span key={`z-${i}`} style={{ ...tokenStyle, color: '#dc2626' }}>
-                      {op._name}
-                      {i < zOperators.length - 1 ? ',' : ''}
-                    </span>
-                  ))}
-                </>
-              ) : (
-                <span style={{ color: '#888' }}>I</span>
-              )}
-            </div>
-          </>
+          <div className="label-tokens">
+            {visibleOperators.length > 0 ? (
+              <>
+                {xOperators.length > 0 && (
+                  <span className="label-token label-token-x">
+                    ⟨
+                    {xOperators.map((op: SinglePauli, i: number) => (
+                      <span key={`x-${i}`}>
+                        {op.qubit}
+                        {i < xOperators.length - 1 ? ',' : ''}
+                      </span>
+                    ))}
+                    ⟩
+                  </span>
+                )}
+                {zOperators.map((op: SinglePauli, i: number) => (
+                  <span key={`z-${i}`} className="label-token label-token-z">
+                    {op.qubit}
+                    {i < zOperators.length - 1 ? ',' : ''}
+                  </span>
+                ))}
+              </>
+            ) : (
+              <span className="label-identity">I</span>
+            )}
+          </div>
         )}
       </div>
     );
   };
 
   return (
-    <div style={labelStyle}>
-      {renderLabel(labels._PhysX, state.showPhysX)}
-      {renderLabel(labels._PhysZ, state.showPhysZ)}
+    <div className="qubit-label-display">
+      {renderLabel(labels.physX, state.showPhysX)}
+      {renderLabel(labels.physZ, state.showPhysZ)}
     </div>
   );
 }
