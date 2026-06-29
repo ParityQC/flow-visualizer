@@ -227,7 +227,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
 
   const handleCircuitSelect = (newCircuit: Circuit, initAuxQubits?: number[]) => {
     resetVisibilityState();
-    setCircuit(newCircuit.shallowCopy());
+    setCircuit(newCircuit.clone());
     initAuxQubits?.forEach((q) => setAuxLabelX(q, false));
   };
 
