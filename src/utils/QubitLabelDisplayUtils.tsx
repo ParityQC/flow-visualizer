@@ -7,6 +7,8 @@ import {
   qubitLabelWidth,
   labelLeftPadding,
   singleQubitGateWidth,
+  doubleQubitLabelPadding,
+  labelRightClearance,
   labelTopOffset,
   gateOverlapOffset,
   iswapGateOverlapOffset,
@@ -18,6 +20,7 @@ export interface PositionedLabel {
   momentIndex: number;
   top: number;
   left: number;
+  maxWidth: number;
   labels: XZLabelPair;
 }
 
@@ -138,6 +141,7 @@ export function computeInitialLabelPos(
       qubitIndex,
       momentIndex: -1,
       labels,
+      maxWidth: qubitLabelWidth - 20,
       top: -padding + qubitIndex * lineHeight + labelTopOffset,
       left: padding,
     });
@@ -162,6 +166,23 @@ export function computeLabelChangePositions(
     const offsetData = momentOffsets.get(moment);
     const cumulativeOffset = offsetData?.cumulativeOffset || 0;
     const maxOffset = offsetData?.maxOffset || 0;
+
+    // Determine effective label padding for this moment. Single-qubit boxed gates
+    // (40px wide) need more clearance than double-qubit gates whose visual extent
+    // is only ~5px from cellLeft (control dot radius). Taking the max across all
+    // gates in the moment keeps all labels in the same column at the same x.
+    let effectivePadding = doubleQubitLabelPadding;
+    const momentObj = circuit.momentOfIndex(moment);
+    if (momentObj) {
+      for (const gate of momentObj.gates()) {
+        if (gate.numControls === 0 && gate.targetType.numTargets === 1) {
+          effectivePadding = singleQubitGateWidth + labelLeftPadding;
+          break;
+        }
+      }
+    }
+    const maxWidth = Math.max(0, momentWidth - effectivePadding - labelRightClearance);
+
     for (const qubit of qubits) {
       const currentLabel = tracker.getLabelsBeforeGate(moment + 1, qubit);
       const previousLabel = tracker.getLabelsBeforeGate(moment, qubit);
@@ -172,17 +193,13 @@ export function computeLabelChangePositions(
         if (!hasGateAtQubit) continue;
       }
       if (!previousLabel?.equals(currentLabel)) {
-        // Uniform offset past the widest gate type (single-qubit box = singleQubitGateWidth).
-        // This keeps all labels at a consistent x position regardless of gate type —
-        // per-gate offsets cause labels to jump left/right between moments.
-        const effectivePadding = singleQubitGateWidth + labelLeftPadding;
         positions.push({
           key: `initial-label-${moment}-${qubit}`,
           qubitIndex: qubit,
           momentIndex: moment,
           labels: currentLabel,
+          maxWidth,
           top: -padding + qubit * lineHeight + labelTopOffset,
-          // cumulativeOffset + maxOffset so all labels align with rightmost CNOT
           left:
             padding +
             qubitLabelWidth +

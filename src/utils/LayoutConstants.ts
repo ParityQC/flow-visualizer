@@ -8,17 +8,22 @@ export const gateRadius = 30;
 // Labels after a boxed gate must start past this boundary.
 export const singleQubitGateWidth = 40;
 
-// Gap applied after the gate (right edge of box for single-qubit, center for others).
+// Gap applied after the gate's right visual edge.
 export const labelLeftPadding = 6;
+
+// Label offset for double-qubit gates (CNOT, CZ, SWAP, iSWAP).
+// These gates are centered at cellLeft via translateX(-50%); their visual right
+// edge is only ~5px from cellLeft (half the 10px control dot).
+// 16 = 5px edge + 11px breathing room.
+export const doubleQubitLabelPadding = 16;
 
 // Gap kept between a label's right edge and the next gate's column edge.
 // Sized to clear the 4px box-shadow halo on gate boxes plus comfortable breathing room.
 export const labelRightClearance = 16;
 
 // Uniform gate-column width is user-adjustable via the Label Settings slider.
-// Default is larger than momentWidth so boxed-gate labels have room:
-// at 120px a boxed gate leaves 120-46-16=58px for the label.
-export const defaultColumnWidth = 100;
+// At 140px default: boxed-gate labels get 140-46-16=78px; CNOT labels get 140-16-16=108px.
+export const defaultColumnWidth = 140;
 export const minColumnWidth = 50;
 export const maxColumnWidth = 300;
 

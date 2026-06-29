@@ -7,14 +7,7 @@ import { InlineMath } from './InlineMath';
 import 'katex/dist/katex.min.css';
 import { Gate } from '../models/Gates';
 import { Circuit } from '../models/Circuit';
-import {
-  lineHeight,
-  padding,
-  qubitLabelWidth,
-  labelLeftPadding,
-  labelRightClearance,
-  singleQubitGateWidth,
-} from '../utils/LayoutConstants';
+import { lineHeight, padding, qubitLabelWidth } from '../utils/LayoutConstants';
 import { Fragment, useMemo, useState } from 'react';
 import { TruncatedLabel } from '../utils/QubitLabelDisplay';
 import {
@@ -49,12 +42,6 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
 
   const { state, isLabelXVisible, isLabelZVisible } = useLabelVisibility();
   const columnWidth = state.columnWidth;
-  // All labels start singleQubitGateWidth+labelLeftPadding from cellLeft. The
-  // clip budget guarantees a label can never reach the next gate's column.
-  const labelMaxWidth = Math.max(
-    0,
-    columnWidth - (singleQubitGateWidth + labelLeftPadding) - labelRightClearance
-  );
   // Initial labels live in the qubit-name column; clip them to that width.
   const initialLabelMaxWidth = qubitLabelWidth - 20;
 
@@ -225,7 +212,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   zIndex: 5,
                 }}
               >
-                <TruncatedLabel labels={position.labels} maxWidth={labelMaxWidth} />
+                <TruncatedLabel labels={position.labels} maxWidth={position.maxWidth} />
               </div>
             ));
 
