@@ -27,9 +27,9 @@ export interface PositionedLabel {
 // wrapper) sits half its width left of the column position, so its visual left edge is
 // `columnLeft - gateHalfWidth`.
 const gateHalfWidth = 20;
-// Extra gap kept between a faded label and that left edge (covers the box's 4px shadow
-// halo plus a little breathing room).
-const nextGateClearance = 6;
+// Extra gap kept between a faded label and that left edge. Just enough to clear the
+// box's 4px shadow halo so labels use as much of the gap as possible.
+const nextGateClearance = 2;
 
 export interface RenderConfig {
   padding: number;

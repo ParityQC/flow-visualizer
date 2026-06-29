@@ -52,11 +52,13 @@
   width: max-content;
 }
 
-/* Only when the label is too wide: clip + fade it before it hits the next gate. */
+/* Only when the label is too wide: clip + fade it before it hits the next gate. A long,
+   gentle ramp (capped so narrow labels keep a readable opaque part) makes the fade
+   obvious and keeps trailing digits faintly visible instead of vanishing abruptly. */
 .label-fade-active {
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, black calc(100% - 14px), transparent);
-  mask-image: linear-gradient(to right, black calc(100% - 14px), transparent);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - min(28px, 55%)), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - min(28px, 55%)), transparent);
 }
 
 /* Full, un-faded label revealed on hover. */
