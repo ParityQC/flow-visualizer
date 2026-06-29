@@ -5,7 +5,10 @@
   "type": "module",
   "author": "Parity Quantum Computing GmbH (ParityQC)",
   "license": "BSD-3-Clause",
-  "repository": "https://github.com/ParityQC/flow-gui",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ParityQC/flow-gui"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
