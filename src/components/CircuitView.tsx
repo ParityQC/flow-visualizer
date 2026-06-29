@@ -13,6 +13,7 @@ import {
   qubitLabelWidth,
   labelLeftPadding,
   labelRightClearance,
+  singleQubitGateWidth,
 } from '../utils/LayoutConstants';
 import { Fragment, useMemo, useState } from 'react';
 import { TruncatedLabel } from '../utils/QubitLabelDisplay';
@@ -48,8 +49,12 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
 
   const { state, isLabelXVisible, isLabelZVisible } = useLabelVisibility();
   const columnWidth = state.columnWidth;
-  // Clip width that guarantees a label can never reach the next gate's column.
-  const labelMaxWidth = columnWidth - labelLeftPadding - labelRightClearance;
+  // All labels start singleQubitGateWidth+labelLeftPadding from cellLeft. The
+  // clip budget guarantees a label can never reach the next gate's column.
+  const labelMaxWidth = Math.max(
+    0,
+    columnWidth - (singleQubitGateWidth + labelLeftPadding) - labelRightClearance
+  );
   // Initial labels live in the qubit-name column; clip them to that width.
   const initialLabelMaxWidth = qubitLabelWidth - 20;
 
@@ -220,10 +225,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   zIndex: 5,
                 }}
               >
-                <TruncatedLabel
-                  labels={position.labels}
-                  maxWidth={position.maxWidth ?? labelMaxWidth}
-                />
+                <TruncatedLabel labels={position.labels} maxWidth={labelMaxWidth} />
               </div>
             ));
 

@@ -18,9 +18,9 @@ export const labelRightClearance = 16;
 // Uniform gate-column width is user-adjustable via the Label Settings slider.
 // Default is larger than momentWidth so boxed-gate labels have room:
 // at 120px a boxed gate leaves 120-46-16=58px for the label.
-export const defaultColumnWidth = 120;
-export const minColumnWidth = 80;
-export const maxColumnWidth = 220;
+export const defaultColumnWidth = 100;
+export const minColumnWidth = 50;
+export const maxColumnWidth = 300;
 
 // Vertical fudge applied to label positions (compensates for the lineHeight bump from 50→60).
 export const labelTopOffset = 10;

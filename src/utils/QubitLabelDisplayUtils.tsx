@@ -6,7 +6,6 @@ import { XZLabelPair, LabelTracker } from './labelTracking';
 import {
   qubitLabelWidth,
   labelLeftPadding,
-  labelRightClearance,
   singleQubitGateWidth,
   labelTopOffset,
   gateOverlapOffset,
@@ -19,7 +18,6 @@ export interface PositionedLabel {
   momentIndex: number;
   top: number;
   left: number;
-  maxWidth?: number; // per-label clip budget; undefined for initial labels (CircuitView uses its own budget)
   labels: XZLabelPair;
 }
 
@@ -174,21 +172,15 @@ export function computeLabelChangePositions(
         if (!hasGateAtQubit) continue;
       }
       if (!previousLabel?.equals(currentLabel)) {
-        const gate = circuit.momentOfIndex(moment)?.getGate(qubit);
-        const isBoxedGate =
-          gate !== undefined && gate.numControls === 0 && gate.targetType.numTargets === 1;
-        // Boxed single-qubit gates (H, S, T, Rz …) are 40px wide starting at cellLeft,
-        // so the label must start past the right edge of the box.
-        const effectivePadding = isBoxedGate
-          ? singleQubitGateWidth + labelLeftPadding
-          : labelLeftPadding;
-        const labelMaxWidth = Math.max(0, momentWidth - effectivePadding - labelRightClearance);
+        // Uniform offset past the widest gate type (single-qubit box = singleQubitGateWidth).
+        // This keeps all labels at a consistent x position regardless of gate type —
+        // per-gate offsets cause labels to jump left/right between moments.
+        const effectivePadding = singleQubitGateWidth + labelLeftPadding;
         positions.push({
           key: `initial-label-${moment}-${qubit}`,
           qubitIndex: qubit,
           momentIndex: moment,
           labels: currentLabel,
-          maxWidth: labelMaxWidth,
           top: -padding + qubit * lineHeight + labelTopOffset,
           // cumulativeOffset + maxOffset so all labels align with rightmost CNOT
           left:
