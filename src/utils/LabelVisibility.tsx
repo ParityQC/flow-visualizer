@@ -5,7 +5,7 @@
  */
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { InlineMath } from '../components/InlineMath';
-import { momentWidth as defaultMomentWidth } from './LayoutConstants';
+import { defaultMomentWidth } from './LayoutConstants';
 
 interface LabelVisibilityState {
   showPhysX: boolean;
