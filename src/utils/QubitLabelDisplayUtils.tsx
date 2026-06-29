@@ -18,7 +18,18 @@ export interface PositionedLabel {
   top: number;
   left: number;
   labels: XZLabelPair;
+  // Width at which the label fades out, so it never crosses into the next gate on
+  // its qubit. Infinity when there is no following gate (no fade needed).
+  maxWidth: number;
 }
+
+// Gates are centred on their column: a 40px single-qubit box (and the 2-qubit gate
+// wrapper) sits half its width left of the column position, so its visual left edge is
+// `columnLeft - gateHalfWidth`.
+const gateHalfWidth = 20;
+// Extra gap kept between a faded label and that left edge (covers the box's 4px shadow
+// halo plus a little breathing room).
+const nextGateClearance = 6;
 
 export interface RenderConfig {
   padding: number;
@@ -139,6 +150,7 @@ export function computeInitialLabelPos(
       labels,
       top: -padding + qubitIndex * lineHeight + labelTopOffset,
       left: padding,
+      maxWidth: Number.POSITIVE_INFINITY,
     });
   }
   return positions;
@@ -153,6 +165,20 @@ export function computeLabelChangePositions(
   const { padding, lineHeight, momentWidth } = config;
   const positions: PositionedLabel[] = [];
   const moments = tracker.getMomentIndices();
+  const numMoments = Array.from(circuit.moments()).length;
+
+  // Visual left edge of the gate occupying `qubit` at the first moment after
+  // `fromMoment`, or +Infinity if the qubit has no further gate. Mirrors the gate
+  // positioning in CircuitView, where gates are centred on their column.
+  const nextGateLeftEdge = (qubit: number, fromMoment: number): number => {
+    for (let m = fromMoment + 1; m < numMoments; m++) {
+      if (circuit.momentOfIndex(m)?.getGate(qubit) !== undefined) {
+        const nextCumulative = momentOffsets.get(m)?.cumulativeOffset || 0;
+        return padding + qubitLabelWidth + momentWidth * m + nextCumulative - gateHalfWidth;
+      }
+    }
+    return Number.POSITIVE_INFINITY;
+  };
 
   for (const moment of moments) {
     const qubits = tracker.getActiveQubitsAtMoment(moment);
@@ -171,20 +197,27 @@ export function computeLabelChangePositions(
         if (!hasGateAtQubit) continue;
       }
       if (!previousLabel?.equals(currentLabel)) {
+        // cumulativeOffset + maxOffset so all labels align with rightmost CNOT
+        const left =
+          padding +
+          qubitLabelWidth +
+          momentWidth * moment +
+          labelLeftPadding +
+          cumulativeOffset +
+          maxOffset;
+        const gateLeft = nextGateLeftEdge(qubit, moment);
+        const maxWidth =
+          gateLeft === Number.POSITIVE_INFINITY
+            ? Number.POSITIVE_INFINITY
+            : Math.max(20, gateLeft - left - nextGateClearance);
         positions.push({
           key: `initial-label-${moment}-${qubit}`,
           qubitIndex: qubit,
           momentIndex: moment,
           labels: currentLabel,
           top: -padding + qubit * lineHeight + labelTopOffset,
-          // cumulativeOffset + maxOffset so all labels align with rightmost CNOT
-          left:
-            padding +
-            qubitLabelWidth +
-            momentWidth * moment +
-            labelLeftPadding +
-            cumulativeOffset +
-            maxOffset,
+          left,
+          maxWidth,
         });
       }
     }

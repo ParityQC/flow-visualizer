@@ -7,7 +7,7 @@ import { InlineMath } from './InlineMath';
 import 'katex/dist/katex.min.css';
 import { Gate } from '../models/Gates';
 import { Circuit } from '../models/Circuit';
-import { lineHeight, padding, qubitLabelWidth, labelLeftPadding } from '../utils/LayoutConstants';
+import { lineHeight, padding, qubitLabelWidth } from '../utils/LayoutConstants';
 import { Fragment, useMemo, useState } from 'react';
 import { QubitLabelDisplay, FadingLabel } from '../utils/QubitLabelDisplay';
 import {
@@ -113,10 +113,6 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
     setQubitMenu(null);
   };
 
-  // Space available before the next gate's box: a full moment minus the label's own
-  // left inset. The label fades only once it would cross into that gate.
-  const maxLabelWidth = Math.max(20, momentWidth - labelLeftPadding);
-
   return (
     <div className="circuit-box">
       <div
@@ -211,7 +207,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   zIndex: 5,
                 }}
               >
-                <FadingLabel labels={position.labels} maxWidth={maxLabelWidth} />
+                <FadingLabel labels={position.labels} maxWidth={position.maxWidth} />
               </div>
             ));
 
