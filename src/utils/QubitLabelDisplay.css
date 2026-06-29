@@ -45,14 +45,19 @@
   position: relative;
 }
 
-/* Clip + fade the label so it dissolves before colliding with the next gate. */
-.label-fade {
+/* Natural width of the label, used to decide whether it overflows the gap. */
+.label-fade-content {
+  width: fit-content;
+}
+
+/* Only when the label is too wide: clip + fade it before it hits the next gate. */
+.label-fade-active {
   overflow: hidden;
   -webkit-mask-image: linear-gradient(to right, black calc(100% - 14px), transparent);
   mask-image: linear-gradient(to right, black calc(100% - 14px), transparent);
 }
 
-.label-fade .qubit-label-display {
+.label-fade-active .qubit-label-display {
   align-items: flex-start;
 }
 

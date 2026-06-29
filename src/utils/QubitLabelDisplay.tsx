@@ -2,6 +2,7 @@
  * Renders the X and Z Pauli labels for one qubit at one moment.
  * X labels are blue and bracketed; Z labels are red and plain.
  */
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Label, XZLabelPair, SinglePauli } from './labelTracking';
 import { useLabelVisibility } from './LabelVisibility';
 import './QubitLabelDisplay.css';
@@ -88,17 +89,34 @@ interface FadingLabelProps {
 
 /**
  * Wraps a label so it fades out at the right edge before reaching the next gate.
- * Hovering reveals a tooltip with the full, un-faded label.
+ * The fade (and the hover tooltip) only kick in when the label is actually wider
+ * than the space available before the next gate; shorter labels render in full.
  */
 export function FadingLabel({ labels, maxWidth }: FadingLabelProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    setOverflowing(el.scrollWidth > maxWidth + 1);
+  }, [labels, maxWidth]);
+
   return (
     <div className="fading-label">
-      <div className="label-fade" style={{ maxWidth: `${maxWidth}px` }}>
-        <QubitLabelDisplay labels={labels} />
+      <div
+        className={overflowing ? 'label-fade label-fade-active' : 'label-fade'}
+        style={overflowing ? { maxWidth: `${maxWidth}px` } : undefined}
+      >
+        <div className="label-fade-content" ref={contentRef}>
+          <QubitLabelDisplay labels={labels} />
+        </div>
       </div>
-      <div className="label-tooltip">
-        <QubitLabelDisplay labels={labels} />
-      </div>
+      {overflowing && (
+        <div className="label-tooltip">
+          <QubitLabelDisplay labels={labels} />
+        </div>
+      )}
     </div>
   );
 }
