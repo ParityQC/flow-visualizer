@@ -49,3 +49,29 @@
 .dropdown-item:hover {
   background-color: var(--color-raised);
 }
+
+.dropdown-slider {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  cursor: default;
+  border-top: 1px solid var(--color-border-divider);
+}
+
+.dropdown-slider:hover {
+  background: none;
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text);
+}
+
+.slider-value {
+  color: var(--color-text-faint);
+}
+
+.dropdown-slider input[type='range'] {
+  width: 100%;
+}

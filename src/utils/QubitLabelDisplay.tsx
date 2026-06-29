@@ -80,3 +80,25 @@ export function QubitLabelDisplay({ labels }: QubitLabelDisplayProps) {
     </div>
   );
 }
+
+interface FadingLabelProps {
+  labels: XZLabelPair;
+  maxWidth: number;
+}
+
+/**
+ * Wraps a label so it fades out at the right edge before reaching the next gate.
+ * Hovering reveals a tooltip with the full, un-faded label.
+ */
+export function FadingLabel({ labels, maxWidth }: FadingLabelProps) {
+  return (
+    <div className="fading-label">
+      <div className="label-fade" style={{ maxWidth: `${maxWidth}px` }}>
+        <QubitLabelDisplay labels={labels} />
+      </div>
+      <div className="label-tooltip">
+        <QubitLabelDisplay labels={labels} />
+      </div>
+    </div>
+  );
+}

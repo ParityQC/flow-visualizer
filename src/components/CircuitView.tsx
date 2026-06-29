@@ -7,9 +7,15 @@ import { InlineMath } from './InlineMath';
 import 'katex/dist/katex.min.css';
 import { Gate } from '../models/Gates';
 import { Circuit } from '../models/Circuit';
-import { lineHeight, momentWidth, padding, qubitLabelWidth } from '../utils/LayoutConstants';
+import {
+  lineHeight,
+  padding,
+  qubitLabelWidth,
+  labelLeftPadding,
+  gateRadius,
+} from '../utils/LayoutConstants';
 import { Fragment, useMemo, useState } from 'react';
-import { QubitLabelDisplay } from '../utils/QubitLabelDisplay';
+import { QubitLabelDisplay, FadingLabel } from '../utils/QubitLabelDisplay';
 import {
   computeCircuitRenderingData,
   PositionedLabel,
@@ -39,6 +45,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
   const numMoments = Math.max(Array.from(circuit.moments()).length + 3, 3);
 
   const [qubitMenu, setQubitMenu] = useState<QubitMenuState | null>(null);
+  const { isLabelXVisible, isLabelZVisible, momentWidth } = useLabelVisibility();
 
   const { initialLabels, labelChangesByMoment, momentOffsets } = useMemo(() => {
     const config: RenderConfig = {
@@ -62,7 +69,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
       labelChangesByMoment,
       momentOffsets: result.momentOffsets,
     };
-  }, [circuit]);
+  }, [circuit, momentWidth]);
   const previewGate = useMemo(() => {
     if (!gatePreview) return null;
     if (gatePreview.controlQubit === null) return null;
@@ -111,7 +118,8 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
   const closeQubitMenu = () => {
     setQubitMenu(null);
   };
-  const { isLabelXVisible, isLabelZVisible } = useLabelVisibility();
+
+  const maxLabelWidth = Math.max(20, momentWidth - labelLeftPadding - gateRadius);
 
   return (
     <div className="circuit-box">
@@ -204,11 +212,10 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   position: 'absolute',
                   top: `${position.top}px`,
                   left: `${position.left}px`, // correct positions already computed
-                  pointerEvents: 'none',
                   zIndex: 5,
                 }}
               >
-                <QubitLabelDisplay labels={position.labels} />
+                <FadingLabel labels={position.labels} maxWidth={maxLabelWidth} />
               </div>
             ));
 

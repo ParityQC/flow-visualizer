@@ -40,3 +40,41 @@
 .label-token-z {
   color: var(--color-z-label);
 }
+
+.fading-label {
+  position: relative;
+}
+
+/* Clip + fade the label so it dissolves before colliding with the next gate. */
+.label-fade {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 14px), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - 14px), transparent);
+}
+
+.label-fade .qubit-label-display {
+  align-items: flex-start;
+}
+
+/* Full, un-faded label revealed on hover. */
+.label-tooltip {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  display: none;
+  padding: 4px 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-dropdown);
+  white-space: nowrap;
+  z-index: 20;
+}
+
+.label-tooltip .qubit-label-display {
+  align-items: flex-start;
+}
+
+.fading-label:hover .label-tooltip {
+  display: block;
+}

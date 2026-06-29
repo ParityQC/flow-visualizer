@@ -5,6 +5,7 @@
  */
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { InlineMath } from '../components/InlineMath';
+import { momentWidth as defaultMomentWidth } from './LayoutConstants';
 
 interface LabelVisibilityState {
   showPhysX: boolean;
@@ -25,6 +26,8 @@ interface LabelVisibilityContextType {
   isLabelXVisible: (_qubitIndex: number) => boolean;
   isLabelZVisible: (_qubitIndex: number) => boolean;
   resetVisibilityState: () => void;
+  momentWidth: number; // horizontal spacing between moments, adjustable via the slider
+  setMomentWidth: (_px: number) => void;
 }
 
 const LabelVisibilityContext = createContext<LabelVisibilityContextType | null>(null);
@@ -37,6 +40,8 @@ export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
     showPhysZ: true,
     initAuxVisibility: new Map(),
   });
+
+  const [momentWidth, setMomentWidth] = useState<number>(defaultMomentWidth);
 
   const togglePhysX = useCallback(() => {
     setState((prev) => ({
@@ -97,6 +102,8 @@ export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
         isLabelXVisible,
         isLabelZVisible,
         resetVisibilityState,
+        momentWidth,
+        setMomentWidth,
       }}
     >
       {children}
