@@ -7,9 +7,15 @@ import { InlineMath } from './InlineMath';
 import 'katex/dist/katex.min.css';
 import { Gate } from '../models/Gates';
 import { Circuit } from '../models/Circuit';
-import { lineHeight, momentWidth, padding, qubitLabelWidth } from '../utils/LayoutConstants';
+import {
+  lineHeight,
+  padding,
+  qubitLabelWidth,
+  labelLeftPadding,
+  labelRightClearance,
+} from '../utils/LayoutConstants';
 import { Fragment, useMemo, useState } from 'react';
-import { QubitLabelDisplay } from '../utils/QubitLabelDisplay';
+import { TruncatedLabel } from '../utils/QubitLabelDisplay';
 import {
   computeCircuitRenderingData,
   PositionedLabel,
@@ -40,11 +46,18 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
 
   const [qubitMenu, setQubitMenu] = useState<QubitMenuState | null>(null);
 
+  const { state, isLabelXVisible, isLabelZVisible } = useLabelVisibility();
+  const columnWidth = state.columnWidth;
+  // Clip width that guarantees a label can never reach the next gate's column.
+  const labelMaxWidth = columnWidth - labelLeftPadding - labelRightClearance;
+  // Initial labels live in the qubit-name column; clip them to that width.
+  const initialLabelMaxWidth = qubitLabelWidth - 20;
+
   const { initialLabels, labelChangesByMoment, momentOffsets } = useMemo(() => {
     const config: RenderConfig = {
       padding,
       lineHeight,
-      momentWidth,
+      momentWidth: columnWidth,
       qubitLabelWidth,
     };
 
@@ -62,7 +75,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
       labelChangesByMoment,
       momentOffsets: result.momentOffsets,
     };
-  }, [circuit]);
+  }, [circuit, columnWidth]);
   const previewGate = useMemo(() => {
     if (!gatePreview) return null;
     if (gatePreview.controlQubit === null) return null;
@@ -90,7 +103,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
     return total;
   }, [momentOffsets]);
 
-  const canvasWidth = padding + qubitLabelWidth + numMoments * momentWidth + totalOffset;
+  const canvasWidth = padding + qubitLabelWidth + numMoments * columnWidth + totalOffset;
   const canvasHeight = padding * 2 + numQubits * lineHeight;
 
   const getGateContainerTop = (gate: Gate): number => {
@@ -111,7 +124,6 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
   const closeQubitMenu = () => {
     setQubitMenu(null);
   };
-  const { isLabelXVisible, isLabelZVisible } = useLabelVisibility();
 
   return (
     <div className="circuit-box">
@@ -135,8 +147,8 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   className="circuit-cell"
                   style={{
                     top: `${padding + qubitIndex * lineHeight}px`,
-                    left: `${padding + qubitLabelWidth + momentIndex * momentWidth + cumulativeOffset}px`,
-                    width: `${momentWidth}px`,
+                    left: `${padding + qubitLabelWidth + momentIndex * columnWidth + cumulativeOffset}px`,
+                    width: `${columnWidth}px`,
                     height: `${lineHeight}px`,
                   }}
                 />
@@ -155,7 +167,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                 zIndex: 5,
               }}
             >
-              <QubitLabelDisplay labels={position.labels} />
+              <TruncatedLabel labels={position.labels} maxWidth={initialLabelMaxWidth} />
             </div>
           ))}
           {Array.from(circuit.moments()).map((moment, momentIndex) => {
@@ -178,7 +190,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   style={{
                     position: 'absolute',
                     top: `${getGateContainerTop(gate)}px`,
-                    left: `${padding + qubitLabelWidth + momentIndex * momentWidth + cumulativeOffset + gateOffset}px`,
+                    left: `${padding + qubitLabelWidth + momentIndex * columnWidth + cumulativeOffset + gateOffset}px`,
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -208,7 +220,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   zIndex: 5,
                 }}
               >
-                <QubitLabelDisplay labels={position.labels} />
+                <TruncatedLabel labels={position.labels} maxWidth={labelMaxWidth} />
               </div>
             ));
 
@@ -224,7 +236,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
               style={{
                 position: 'absolute',
                 top: `${getGateContainerTop(previewGate)}px`,
-                left: `${padding + qubitLabelWidth + gatePreview.momentIndex * momentWidth + (momentOffsets.get(gatePreview.momentIndex)?.cumulativeOffset || 0)}px`,
+                left: `${padding + qubitLabelWidth + gatePreview.momentIndex * columnWidth + (momentOffsets.get(gatePreview.momentIndex)?.cumulativeOffset || 0)}px`,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',

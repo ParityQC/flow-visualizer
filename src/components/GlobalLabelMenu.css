@@ -49,3 +49,22 @@
 .dropdown-item:hover {
   background-color: var(--color-raised);
 }
+
+.dropdown-slider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.dropdown-slider input[type='range'] {
+  flex: 1;
+  cursor: pointer;
+}
+
+.slider-value {
+  min-width: 40px;
+  text-align: right;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

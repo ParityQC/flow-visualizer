@@ -5,10 +5,12 @@
  */
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { InlineMath } from '../components/InlineMath';
+import { defaultColumnWidth } from './LayoutConstants';
 
 interface LabelVisibilityState {
   showPhysX: boolean;
   showPhysZ: boolean;
+  columnWidth: number; // uniform gate-column width (px), controls room for labels
   initAuxVisibility: Map<number, InitAuxLabelVisibility>; // maps qubit to initialized label
 }
 
@@ -20,6 +22,7 @@ interface LabelVisibilityContextType {
   state: LabelVisibilityState;
   togglePhysX: () => void; // global toggle
   togglePhysZ: () => void; // global toggle
+  setColumnWidth: (_width: number) => void;
   setAuxLabelX: (_qubitIndex: number, _visible: boolean) => void;
   setAuxLabelZ: (_qubitIndex: number, _visible: boolean) => void;
   isLabelXVisible: (_qubitIndex: number) => boolean;
@@ -35,8 +38,13 @@ export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<LabelVisibilityState>({
     showPhysX: true,
     showPhysZ: true,
+    columnWidth: defaultColumnWidth,
     initAuxVisibility: new Map(),
   });
+
+  const setColumnWidth = useCallback((width: number) => {
+    setState((prev) => ({ ...prev, columnWidth: width }));
+  }, []);
 
   const togglePhysX = useCallback(() => {
     setState((prev) => ({
@@ -83,7 +91,12 @@ export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
     [state.initAuxVisibility]
   );
   const resetVisibilityState = useCallback(() => {
-    setState({ showPhysX: true, showPhysZ: true, initAuxVisibility: new Map() });
+    setState({
+      showPhysX: true,
+      showPhysZ: true,
+      columnWidth: defaultColumnWidth,
+      initAuxVisibility: new Map(),
+    });
   }, []);
 
   return (
@@ -92,6 +105,7 @@ export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
         state,
         togglePhysX,
         togglePhysZ,
+        setColumnWidth,
         setAuxLabelX,
         setAuxLabelZ,
         isLabelXVisible,

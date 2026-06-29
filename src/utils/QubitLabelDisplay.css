@@ -4,7 +4,20 @@
   gap: 4px;
   border-radius: var(--radius-md);
   font-family: var(--font-mono);
-  align-items: center;
+  align-items: flex-start;
+}
+
+/* Fixed-width clip box around a label; fades the right edge when truncated and
+   captures hover so the native tooltip (full value) works. */
+.label-clip {
+  overflow: hidden;
+  pointer-events: auto;
+  width: max-content;
+}
+
+.label-clip-truncated {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 14px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 14px), transparent);
 }
 
 .label-row {
@@ -12,6 +25,8 @@
   gap: 4px;
   align-items: center;
   min-height: 18px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .label-phase {
@@ -25,6 +40,8 @@
 .label-tokens {
   display: flex;
   gap: 2px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .label-token {

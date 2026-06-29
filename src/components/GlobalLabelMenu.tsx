@@ -1,13 +1,14 @@
 import { useRef, useState, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLabelVisibility } from '../utils/LabelVisibility';
+import { minColumnWidth, maxColumnWidth } from '../utils/LayoutConstants';
 import './GlobalLabelMenu.css';
 
 export function GlobalLabelMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { state, togglePhysX, togglePhysZ } = useLabelVisibility();
+  const { state, togglePhysX, togglePhysZ, setColumnWidth } = useLabelVisibility();
 
   useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
@@ -49,9 +50,22 @@ export function GlobalLabelMenu() {
                 <span className="checkbox">{state.showPhysZ ? '☑' : '☐'}</span>
                 Show all Z labels
               </button>
+              <div className="label-menu-header">Column width</div>
+              <div className="dropdown-slider">
+                <input
+                  type="range"
+                  min={minColumnWidth}
+                  max={maxColumnWidth}
+                  step={5}
+                  value={state.columnWidth}
+                  onChange={(e) => setColumnWidth(Number(e.target.value))}
+                  aria-label="Gate column width"
+                />
+                <span className="slider-value">{state.columnWidth}px</span>
+              </div>
             </div>
           </>,
-          document.body,
+          document.body
         )}
     </div>
   );
