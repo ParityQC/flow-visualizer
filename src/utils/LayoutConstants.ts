@@ -4,18 +4,22 @@ export const momentWidth = 80;
 export const qubitLabelWidth = 80;
 export const gateRadius = 30;
 
-// Horizontal offset applied to labels so they start just right of their own gate.
-export const labelLeftPadding = 10;
+// CSS width of a single-qubit gate box (matches .gate-box { width: 40px }).
+// Labels after a boxed gate must start past this boundary.
+export const singleQubitGateWidth = 40;
 
-// Gap kept between a label's right edge and the next gate's column. The label is
-// clipped to `columnWidth - labelLeftPadding - labelRightClearance` so it can never
-// reach (let alone overlap) the following gate, regardless of column width.
-export const labelRightClearance = 10;
+// Gap applied after the gate (right edge of box for single-qubit, center for others).
+export const labelLeftPadding = 6;
+
+// Gap kept between a label's right edge and the next gate's column edge.
+// Sized to clear the 4px box-shadow halo on gate boxes plus comfortable breathing room.
+export const labelRightClearance = 16;
 
 // Uniform gate-column width is user-adjustable via the Label Settings slider.
-// `momentWidth` is the default; the slider ranges between these bounds.
-export const defaultColumnWidth = momentWidth;
-export const minColumnWidth = 60;
+// Default is larger than momentWidth so boxed-gate labels have room:
+// at 120px a boxed gate leaves 120-46-16=58px for the label.
+export const defaultColumnWidth = 120;
+export const minColumnWidth = 80;
 export const maxColumnWidth = 220;
 
 // Vertical fudge applied to label positions (compensates for the lineHeight bump from 50→60).

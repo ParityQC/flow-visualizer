@@ -220,7 +220,10 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   zIndex: 5,
                 }}
               >
-                <TruncatedLabel labels={position.labels} maxWidth={labelMaxWidth} />
+                <TruncatedLabel
+                  labels={position.labels}
+                  maxWidth={position.maxWidth ?? labelMaxWidth}
+                />
               </div>
             ));
 

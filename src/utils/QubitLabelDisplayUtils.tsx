@@ -6,6 +6,8 @@ import { XZLabelPair, LabelTracker } from './labelTracking';
 import {
   qubitLabelWidth,
   labelLeftPadding,
+  labelRightClearance,
+  singleQubitGateWidth,
   labelTopOffset,
   gateOverlapOffset,
   iswapGateOverlapOffset,
@@ -17,6 +19,7 @@ export interface PositionedLabel {
   momentIndex: number;
   top: number;
   left: number;
+  maxWidth?: number; // per-label clip budget; undefined for initial labels (CircuitView uses its own budget)
   labels: XZLabelPair;
 }
 
@@ -171,18 +174,28 @@ export function computeLabelChangePositions(
         if (!hasGateAtQubit) continue;
       }
       if (!previousLabel?.equals(currentLabel)) {
+        const gate = circuit.momentOfIndex(moment)?.getGate(qubit);
+        const isBoxedGate =
+          gate !== undefined && gate.numControls === 0 && gate.targetType.numTargets === 1;
+        // Boxed single-qubit gates (H, S, T, Rz …) are 40px wide starting at cellLeft,
+        // so the label must start past the right edge of the box.
+        const effectivePadding = isBoxedGate
+          ? singleQubitGateWidth + labelLeftPadding
+          : labelLeftPadding;
+        const labelMaxWidth = Math.max(0, momentWidth - effectivePadding - labelRightClearance);
         positions.push({
           key: `initial-label-${moment}-${qubit}`,
           qubitIndex: qubit,
           momentIndex: moment,
           labels: currentLabel,
+          maxWidth: labelMaxWidth,
           top: -padding + qubit * lineHeight + labelTopOffset,
           // cumulativeOffset + maxOffset so all labels align with rightmost CNOT
           left:
             padding +
             qubitLabelWidth +
             momentWidth * moment +
-            labelLeftPadding +
+            effectivePadding +
             cumulativeOffset +
             maxOffset,
         });
