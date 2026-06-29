@@ -45,9 +45,11 @@
   position: relative;
 }
 
-/* Natural width of the label, used to decide whether it overflows the gap. */
+/* Natural width of the label, used to decide whether it overflows the gap. Uses
+   max-content (not fit-content) so a clipped label keeps its full width and overflows
+   the mask instead of wrapping (e.g. a "-i" phase onto two lines). */
 .label-fade-content {
-  width: fit-content;
+  width: max-content;
 }
 
 /* Only when the label is too wide: clip + fade it before it hits the next gate. */
