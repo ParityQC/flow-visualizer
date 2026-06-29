@@ -62,14 +62,14 @@ export function GlobalLabelMenu() {
                   type="range"
                   min={50}
                   max={300}
-                  step={5}
+                  step={1}
                   value={momentWidth}
                   onChange={(e) => setMomentWidth(Number(e.target.value))}
                 />
               </div>
             </div>
           </>,
-          document.body,
+          document.body
         )}
     </div>
   );
