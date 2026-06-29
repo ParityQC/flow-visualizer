@@ -4,7 +4,7 @@
   gap: 4px;
   border-radius: var(--radius-md);
   font-family: var(--font-mono);
-  align-items: center;
+  align-items: flex-start;
 }
 
 .label-row {
@@ -57,10 +57,6 @@
   mask-image: linear-gradient(to right, black calc(100% - 14px), transparent);
 }
 
-.label-fade-active .qubit-label-display {
-  align-items: flex-start;
-}
-
 /* Full, un-faded label revealed on hover. */
 .label-tooltip {
   position: absolute;
@@ -74,10 +70,6 @@
   box-shadow: var(--shadow-dropdown);
   white-space: nowrap;
   z-index: 20;
-}
-
-.label-tooltip .qubit-label-display {
-  align-items: flex-start;
 }
 
 .fading-label:hover .label-tooltip {
