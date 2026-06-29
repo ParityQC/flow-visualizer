@@ -89,8 +89,9 @@ interface FadingLabelProps {
 
 /**
  * Wraps a label so it fades out at the right edge before reaching the next gate.
- * The fade (and the hover tooltip) only kick in when the label is actually wider
- * than the space available before the next gate; shorter labels render in full.
+ * The fade only kicks in when the label is actually wider than the space available
+ * before the next gate; shorter labels render in full. Hovering always reveals a
+ * tooltip with the full, un-faded label.
  */
 export function FadingLabel({ labels, maxWidth }: FadingLabelProps) {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -112,11 +113,9 @@ export function FadingLabel({ labels, maxWidth }: FadingLabelProps) {
           <QubitLabelDisplay labels={labels} />
         </div>
       </div>
-      {overflowing && (
-        <div className="label-tooltip">
-          <QubitLabelDisplay labels={labels} />
-        </div>
-      )}
+      <div className="label-tooltip">
+        <QubitLabelDisplay labels={labels} />
+      </div>
     </div>
   );
 }
