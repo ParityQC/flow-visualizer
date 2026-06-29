@@ -133,6 +133,8 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                 <div
                   key={`grid-${qubitIndex}-${momentIndex}`}
                   className="circuit-cell"
+                  data-moment={momentIndex}
+                  data-qubit={qubitIndex}
                   style={{
                     top: `${padding + qubitIndex * lineHeight}px`,
                     left: `${padding + qubitLabelWidth + momentIndex * momentWidth + cumulativeOffset}px`,

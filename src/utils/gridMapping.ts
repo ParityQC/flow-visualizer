@@ -7,34 +7,52 @@ export interface GridHit {
   momentIndex: number;
 }
 
-/** gets the drop location of the gate and maps it to a qubit and moment index
- * Problem here is that dynamical growth of a moment (by 2-qubit gates overlapping) causes the grid to shift to right which is not yet calculated here.
+/** gets the drop location of the gate and maps it to a qubit and moment index.
+ * Each grid cell carries its own moment/qubit via data attributes and is positioned
+ * with its actual (variable) offset, so we map the point to the cell whose rect
+ * contains it. This stays correct when moments are shifted right by 2-qubit-gate
+ * overlap or by wide-label spacing reservations. If the point lands in a gap between
+ * cells we fall back to the nearest cell.
  */
 export function dynamicPointToGridIndices(
   clientX: number,
   clientY: number,
   gridRoot: HTMLElement
 ): GridHit | undefined {
-  const firstCell = gridRoot.querySelector<HTMLElement>('.circuit-cell');
-  if (!firstCell) return undefined;
+  const cells = gridRoot.querySelectorAll<HTMLElement>('.circuit-cell');
+  if (cells.length === 0) return undefined;
 
-  const firstRect = firstCell.getBoundingClientRect();
-  const cellWidth = firstRect.width;
-  const cellHeight = firstRect.height;
+  let nearest: GridHit | undefined;
+  let nearestDist = Infinity;
 
-  if (cellWidth === 0 || cellHeight === 0) return undefined;
+  for (const cell of cells) {
+    const moment = Number(cell.dataset.moment);
+    const qubit = Number(cell.dataset.qubit);
+    if (Number.isNaN(moment) || Number.isNaN(qubit)) continue;
 
-  const dx = clientX - firstRect.left + cellWidth / 2;
-  const dy = clientY - firstRect.top - cellHeight / 2;
+    const rect = cell.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) continue;
 
-  if (dx < 0 || dy < 0) return undefined;
+    if (
+      clientX >= rect.left &&
+      clientX <= rect.right &&
+      clientY >= rect.top &&
+      clientY <= rect.bottom
+    ) {
+      return { qubitIndex: qubit, momentIndex: moment };
+    }
 
-  const momentIndex = Math.floor(dx / cellWidth);
-  const qubitIndex = Math.floor(dy / cellHeight);
+    // Squared distance from the point to the cell rect (0 on either axis when inside it).
+    const dx = clientX < rect.left ? rect.left - clientX : Math.max(0, clientX - rect.right);
+    const dy = clientY < rect.top ? rect.top - clientY : Math.max(0, clientY - rect.bottom);
+    const dist = dx * dx + dy * dy;
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearest = { qubitIndex: qubit, momentIndex: moment };
+    }
+  }
 
-  if (momentIndex < 0 || qubitIndex < 0) return undefined;
-
-  return { qubitIndex, momentIndex };
+  return nearest;
 }
 
 export function validateAndGetDropIndices(
