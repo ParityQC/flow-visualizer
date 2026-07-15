@@ -4,7 +4,7 @@
   gap: 4px;
   border-radius: var(--radius-md);
   font-family: var(--font-mono);
-  align-items: center;
+  align-items: flex-start;
 }
 
 .label-row {
@@ -39,4 +39,43 @@
 
 .label-token-z {
   color: var(--color-z-label);
+}
+
+.fading-label {
+  position: relative;
+}
+
+/* Natural width of the label, used to decide whether it overflows the gap. Uses
+   max-content (not fit-content) so a clipped label keeps its full width and overflows
+   the mask instead of wrapping (e.g. a "-i" phase onto two lines). */
+.label-fade-content {
+  width: max-content;
+}
+
+/* Only when the label is too wide: clip + fade it before it hits the next gate. A long,
+   gentle ramp (capped so narrow labels keep a readable opaque part) makes the fade
+   obvious and keeps trailing digits faintly visible instead of vanishing abruptly. */
+.label-fade-active {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - min(28px, 55%)), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - min(28px, 55%)), transparent);
+}
+
+/* Full, un-faded label revealed on hover. */
+.label-tooltip {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  display: none;
+  padding: 4px 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-dropdown);
+  white-space: nowrap;
+  z-index: 20;
+}
+
+.fading-label:hover .label-tooltip {
+  display: block;
 }

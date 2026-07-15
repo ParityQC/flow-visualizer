@@ -7,7 +7,7 @@ export function GlobalLabelMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { state, togglePhysX, togglePhysZ } = useLabelVisibility();
+  const { state, togglePhysX, togglePhysZ, momentWidth, setMomentWidth } = useLabelVisibility();
 
   useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
@@ -49,9 +49,27 @@ export function GlobalLabelMenu() {
                 <span className="checkbox">{state.showPhysZ ? '☑' : '☐'}</span>
                 Show all Z labels
               </button>
+              <div
+                className="dropdown-item dropdown-slider"
+                onClick={(e) => e.stopPropagation()}
+                role="presentation"
+              >
+                <div className="slider-label">
+                  <span>Moment width</span>
+                  <span className="slider-value">{momentWidth}px</span>
+                </div>
+                <input
+                  type="range"
+                  min={50}
+                  max={300}
+                  step={1}
+                  value={momentWidth}
+                  onChange={(e) => setMomentWidth(Number(e.target.value))}
+                />
+              </div>
             </div>
           </>,
-          document.body,
+          document.body
         )}
     </div>
   );
