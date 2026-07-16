@@ -1,13 +1,13 @@
 import { CircuitBuilder } from './components/CircuitBuilder';
 import { emptyCircuit } from './utils/exampleCircuits';
-import { LabelVisibilityProvider } from './utils/LabelVisibility';
+import { DisplaySettingsProvider } from './utils/DisplaySettings';
 
 function App() {
   return (
     <div className="App">
-      <LabelVisibilityProvider>
+      <DisplaySettingsProvider>
         <CircuitBuilder initialCircuit={emptyCircuit} />
-      </LabelVisibilityProvider>
+      </DisplaySettingsProvider>
     </div>
   );
 }

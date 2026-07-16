@@ -3,7 +3,7 @@
  */
 import { useEffect } from 'react';
 import './QubitContextMenu.css';
-import { useLabelVisibility } from '../utils/LabelVisibility';
+import { useDisplaySettings } from '../utils/DisplaySettings';
 
 interface QubitContextMenuProps {
   qubitIndex: number;
@@ -12,7 +12,7 @@ interface QubitContextMenuProps {
 }
 
 export function QubitContextMenu({ qubitIndex, position, onClose }: QubitContextMenuProps) {
-  const { setAuxLabelX, setAuxLabelZ, isLabelXVisible, isLabelZVisible } = useLabelVisibility();
+  const { setAuxLabelX, setAuxLabelZ, isLabelXVisible, isLabelZVisible } = useDisplaySettings();
 
   // Close on Escape key
   useEffect(() => {

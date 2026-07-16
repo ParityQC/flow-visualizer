@@ -4,7 +4,7 @@
  */
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Label, XZLabelPair, SinglePauli } from './labelTracking';
-import { useLabelVisibility } from './LabelVisibility';
+import { useDisplaySettings } from './DisplaySettings';
 import './QubitLabelDisplay.css';
 
 interface QubitLabelDisplayProps {
@@ -14,7 +14,7 @@ interface QubitLabelDisplayProps {
 const values = ['', 'i', '-', '-i'];
 
 export function QubitLabelDisplay({ labels }: QubitLabelDisplayProps) {
-  const { state, isLabelXVisible, isLabelZVisible } = useLabelVisibility();
+  const { state, isLabelXVisible, isLabelZVisible } = useDisplaySettings();
 
   const isOperatorVisible = (op: SinglePauli): boolean => {
     const qubitIndex = parseInt(op.qubit, 10);

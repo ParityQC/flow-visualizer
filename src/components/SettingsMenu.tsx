@@ -1,13 +1,13 @@
 import { useRef, useState, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useLabelVisibility } from '../utils/LabelVisibility';
-import './GlobalLabelMenu.css';
+import { useDisplaySettings } from '../utils/DisplaySettings';
+import './SettingsMenu.css';
 
-export function GlobalLabelMenu() {
+export function SettingsMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { state, togglePhysX, togglePhysZ, momentWidth, setMomentWidth } = useLabelVisibility();
+  const { state, togglePhysX, togglePhysZ, momentWidth, setMomentWidth } = useDisplaySettings();
 
   useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
@@ -19,10 +19,10 @@ export function GlobalLabelMenu() {
   }, [isOpen]);
 
   return (
-    <div className="global-label-menu">
+    <div className="settings-menu">
       <button
         ref={buttonRef}
-        className="btn global-label-menu-button"
+        className="btn settings-menu-button"
         onClick={() => setIsOpen(!isOpen)}
         title="Display settings"
       >
@@ -39,10 +39,10 @@ export function GlobalLabelMenu() {
               role="presentation"
             />
             <div
-              className="global-label-dropdown"
+              className="settings-dropdown"
               style={{ top: dropdownPos.top, right: dropdownPos.right }}
             >
-              <div className="label-menu-header">Settings</div>
+              <div className="settings-menu-header">Settings</div>
               <button className="dropdown-item" onClick={togglePhysX}>
                 <span className="checkbox">{state.showPhysX ? '☑' : '☐'}</span>
                 Show all X labels

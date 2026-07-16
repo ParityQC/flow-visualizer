@@ -17,7 +17,7 @@ import {
 } from '../utils/QubitLabelDisplayUtils';
 import { GatePreview } from './CircuitBuilder';
 import { QubitContextMenu } from './QubitContextMenu';
-import { getInitialState, useLabelVisibility } from '../utils/LabelVisibility';
+import { getInitialState, useDisplaySettings } from '../utils/DisplaySettings';
 
 /** The key to be used within `DataTransfer.setData` to signal that a gates is moved. */
 export const mimeMoveGate = 'application/x-move-gate';
@@ -39,7 +39,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
   const numMoments = Math.max(Array.from(circuit.moments()).length + 3, 3);
 
   const [qubitMenu, setQubitMenu] = useState<QubitMenuState | null>(null);
-  const { isLabelXVisible, isLabelZVisible, momentWidth } = useLabelVisibility();
+  const { isLabelXVisible, isLabelZVisible, momentWidth } = useDisplaySettings();
 
   const { initialLabels, labelChangesByMoment, momentOffsets } = useMemo(() => {
     const config: RenderConfig = {
