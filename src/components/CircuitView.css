@@ -56,3 +56,14 @@
   width: 100%;
   height: 100%;
 }
+
+/* Propagated labels each form their own stacking context. On hover, lift the whole
+   wrapper above sibling labels so its tooltip (z-index: 20 inside) reaches the
+   foreground instead of being overpainted by the next gate's label. */
+.moment-label {
+  z-index: 5;
+}
+
+.moment-label:hover {
+  z-index: 25;
+}

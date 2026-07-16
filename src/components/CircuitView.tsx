@@ -200,11 +200,11 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
             const labelElements = (labelChangesByMoment.get(momentIndex) ?? []).map((position) => (
               <div
                 key={`label-${position.momentIndex}-${position.key}`}
+                className="moment-label"
                 style={{
                   position: 'absolute',
                   top: `${position.top}px`,
                   left: `${position.left}px`, // correct positions already computed
-                  zIndex: 5,
                 }}
               >
                 <FadingLabel labels={position.labels} maxWidth={position.maxWidth} />
