@@ -5,7 +5,7 @@
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-dropdown);
   min-width: 160px;
-  z-index: 1000;
+  z-index: var(--z-modal);
   padding: 4px 0;
 }
 
