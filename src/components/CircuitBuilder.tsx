@@ -20,8 +20,8 @@ import logo from '../assets/parityqc_4c_pos.png';
 import { QasmDisplay } from './QasmDisplay';
 import { instantiateTargetType, TargetType } from '../models/Targets';
 import HelpButton from './HelpButton';
-import { useLabelVisibility } from '../utils/LabelVisibility';
-import { GlobalLabelMenu } from './GlobalLabelMenu';
+import { useDisplaySettings } from '../utils/DisplaySettings';
+import { SettingsMenu } from './SettingsMenu';
 import { CircuitSelector } from './CircuitSelector';
 import MathHelp from './MathHelp';
 
@@ -31,7 +31,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
   // first (sets pendingGate), control/second qubit is placed on the next click.
   const [pendingGate, setPendingGate] = useState<pendingGate | null>(null);
 
-  const { resetVisibilityState, setAuxLabelX } = useLabelVisibility();
+  const { resetVisibilityState, setAuxLabelX } = useDisplaySettings();
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   const [gatePreview, setGatePreview] = useState<GatePreview | null>(null);
@@ -241,7 +241,6 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
             <span className="panel-label">Circuit Actions</span>
           </div>
           <div className="panel-body circuit-actions">
-            <GlobalLabelMenu />
             <button className="btn" onClick={handleParallelizeGates}>
               Compact Circuit
             </button>
@@ -257,6 +256,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
           <CircuitSelector onSelect={handleCircuitSelect} />
           <h1 className="circuit-title">Parity Flow Circuit</h1>
           <div className="circuit-top-bar-end">
+            <SettingsMenu />
             <MathHelp />
             <HelpButton />
             <a href="https://parityqc.com" target="_blank" rel="noopener noreferrer">

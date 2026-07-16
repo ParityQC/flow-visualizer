@@ -1,7 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 /**
- * React context for per-qubit label visibility (toggle X/Z labels globally
- * or per qubit, plus the implied initial-state notation).
+ * React context for circuit display settings: label visibility (toggle X/Z
+ * labels globally or per qubit, plus the implied initial-state notation) and
+ * the moment width (horizontal spacing between moments).
  */
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { InlineMath } from '../components/InlineMath';
@@ -17,7 +18,7 @@ interface InitAuxLabelVisibility {
   showX: boolean;
   showZ: boolean;
 }
-interface LabelVisibilityContextType {
+interface DisplaySettingsContextType {
   state: LabelVisibilityState;
   togglePhysX: () => void; // global toggle
   togglePhysZ: () => void; // global toggle
@@ -30,9 +31,9 @@ interface LabelVisibilityContextType {
   setMomentWidth: (_px: number) => void;
 }
 
-const LabelVisibilityContext = createContext<LabelVisibilityContextType | null>(null);
+const DisplaySettingsContext = createContext<DisplaySettingsContextType | null>(null);
 
-export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
+export function DisplaySettingsProvider({ children }: { children: ReactNode }) {
   // ReactNode is one of the following types: bool, null (both ignored), number, string, react element, array of the above
 
   const [state, setState] = useState<LabelVisibilityState>({
@@ -92,7 +93,7 @@ export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <LabelVisibilityContext.Provider
+    <DisplaySettingsContext.Provider
       value={{
         state,
         togglePhysX,
@@ -107,7 +108,7 @@ export function LabelVisibilityProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-    </LabelVisibilityContext.Provider>
+    </DisplaySettingsContext.Provider>
   );
 }
 
@@ -116,10 +117,10 @@ export function getInitialState(isLabelXVisible: boolean, isLabelZVisible: boole
   if (!isLabelZVisible) return <InlineMath math={'\\lvert 0\\rangle'} />;
 }
 
-export function useLabelVisibility() {
-  const context = useContext(LabelVisibilityContext);
+export function useDisplaySettings() {
+  const context = useContext(DisplaySettingsContext);
   if (!context) {
-    throw new Error('useLabelVisibility must be used within a LabelVisibilityProvider');
+    throw new Error('useDisplaySettings must be used within a DisplaySettingsProvider');
   }
   return context;
 }
