@@ -37,6 +37,19 @@
   --color-error-bg: #fdecea;
   --color-error-text: #a4231b;
 
+  /* Layering (z-index scale, low → high). Ordered by intent; note that circuit-internal
+     tiers and portaled overlays live in separate stacking contexts. */
+  --z-iswap-label: 1; /* iSWAP "i" badge within a gate */
+  --z-gate: 2; /* single-qubit gate box */
+  --z-label: 5; /* propagated Pauli labels */
+  --z-gate-area: 10; /* gate layer above wires */
+  --z-qubit-label: 11; /* qubit name gutter */
+  --z-label-tooltip: 20; /* full label tooltip, inside its label wrapper */
+  --z-label-hover: 25; /* hovered label wrapper lifts above sibling labels */
+  --z-overlay: 99; /* full-screen click-catcher backdrops */
+  --z-dropdown: 100; /* settings / circuit-selector menus */
+  --z-modal: 1000; /* help modal, qubit context menu */
+
   /* Shape */
   --radius-sm: 4px;
   --radius-md: 6px;

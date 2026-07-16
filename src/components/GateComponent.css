@@ -8,7 +8,7 @@
 
 .gate-wrapper-single {
   position: absolute;
-  z-index: 2;
+  z-index: var(--z-gate);
 }
 
 .cnot-control {
@@ -121,5 +121,5 @@
   border-radius: var(--radius-sm);
   padding: 2px 6px;
   font-size: var(--font-size-sm);
-  z-index: 1;
+  z-index: var(--z-iswap-label);
 }

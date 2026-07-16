@@ -73,7 +73,7 @@
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-dropdown);
   white-space: nowrap;
-  z-index: 20;
+  z-index: var(--z-label-tooltip);
 }
 
 .fading-label:hover .label-tooltip {

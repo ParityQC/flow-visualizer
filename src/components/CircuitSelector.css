@@ -18,7 +18,7 @@
 .circuit-selector-overlay {
   position: fixed;
   inset: 0;
-  z-index: 99;
+  z-index: var(--z-overlay);
   background: transparent;
   border: none;
   padding: 0;
@@ -36,7 +36,7 @@
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 100;
+  z-index: var(--z-dropdown);
   overflow: hidden;
 }
 
