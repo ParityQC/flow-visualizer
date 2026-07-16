@@ -241,7 +241,6 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
             <span className="panel-label">Circuit Actions</span>
           </div>
           <div className="panel-body circuit-actions">
-            <GlobalLabelMenu />
             <button className="btn" onClick={handleParallelizeGates}>
               Compact Circuit
             </button>
@@ -257,6 +256,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
           <CircuitSelector onSelect={handleCircuitSelect} />
           <h1 className="circuit-title">Parity Flow Circuit</h1>
           <div className="circuit-top-bar-end">
+            <GlobalLabelMenu />
             <MathHelp />
             <HelpButton />
             <a href="https://parityqc.com" target="_blank" rel="noopener noreferrer">

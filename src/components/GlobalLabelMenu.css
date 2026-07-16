@@ -2,10 +2,6 @@
   position: relative;
 }
 
-.global-label-menu-button {
-  width: 100%;
-}
-
 .menu-backdrop {
   position: fixed;
   top: 0;
