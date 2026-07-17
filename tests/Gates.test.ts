@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 import { describe, it, expect } from 'vitest';
 import { Gate } from '../src/models/Gates';
 import { XTargetType } from '../src/models/Targets';

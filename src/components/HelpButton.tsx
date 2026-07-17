@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * The "Help" modal and the corresponding button to access it.
  */

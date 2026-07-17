@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 import { useRef, useState, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useDisplaySettings } from '../utils/DisplaySettings';

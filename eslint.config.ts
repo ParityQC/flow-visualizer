@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import react from 'eslint-plugin-react';

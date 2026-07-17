@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * Renders the X and Z Pauli labels for one qubit at one moment.
  * X labels are blue and bracketed; Z labels are red and plain.

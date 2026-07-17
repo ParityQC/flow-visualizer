@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * handles a dropdown menu with multiple arbitrary circuits that get initialized when clicked upon.
  */

@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * Handles the right click on a qubit, leading to a toggle between the label visibility of X or Z label
  */

@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * Returns the xz coordinates of where the labels should be positioned and offsets if 2-qubit gates overlap
  */

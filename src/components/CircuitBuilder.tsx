@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * Top-level stateful component. Owns the `Circuit` and orchestrates
  * drag-and-drop, two-step controlled/two-qubit placement, the QASM
