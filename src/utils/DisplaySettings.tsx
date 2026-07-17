@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /* eslint-disable react-refresh/only-export-components */
 /**
  * React context for circuit display settings: label visibility (toggle X/Z

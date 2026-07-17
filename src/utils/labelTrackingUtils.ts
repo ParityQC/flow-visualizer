@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * Pure label arithmetic: combining Pauli operators, anticommutation
  * tracking, and the X·X = Z·Z = I cancellations.

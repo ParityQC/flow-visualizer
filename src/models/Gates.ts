@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 import { TargetType } from './Targets';
 import { XZLabelPair } from '../utils/labelTracking';
 import { combineLabels } from '../utils/labelTrackingUtils';

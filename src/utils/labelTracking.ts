@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * Label-tracking core: Each qubit is assigned a pair (`XZLabelPair`) of labels
  * (`Label`). Labels in turn are composed of individual single pauli operators

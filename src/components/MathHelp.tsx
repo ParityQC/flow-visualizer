@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * "Math Background" modal: written explainer of the parity flow
  * formalism, label-update rules per gate, and how to read off

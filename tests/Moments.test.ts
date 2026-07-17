@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 import { describe, it, expect } from 'vitest';
 import { Moment } from '../src/models/Moments';
 import { Gate } from '../src/models/Gates';

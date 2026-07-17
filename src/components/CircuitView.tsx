@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * handles the view of the GUI and feeds into CircuitBuilder. Label and Gate placement happens here.
  */

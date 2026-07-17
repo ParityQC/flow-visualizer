@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 export const padding = 20;
 export const lineHeight = 60;
 export const defaultMomentWidth = 140;

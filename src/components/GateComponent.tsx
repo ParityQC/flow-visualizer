@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * Renders a single gate cell (single-qubit box, controlled-gate stem,
  * SWAP/iSWAP/CNOT marks) for a given `Gate`.

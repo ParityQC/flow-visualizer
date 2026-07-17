@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * QASM panel: live-renders the OpenQASM3 of the current circuit, plus
  * copy/download buttons. Surfaces clipboard outcomes and converter failures in

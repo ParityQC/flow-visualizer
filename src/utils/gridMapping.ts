@@ -1,3 +1,4 @@
+// ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * converts the X-Y position of the mouse to the moment-qubit position
  * */
