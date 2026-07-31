@@ -3,6 +3,7 @@
  * The "Help" modal and the corresponding button to access it.
  */
 import React from 'react';
+import { InlineMath } from './InlineMath';
 import { ModalButton } from './ModalButton';
 
 export const HelpButton: React.FC = () => (
@@ -48,7 +49,8 @@ export const HelpButton: React.FC = () => (
         To toggle the Label Visibility of single qubits, right click on the desired qubit label (q1,
         q2, ...) and select if the X or Z label should be visible.
         <br />
-        This corresponds to initializing the qubit in the |0{'>'} resp. |+{'>'} state.
+        This corresponds to initializing the qubit in the <InlineMath math="|0\rangle" /> resp.{' '}
+        <InlineMath math="|{+}\rangle" /> state.
       </p>
     </div>
   </ModalButton>
