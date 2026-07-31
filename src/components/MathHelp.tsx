@@ -10,13 +10,17 @@ import LabelUpdates from '../assets/LabelUpdates.png';
 import CnotLabels from '../assets/CnotLabels.png';
 import { InlineMath } from './InlineMath';
 import { ModalButton } from './ModalButton';
+import { X_LABEL_COLOR, Z_LABEL_COLOR } from '../styles/labelColors';
 import './MathHelp.css';
+
+const xc = (s: string) => `\\textcolor{${X_LABEL_COLOR}}{${s}}`;
+const zc = (s: string) => `\\textcolor{${Z_LABEL_COLOR}}{${s}}`;
 
 export const MathHelp: React.FC = () => (
   <ModalButton buttonLabel="Math Background" modalClassName="math-help-modal">
     <div>
-      <h3 style={{ textAlign: 'center' }}>Math Background</h3>
-      <h4 style={{ textAlign: 'center' }}>Core Concept</h4>
+      <h3 className="math-help-heading">Math Background</h3>
+      <h4 className="math-help-heading">Core Concept</h4>
 
       <p>
         The labels in the <strong> parity flow formalism</strong> track how quantum information
@@ -30,16 +34,15 @@ export const MathHelp: React.FC = () => (
         </a>
       </p>
       <p>
-        The blue labels with the brackets <InlineMath math="\textcolor{#2563eb}{⟨i⟩}" /> denote the
-        logical Pauli X Operator <InlineMath>X_i</InlineMath> and the red labels without brackets{' '}
-        <InlineMath math="\textcolor{#dc2626}{i}" /> denote the logical Pauli Z Operator{' '}
+        The blue labels with the brackets <InlineMath math={xc('⟨i⟩')} /> denote the logical Pauli
+        X Operator <InlineMath>X_i</InlineMath> and the red labels without brackets{' '}
+        <InlineMath math={zc('i')} /> denote the logical Pauli Z Operator{' '}
         <InlineMath>Z_i</InlineMath>.
         <br />
-        <InlineMath> X_1 </InlineMath> corresponds to{' '}
-        <InlineMath math="\textcolor{#2563eb}{⟨1⟩}" />; <InlineMath> Z_1 </InlineMath> corresponds
-        to <InlineMath math="\textcolor{#dc2626}{1}" />; {''}
+        <InlineMath> X_1 </InlineMath> corresponds to <InlineMath math={xc('⟨1⟩')} />;{' '}
+        <InlineMath> Z_1 </InlineMath> corresponds to <InlineMath math={zc('1')} />; {''}
         <InlineMath> Y_1 = i*X_1*Z_1</InlineMath> which corresponds to{' '}
-        <InlineMath math="i\textcolor{#2563eb}{⟨1⟩}\textcolor{#dc2626}{1}" />.
+        <InlineMath math={`i${xc('⟨1⟩')}${zc('1')}`} />.
       </p>
       <p>
         {' '}
@@ -53,9 +56,9 @@ export const MathHelp: React.FC = () => (
         qubit.
       </p>
 
-      <h4 style={{ textAlign: 'center' }}>Gate-Specific Label Updates</h4>
+      <h4 className="math-help-heading">Gate-Specific Label Updates</h4>
       <p>Different quantum gates update the qubit labels dynamically as they operate:</p>
-      <ul style={{ display: 'inline-block', textAlign: 'left' }}>
+      <ul className="math-help-gate-list">
         <div className="math-help-gate-row">
           <img className="math-help-gate-img" src={LabelUpdates} alt="single-qubit label updates" />
           <p>
@@ -95,16 +98,15 @@ export const MathHelp: React.FC = () => (
         These updates propagate dynamically as gates are applied, combining labels by the update rule
         of the gate, using the (anti-)commutation rules stated below.
       </p>
-      <h4 style={{ textAlign: 'center' }}>Interpretation of rotations</h4>
+      <h4 className="math-help-heading">Interpretation of rotations</h4>
       <p>
         Refer to the image below for a visual representation of how physical rotations can be
         interpreted with the help of the labels. <br />
         The Pauli Rotations below are defined as{' '}
         <InlineMath math="R_P (\alpha) = \exp(iP \alpha/2)" />. <br />
         For example for the first <InlineMath math="R_Z(2\gamma)" /> rotation, just read off the Z
-        label <InlineMath math="\textcolor{#dc2626}{12}" /> which corresponds to{' '}
-        <InlineMath math="Z_1Z_2" /> giving the rotation{' '}
-        <InlineMath math="\bar{R}_{Z_1Z_2}(2\gamma)" />. <br />
+        label <InlineMath math={zc('12')} /> which corresponds to <InlineMath math="Z_1Z_2" />{' '}
+        giving the rotation <InlineMath math="\bar{R}_{Z_1Z_2}(2\gamma)" />. <br />
         Since the flow labels at the end of the circuit equal those at the beginning, the circuit
         below is equivalent to{' '}
         <InlineMath math="e^{i\bar{Z}_1\bar{Z}_2\gamma}e^{i\bar{X}_1\bar{X}_2\beta}e^{i\bar{Y}_1\bar{Y}_2\alpha}" />
@@ -112,8 +114,8 @@ export const MathHelp: React.FC = () => (
         <br />
         Note that{' '}
         <InlineMath
-          math="X_1Z_1 = i^3Y_1 \;\&\; X_2Z_2 = i^3Y_2 \implies
-                {\textcolor{#2563eb}{⟨12⟩}}{\textcolor{#dc2626}{12}} \mapsto X_1Z_1X_2Z_2 = i^3Y_1i^3Y_2 = -Y_1Y_2 "
+          math={`X_1Z_1 = i^3Y_1 \\;\\&\\; X_2Z_2 = i^3Y_2 \\implies
+                ${xc('⟨12⟩')}${zc('12')} \\mapsto X_1Z_1X_2Z_2 = i^3Y_1i^3Y_2 = -Y_1Y_2`}
         />
         . <br />
         Therefore, the physical rotation <InlineMath math="R_X(-2\alpha)" /> translates into the
@@ -127,9 +129,9 @@ export const MathHelp: React.FC = () => (
         <InlineMath math="Y=i*X*Z" /> form. For example, an <InlineMath math="R_Y" /> rotation
         after the second CNOT on the first qubit <br /> would get interpreted as{' '}
         <InlineMath
-          math="i\ast {\textcolor{#dc2626}{12}} \ast {\textcolor{#2563eb}{\langle 1\rangle}}
-                {\textcolor{#dc2626}{2}} = i \cdot (-1) {\textcolor{#2563eb}{\langle 1\rangle}} {\textcolor{#dc2626}{122}}
-                = i^3 {\textcolor{#2563eb}{\langle 1 \rangle}} {\textcolor{#dc2626}{1}}"
+          math={`i\\ast ${zc('12')} \\ast ${xc('\\langle 1\\rangle')}
+                ${zc('2')} = i \\cdot (-1) ${xc('\\langle 1\\rangle')} ${zc('122')}
+                = i^3 ${xc('\\langle 1 \\rangle')} ${zc('1')}`}
         />
         , i.e. <InlineMath math="\bar{R}_{-Y_1}" />.<br />
         When doing this pay attention to the anticommutation rules:{' '}
@@ -137,27 +139,27 @@ export const MathHelp: React.FC = () => (
       <ul>
         <li>
           <InlineMath>X_i</InlineMath> and <InlineMath>Z_i</InlineMath> anticommute:{' '}
-          <InlineMath math="\textcolor{#2563eb}{⟨1⟩}\textcolor{#dc2626}{1}" />
+          <InlineMath math={`${xc('⟨1⟩')}${zc('1')}`} />
           = <InlineMath math="-" />
-          <InlineMath math="\textcolor{#dc2626}{1}\textcolor{#2563eb}{⟨1⟩}" />
+          <InlineMath math={`${zc('1')}${xc('⟨1⟩')}`} />
         </li>
         <li>
           <InlineMath>X_i</InlineMath> and <InlineMath math="Z_j (i \neq j)" /> commute meaning no
-          phase change: <InlineMath math="{\textcolor{#2563eb}⟨1⟩}\textcolor{#dc2626}{2}" /> ={' '}
-          <InlineMath math="\textcolor{#dc2626}{2}\textcolor{#2563eb}{⟨1⟩}" />
+          phase change: <InlineMath math={`${xc('⟨1⟩')}${zc('2')}`} /> ={' '}
+          <InlineMath math={`${zc('2')}${xc('⟨1⟩')}`} />
         </li>
         <li>
           {' '}
           <InlineMath math="X_i" /> and <InlineMath math="X_j" /> (resp.{' '}
           <InlineMath math="Z_i" /> and <InlineMath math="Z_j" />) commute:{' '}
-          <InlineMath math="{\textcolor{#2563eb}⟨12⟩}=\textcolor{#2563eb}{⟨21⟩}" /> {'('}
-          resp. <InlineMath math="{\textcolor{#dc2626}12}=\textcolor{#dc2626}{21}" />
+          <InlineMath math={`${xc('⟨12⟩')}=${xc('⟨21⟩')}`} /> {'('}
+          resp. <InlineMath math={`${zc('12')}=${zc('21')}`} />
           {')'}
         </li>
         <li>
           <InlineMath math="X_iX_i = I" /> and <InlineMath math="Z_iZ_i = I" /> cancel out e.g.{' '}
-          <InlineMath math="{\textcolor{#2563eb}⟨112⟩}=\textcolor{#2563eb}{⟨2⟩}" /> and{' '}
-          <InlineMath math="{\textcolor{#dc2626}112}=\textcolor{#dc2626}{2}" />
+          <InlineMath math={`${xc('⟨112⟩')}=${xc('⟨2⟩')}`} /> and{' '}
+          <InlineMath math={`${zc('112')}=${zc('2')}`} />
         </li>
       </ul>
       <img className="math-help-formalism-img" src={FlowFormalism} alt="Figure 1" />
