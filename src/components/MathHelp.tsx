@@ -10,7 +10,7 @@ import LabelUpdates from '../assets/LabelUpdates.png';
 import CnotLabels from '../assets/CnotLabels.png';
 import { InlineMath } from './InlineMath';
 import { ModalButton } from './ModalButton';
-import { X_LABEL_COLOR, Z_LABEL_COLOR } from '../styles/labelColors';
+import { X_LABEL_COLOR, Z_LABEL_COLOR } from '../styles/katexColors';
 import './MathHelp.css';
 
 const xc = (s: string) => `\\textcolor{${X_LABEL_COLOR}}{${s}}`;
@@ -34,8 +34,8 @@ export const MathHelp: React.FC = () => (
         </a>
       </p>
       <p>
-        The blue labels with the brackets <InlineMath math={xc('⟨i⟩')} /> denote the logical Pauli
-        X Operator <InlineMath>X_i</InlineMath> and the red labels without brackets{' '}
+        The blue labels with the brackets <InlineMath math={xc('⟨i⟩')} /> denote the logical Pauli X
+        Operator <InlineMath>X_i</InlineMath> and the red labels without brackets{' '}
         <InlineMath math={zc('i')} /> denote the logical Pauli Z Operator{' '}
         <InlineMath>Z_i</InlineMath>.
         <br />
@@ -47,8 +47,8 @@ export const MathHelp: React.FC = () => (
       <p>
         {' '}
         Clifford Gates map Pauli Eigenstates to Pauli Eigenstates. This gives the physical X or Z
-        label of the ith qubit after the Clifford circuit C as{' '}
-        <InlineMath math="C^\dagger X_i C" /> resp. <InlineMath math="C^\dagger Z_i C" />.
+        label of the ith qubit after the Clifford circuit C as <InlineMath math="C^\dagger X_i C" />{' '}
+        resp. <InlineMath math="C^\dagger Z_i C" />.
         <br />
         The X label is denoted above the qubit wire, the Z label below.
         <br />
@@ -95,8 +95,8 @@ export const MathHelp: React.FC = () => (
         <br />
       </ul>
       <p>
-        These updates propagate dynamically as gates are applied, combining labels by the update rule
-        of the gate, using the (anti-)commutation rules stated below.
+        These updates propagate dynamically as gates are applied, combining labels by the update
+        rule of the gate, using the (anti-)commutation rules stated below.
       </p>
       <h4 className="math-help-heading">Interpretation of rotations</h4>
       <p>
@@ -119,15 +119,15 @@ export const MathHelp: React.FC = () => (
         />
         . <br />
         Therefore, the physical rotation <InlineMath math="R_X(-2\alpha)" /> translates into the
-        logical rotation{' '}
-        <InlineMath math="\bar{R}_{-Y_1Y_2}(-2\alpha)=\bar{R}_{Y_1Y_2}(2\alpha)" />.
+        logical rotation <InlineMath math="\bar{R}_{-Y_1Y_2}(-2\alpha)=\bar{R}_{Y_1Y_2}(2\alpha)" />
+        .
       </p>
 
       <p>
         {' '}
-        To read off Y rotations combine X and Z labels on basis of{' '}
-        <InlineMath math="Y=i*X*Z" /> form. For example, an <InlineMath math="R_Y" /> rotation
-        after the second CNOT on the first qubit <br /> would get interpreted as{' '}
+        To read off Y rotations combine X and Z labels on basis of <InlineMath math="Y=i*X*Z" />{' '}
+        form. For example, an <InlineMath math="R_Y" /> rotation after the second CNOT on the first
+        qubit <br /> would get interpreted as{' '}
         <InlineMath
           math={`i\\ast ${zc('12')} \\ast ${xc('\\langle 1\\rangle')}
                 ${zc('2')} = i \\cdot (-1) ${xc('\\langle 1\\rangle')} ${zc('122')}
@@ -150,8 +150,8 @@ export const MathHelp: React.FC = () => (
         </li>
         <li>
           {' '}
-          <InlineMath math="X_i" /> and <InlineMath math="X_j" /> (resp.{' '}
-          <InlineMath math="Z_i" /> and <InlineMath math="Z_j" />) commute:{' '}
+          <InlineMath math="X_i" /> and <InlineMath math="X_j" /> (resp. <InlineMath math="Z_i" />{' '}
+          and <InlineMath math="Z_j" />) commute:{' '}
           <InlineMath math={`${xc('⟨12⟩')}=${xc('⟨21⟩')}`} /> {'('}
           resp. <InlineMath math={`${zc('12')}=${zc('21')}`} />
           {')'}
