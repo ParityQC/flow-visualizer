@@ -44,9 +44,10 @@ export const HelpButton: React.FC = () => {
                 side, and drop the desired gate at the desired moment and qubit in the circuit.
               </p>
               <p>
-                To place a double qubit gate, first drop the gate symbol on the desired location,
-                this will be your target. Then place your control or your second target on a
-                different qubit in the same moment.
+                To place a two qubit gate, first drop the gate symbol on the desired location, this
+                will be your target. Then place your control or your second target on a different
+                qubit in the same moment. To drag a two qubit gate always take it by its target or
+                control qubit.
               </p>
               <p>
                 When placing a gate on top of another gate, the old gate and all subsequent elements
@@ -66,18 +67,12 @@ export const HelpButton: React.FC = () => {
                 If more qubits are needed drop a gate below the last qubit and the gate is
                 automatically assigned to the next qubit.
               </p>
-              <p>
-                To parallelize a Circuit, press the &quot;Compact Circuit&quot; button located at
-                the bottom left of the page.
-              </p>
+              <p>To parallelize a Circuit, press the &quot;Compact Circuit&quot; button.</p>
               <p>
                 To delete the current circuit, press the &quot;Delete Circuit&quot; button located
                 at the bottom left of the page.
               </p>
-              <p>
-                To toggle the global Label Visibility of X and Z labels, choose from the &quot;Label
-                Settings&quot; button at the bottom of the page.
-              </p>
+              <p>Global label visibility can be toggled under &quot;Settings&quot;.</p>
               <p>
                 To toggle the Label Visibility of single qubits, right click on the desired qubit
                 label (q1, q2, ...) and select if the X or Z label should be visible.
