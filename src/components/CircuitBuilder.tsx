@@ -255,7 +255,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
       <div className="circuit-container">
         <div className="circuit-top-bar">
           <CircuitSelector onSelect={handleCircuitSelect} />
-          <h1 className="circuit-title">Parity Flow Circuit</h1>
+          <h1 className="circuit-title">Parity Flow Visualizer</h1>
           <div className="circuit-top-bar-end">
             <SettingsMenu />
             <MathHelp />
