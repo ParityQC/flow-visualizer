@@ -84,6 +84,7 @@ export function QasmDisplay({ circuit, onCircuitLoad }: QasmDisplayProps) {
 
   const displayed = conversionError ? `// ${conversionError}` : qasmCode;
   const copied = status.kind === 'copied';
+  const copyLabel = copied ? 'Copied to clipboard' : 'Copy to clipboard';
 
   return (
     <div className="qasm-display panel">
@@ -112,8 +113,8 @@ export function QasmDisplay({ circuit, onCircuitLoad }: QasmDisplayProps) {
         <button
           className={`qasm-copy-button${copied ? ' is-copied' : ''}`}
           onClick={copyToClipboard}
-          title={copied ? 'Copied!' : 'Copy to clipboard'}
-          aria-label={copied ? 'Copied to clipboard' : 'Copy to clipboard'}
+          title={copyLabel}
+          aria-label={copyLabel}
           aria-live="polite"
         >
           {copied ? <CheckIcon /> : <CopyIcon />}

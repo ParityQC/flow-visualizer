@@ -19,61 +19,38 @@
    the icon has to live outside it to stay pinned while the code scrolls. */
 .qasm-code-area {
   position: relative;
-  display: flex;
-  flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
+/* Deliberately not a .btn -- prominence is what this button is meant to avoid.
+   The equal padding around the 15px icon is what makes the hit area square. */
 .qasm-copy-button {
   position: absolute;
   top: 8px;
   /* Clears the code area's scrollbar. */
   right: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  /* Transparent rather than absent, so the hover border doesn't shift the glyph. */
-  border: 1px solid transparent;
+  display: flex;
+  padding: 6px;
+  border: none;
   border-radius: var(--radius-sm);
   background: none;
   color: var(--color-text-faint);
   cursor: pointer;
-  opacity: 0.5;
-  transition:
-    opacity 0.1s,
-    background-color 0.1s,
-    border-color 0.1s,
-    color 0.1s;
-}
-
-.qasm-code-area:hover .qasm-copy-button,
-.qasm-copy-button:focus-visible {
-  opacity: 1;
+  transition: all 0.1s;
 }
 
 .qasm-copy-button:hover {
   background-color: var(--color-raised);
-  border-color: var(--color-border);
   color: var(--color-text);
 }
 
 .qasm-copy-button.is-copied {
   color: var(--color-success-text);
-  opacity: 1;
-}
-
-.qasm-copy-button:focus-visible {
-  outline: 2px solid var(--color-interactive);
-  outline-offset: 1px;
 }
 
 .qasm-code {
-  flex: 1;
-  min-height: 0;
+  height: 100%;
   margin: 0;
   padding: 15px;
   /* Keeps wrapped lines clear of the copy icon. */
