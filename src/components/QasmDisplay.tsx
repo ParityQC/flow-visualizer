@@ -1,8 +1,9 @@
 // ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
- * QASM panel: live-renders the OpenQASM3 of the current circuit, plus
- * copy/download/upload buttons. Surfaces clipboard outcomes and converter
- * failures in an inline auto-dismissing banner, and upload failures in a modal.
+ * QASM panel: live-renders the OpenQASM3 of the current circuit, plus a corner
+ * copy icon and download/upload buttons. A successful copy briefly turns the
+ * icon into a checkmark; converter and clipboard failures surface in an inline
+ * auto-dismissing banner, and upload failures in a modal.
  */
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Circuit } from '../models/Circuit';
@@ -82,21 +83,13 @@ export function QasmDisplay({ circuit, onCircuitLoad }: QasmDisplayProps) {
   };
 
   const displayed = conversionError ? `// ${conversionError}` : qasmCode;
-  const banner =
-    status.kind === 'copied'
-      ? { className: 'qasm-banner qasm-banner-success', text: 'Copied to clipboard' }
-      : status.kind === 'error'
-        ? { className: 'qasm-banner qasm-banner-error', text: status.message }
-        : null;
+  const copied = status.kind === 'copied';
 
   return (
     <div className="qasm-display panel">
       <div className="panel-header">
         <p className="panel-label">QASM Code</p>
         <div className="qasm-actions">
-          <button className="btn" onClick={copyToClipboard}>
-            Copy to Clipboard
-          </button>
           <button className="btn" onClick={downloadQasm}>
             Download QASM
           </button>
@@ -112,8 +105,21 @@ export function QasmDisplay({ circuit, onCircuitLoad }: QasmDisplayProps) {
           />
         </div>
       </div>
-      {banner && <div className={banner.className}>{banner.text}</div>}
-      <pre className="qasm-code">{displayed}</pre>
+      {status.kind === 'error' && (
+        <div className="qasm-banner qasm-banner-error">{status.message}</div>
+      )}
+      <div className="qasm-code-area">
+        <button
+          className={`qasm-copy-button${copied ? ' is-copied' : ''}`}
+          onClick={copyToClipboard}
+          title={copied ? 'Copied!' : 'Copy to clipboard'}
+          aria-label={copied ? 'Copied to clipboard' : 'Copy to clipboard'}
+          aria-live="polite"
+        >
+          {copied ? <CheckIcon /> : <CopyIcon />}
+        </button>
+        <pre className="qasm-code">{displayed}</pre>
+      </div>
 
       {uploadError !== null && (
         <Modal className="qasm-error-modal" onClose={() => setUploadError(null)}>
@@ -126,5 +132,35 @@ export function QasmDisplay({ circuit, onCircuitLoad }: QasmDisplayProps) {
         </Modal>
       )}
     </div>
+  );
+}
+
+/** Shared geometry/stroke setup for the corner icons; colour comes from CSS. */
+const iconProps = {
+  width: 15,
+  height: 15,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  'aria-hidden': true,
+} as const;
+
+function CopyIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
   );
 }
