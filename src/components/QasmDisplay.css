@@ -11,6 +11,10 @@
   gap: 6px;
 }
 
+.qasm-file-input {
+  display: none;
+}
+
 .qasm-code {
   flex: 1;
   min-height: 0;
@@ -38,4 +42,23 @@
 .qasm-banner-error {
   background-color: var(--color-error-bg);
   color: var(--color-error-text);
+}
+
+.qasm-error-modal {
+  position: relative;
+  background-color: var(--color-surface);
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  max-width: 480px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.qasm-error-message {
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+  font-family: var(--font-mono);
+  font-size: 13px;
 }

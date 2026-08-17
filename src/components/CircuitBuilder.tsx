@@ -232,6 +232,16 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
     initAuxQubits?.forEach((q) => setAuxLabelX(q, false));
   };
 
+  /** Replace the circuit with one parsed from an uploaded QASM file. */
+  const handleCircuitUpload = useCallback(
+    (newCircuit: Circuit) => {
+      resetVisibilityState();
+      // The parser hands us a fresh circuit, so no clone is needed.
+      setCircuit(newCircuit);
+    },
+    [resetVisibilityState]
+  );
+
   return (
     <div className="circuit-builder">
       <div className="circuit-sidebar">
@@ -285,7 +295,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
           />
         </div>
       </div>
-      <QasmDisplay circuit={circuit} />
+      <QasmDisplay circuit={circuit} onCircuitLoad={handleCircuitUpload} />
     </div>
   );
 }
