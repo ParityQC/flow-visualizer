@@ -1,5 +1,5 @@
-﻿ParityQC Flow GUI Software License Terms (BSD-3-Clause)
-=======================================================
+﻿ParityQC Flow Visualizer Software License Terms (BSD-3-Clause)
+==============================================================
 
 Copyright 2026 Parity Quantum Computing GmbH (ParityQC)
 

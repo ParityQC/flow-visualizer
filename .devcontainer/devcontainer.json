@@ -1,5 +1,5 @@
 {
-  "name": "Flow GUI",
+  "name": "Flow Visualizer",
   "build": {
     "dockerfile": "Dockerfile",
     "context": "."
@@ -30,7 +30,7 @@
   },
   "mounts": [
     {
-      "source": "bash-history-flow-gui",
+      "source": "bash-history-flow-visualizer",
       "target": "/commandhistory",
       "type": "volume"
     }
