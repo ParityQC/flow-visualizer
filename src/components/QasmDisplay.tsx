@@ -61,7 +61,7 @@ export function QasmDisplay({ circuit, onCircuitLoad }: QasmDisplayProps) {
     const element = document.createElement('a');
     const file = new Blob([qasmCode], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    element.download = 'circuit.txt';
+    element.download = 'circuit.qasm';
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
