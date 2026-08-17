@@ -45,13 +45,8 @@
 }
 
 .qasm-error-modal {
-  position: relative;
-  background-color: var(--color-surface);
-  padding: 24px;
-  border-radius: var(--radius-lg);
   max-width: 480px;
   max-height: 80vh;
-  overflow: auto;
 }
 
 .qasm-error-message {

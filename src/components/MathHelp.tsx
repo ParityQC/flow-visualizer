@@ -9,7 +9,7 @@ import FlowFormalism from '../assets/FlowFormalism.png';
 import LabelUpdates from '../assets/LabelUpdates.png';
 import CnotLabels from '../assets/CnotLabels.png';
 import { InlineMath } from './InlineMath';
-import { ModalButton } from './ModalButton';
+import { ModalButton } from './Modal';
 import { X_LABEL_COLOR, Z_LABEL_COLOR } from '../styles/katexColors';
 import './MathHelp.css';
 

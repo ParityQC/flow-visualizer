@@ -1,12 +1,16 @@
 // ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
- * Presentational modal dialog: dimmed overlay, close button and escape key
- * handling. Use `ModalButton` when the dialog is opened by its own button.
+ * Modal dialog: dimmed overlay, close button and escape key handling.
+ *
+ * `Modal` is controlled by its parent, for dialogs that are opened
+ * programmatically. `ModalButton` bundles it with its own trigger button, for
+ * dialogs that are only ever opened by clicking that button.
  */
-import React, { useEffect } from 'react';
-import './HelpButton.css';
+import React, { useEffect, useState } from 'react';
+import './Modal.css';
 
 interface ModalProps {
+  /** Class of the dialog panel, sizing it on top of `.modal-panel`. */
   className: string;
   onClose: () => void;
   children: React.ReactNode;
@@ -22,10 +26,10 @@ export const Modal: React.FC<ModalProps> = ({ className, onClose, children }) =>
   }, [onClose]);
 
   return (
-    <div className="help-modal-overlay">
-      <button className="help-modal-close-overlay" onClick={onClose} aria-label="Close dialog" />
-      <div className={className}>
-        <button className="help-modal-close" onClick={onClose}>
+    <div className="modal-overlay">
+      <button className="modal-close-overlay" onClick={onClose} aria-label="Close dialog" />
+      <div className={`modal-panel ${className}`}>
+        <button className="modal-close" onClick={onClose}>
           ✕
         </button>
         {children}
@@ -34,4 +38,30 @@ export const Modal: React.FC<ModalProps> = ({ className, onClose, children }) =>
   );
 };
 
-export default Modal;
+interface ModalButtonProps {
+  buttonLabel: string;
+  modalClassName: string;
+  children: React.ReactNode;
+}
+
+export const ModalButton: React.FC<ModalButtonProps> = ({
+  buttonLabel,
+  modalClassName,
+  children,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button className="btn" onClick={() => setIsOpen(true)}>
+        {buttonLabel}
+      </button>
+
+      {isOpen && (
+        <Modal className={modalClassName} onClose={() => setIsOpen(false)}>
+          {children}
+        </Modal>
+      )}
+    </>
+  );
+};

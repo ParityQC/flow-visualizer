@@ -4,7 +4,7 @@
  * copy/download/upload buttons. Surfaces clipboard outcomes and converter
  * failures in an inline auto-dismissing banner, and upload failures in a modal.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Circuit } from '../models/Circuit';
 import { circuitToQasm } from '../utils/QasmConverter';
 import { parseQasm } from '../utils/QasmParser';
@@ -65,9 +65,10 @@ export function QasmDisplay({ circuit, onCircuitLoad }: QasmDisplayProps) {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+    URL.revokeObjectURL(element.href);
   };
 
-  const uploadQasm = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadQasm = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     // Reset so picking the same file again fires another change event.
     event.target.value = '';
