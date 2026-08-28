@@ -4,7 +4,8 @@
  */
 import React from 'react';
 import { InlineMath } from './InlineMath';
-import { ModalButton } from './ModalButton';
+import { ModalButton } from './Modal';
+import './HelpButton.css';
 
 export const HelpButton: React.FC = () => (
   <ModalButton buttonLabel="Help" modalClassName="help-modal">

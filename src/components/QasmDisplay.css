@@ -8,14 +8,53 @@
 .qasm-actions {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+}
+
+.qasm-file-input {
+  display: none;
+}
+
+/* Positioning context for the copy icon: the <pre> is the scroll container, so
+   the icon has to live outside it to stay pinned while the code scrolls. */
+.qasm-code-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Deliberately not a .btn -- prominence is what this button is meant to avoid.
+   The 6px inset plus the button's own 6px padding sits the glyph on the same
+   12px margin as the code below; the equal padding also squares the hit area. */
+.qasm-copy-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  padding: 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-faint);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.qasm-copy-button:hover {
+  background-color: var(--color-raised);
+  color: var(--color-text);
+}
+
+.qasm-copy-button.is-copied {
+  color: var(--color-success-text);
 }
 
 .qasm-code {
-  flex: 1;
-  min-height: 0;
+  height: 100%;
   margin: 0;
-  padding: 15px;
+  padding: 12px;
+  /* Reserves the 27px icon button and its inset, so wrapped lines clear it. */
+  padding-right: 40px;
   font-family: var(--font-mono);
   white-space: pre-wrap;
   font-size: var(--font-size-base);
@@ -25,17 +64,26 @@
 }
 
 .qasm-banner {
-  padding: 8px 15px;
-  font-size: 13px;
+  padding: 8px 12px;
+  font-size: var(--font-size-sm);
   border-top: 1px solid var(--color-border);
-}
-
-.qasm-banner-success {
-  background-color: var(--color-success-bg);
-  color: var(--color-success-text);
 }
 
 .qasm-banner-error {
   background-color: var(--color-error-bg);
   color: var(--color-error-text);
+}
+
+.qasm-error-modal {
+  max-width: 480px;
+  max-height: 80vh;
+}
+
+.qasm-error-message {
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
 }
