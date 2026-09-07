@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { Circuit } from '../src/models/Circuit';
 import { Gate } from '../src/models/Gates';
+import { Angle } from '../src/models/Angle';
 import { Moment } from '../src/models/Moments';
 import {
   HTargetType,
@@ -52,12 +53,76 @@ describe('circuitToQasm — single-qubit gates', () => {
     [new HTargetType(), 'h'],
     [new STargetType(), 's'],
     [new SqrtXTargetType(), 'sx'],
-    [new RxTargetType(), 'rx'],
-    [new RyTargetType(), 'ry'],
-    [new RzTargetType(), 'rz'],
   ])('emits %s as "%s q[0];"', (targetType, qasmName) => {
     const circuit = singleGateCircuit(targetType, [0]);
     expect(circuitToQasm(circuit)).toContain(`${qasmName} q[0];`);
+  });
+
+  // Rotations carry a parameter. `rz q[0];` is not legal against stdgates.inc,
+  // where rz is declared `gate rz(theta) q`.
+  it.each([
+    [new RxTargetType(), 'rx'],
+    [new RyTargetType(), 'ry'],
+    [new RzTargetType(), 'rz'],
+  ])('emits %s with its angle as "%s(theta_1) q[0];"', (targetType, qasmName) => {
+    const qasm = circuitToQasm(singleGateCircuit(targetType, [0]));
+
+    expect(qasm).toContain(`${qasmName}(theta_1) q[0];`);
+    expect(qasm).toContain('input float[64] theta_1;');
+  });
+});
+
+describe('circuitToQasm — rotation angles', () => {
+  function rotationCircuit(...angles: (Angle | undefined)[]) {
+    const circuit = new Circuit();
+    const moment = new Moment();
+    angles.forEach((angle, index) => {
+      moment.addGate(
+        new Gate({
+          targetType: new RzTargetType(),
+          controls: [],
+          targets: [index],
+          params: angle ? [angle] : [],
+        })
+      );
+    });
+    circuit.appendMoment(moment);
+    return circuit;
+  }
+
+  it('emits a valued angle as a float literal and declares nothing', () => {
+    const qasm = circuitToQasm(rotationCircuit(new Angle('theta_1', Math.PI / 4)));
+
+    expect(qasm).toContain('rz(0.7853981633974483) q[0];');
+    expect(qasm).not.toContain('input float');
+  });
+
+  it('writes an integer value with a decimal point so it reads as a float', () => {
+    expect(circuitToQasm(rotationCircuit(new Angle('theta_1', 2)))).toContain('rz(2.0) q[0];');
+    expect(circuitToQasm(rotationCircuit(new Angle('theta_1', 0)))).toContain('rz(0.0) q[0];');
+  });
+
+  it('declares a shared symbol exactly once', () => {
+    const qasm = circuitToQasm(rotationCircuit(new Angle('theta_1'), new Angle('theta_1')));
+
+    expect(qasm).toContain('rz(theta_1) q[0];');
+    expect(qasm).toContain('rz(theta_1) q[1];');
+    expect(qasm.match(/input float\[64\] theta_1;/g)).toHaveLength(1);
+  });
+
+  it("names unnamed rotations without mutating the caller's circuit", () => {
+    const circuit = rotationCircuit(undefined);
+    const gateBefore = [...[...circuit.moments()][0].gates()][0];
+
+    expect(circuitToQasm(circuit)).toContain('rz(theta_1) q[0];');
+    expect(gateBefore.params).toEqual([]);
+  });
+
+  it('puts the input block after the qubit declaration', () => {
+    const qasm = circuitToQasm(rotationCircuit(new Angle('theta_1')));
+
+    expect(qasm.indexOf('qubit[1] q;')).toBeLessThan(qasm.indexOf('input float[64] theta_1;'));
+    expect(qasm.indexOf('input float[64] theta_1;')).toBeLessThan(qasm.indexOf('rz(theta_1)'));
   });
 });
 
@@ -147,7 +212,7 @@ describe('circuitToQasm — error path', () => {
       clone(): TargetType {
         return new UnknownTargetType();
       }
-      calculateLabels(labels: XZLabelPair): XZLabelPair {
+      computeLabels(labels: XZLabelPair): XZLabelPair {
         return labels;
       }
     }

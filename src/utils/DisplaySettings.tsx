@@ -7,6 +7,7 @@
  */
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { InlineMath } from '../components/InlineMath';
+import { AngleDisplayMode } from '../models/Angle';
 import { defaultMomentWidth } from './LayoutConstants';
 
 interface LabelVisibilityState {
@@ -30,6 +31,8 @@ interface DisplaySettingsContextType {
   resetVisibilityState: () => void;
   momentWidth: number; // horizontal spacing between moments, adjustable via the slider
   setMomentWidth: (_px: number) => void;
+  angleDisplay: AngleDisplayMode; // how rotation angles are rendered on the gates
+  setAngleDisplay: (_mode: AngleDisplayMode) => void;
 }
 
 const DisplaySettingsContext = createContext<DisplaySettingsContextType | null>(null);
@@ -44,6 +47,9 @@ export function DisplaySettingsProvider({ children }: { children: ReactNode }) {
   });
 
   const [momentWidth, setMomentWidth] = useState<number>(defaultMomentWidth);
+
+  // Symbolic by default: an angle is a theta index until someone gives it a value.
+  const [angleDisplay, setAngleDisplay] = useState<AngleDisplayMode>('symbolic');
 
   const togglePhysX = useCallback(() => {
     setState((prev) => ({
@@ -106,6 +112,8 @@ export function DisplaySettingsProvider({ children }: { children: ReactNode }) {
         resetVisibilityState,
         momentWidth,
         setMomentWidth,
+        angleDisplay,
+        setAngleDisplay,
       }}
     >
       {children}

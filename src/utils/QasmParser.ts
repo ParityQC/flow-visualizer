@@ -11,6 +11,8 @@
  */
 import { Circuit } from '../models/Circuit';
 import { Gate } from '../models/Gates';
+import { Angle } from '../models/Angle';
+import { parseAngleExpression } from './angleExpression';
 import { Moment } from '../models/Moments';
 import { instantiateTargetType, TargetType } from '../models/Targets';
 
@@ -32,7 +34,7 @@ interface GateSpec {
   numOperands: number;
   /** True if the first operand is a control rather than a target. */
   hasControl: boolean;
-  /** True if a (discarded) rotation angle may be given. */
+  /** True if a rotation angle may be given. */
   takesParams: boolean;
 }
 
@@ -136,6 +138,10 @@ export function parseQasm(source: string): Circuit {
       register = parseRegister(statement);
     } else if (keyword === 'gate') {
       checkGateDefinition(statement);
+    } else if (keyword === 'input') {
+      // Checked before `rejectedKeywords` so that `input float[64] theta_1;` is
+      // accepted while a bare `float x = 3;` keeps its existing error.
+      checkInputDeclaration(statement);
     } else if (keyword in rejectedKeywords) {
       throw new QasmParseError(rejectedKeywords[keyword], statement.line);
     } else {
@@ -144,6 +150,9 @@ export function parseQasm(source: string): Circuit {
   }
 
   circuit.parallelizeGates();
+  // Rotations written without a parameter, and those written with a bare value,
+  // get their theta index here -- the one place that knows the whole circuit.
+  circuit.assignMissingAngleSymbols();
   return circuit;
 }
 
@@ -290,7 +299,7 @@ function parseGateCall(statement: Statement, register: Register | undefined): Ga
   if (paramGroup !== undefined && !spec.takesParams) {
     throw new QasmParseError(`gate '${name}' does not take parameters`, line);
   }
-  // A rotation angle has nowhere to live in our model, so it is discarded.
+  const params = parseAngleParams(match[3], name, line);
 
   const qubits = parseOperands(operandText, register, line);
   if (qubits.length !== spec.numOperands) {
@@ -308,7 +317,57 @@ function parseGateCall(statement: Statement, register: Register | undefined): Ga
   const targets = spec.hasControl ? qubits.slice(1) : qubits;
 
   try {
-    return new Gate({ targetType, controls, targets });
+    return new Gate({ targetType, controls, targets, params });
+  } catch (err) {
+    throw new QasmParseError(err instanceof Error ? err.message : String(err), line);
+  }
+}
+
+/**
+ * Validate an `input float[64] name;` declaration.
+ *
+ * The declaration carries no value, so nothing needs to be remembered: a gate
+ * referencing the symbol produces a valueless `Angle` either way. Accepting the
+ * statement is what matters, so our own export can be read back.
+ */
+function checkInputDeclaration(statement: Statement): void {
+  const { text, line } = statement;
+
+  if (!/^input\s+float\s*(?:\[\s*\d+\s*\])?\s+[A-Za-z_][A-Za-z0-9_]*$/.test(text)) {
+    throw new QasmParseError(
+      `only 'input float[n] name;' declarations are supported, got "${text}"`,
+      line
+    );
+  }
+}
+
+/**
+ * Turn the text inside a gate's parentheses into the gate's params.
+ *
+ * An absent parameter list is allowed -- `rz q[0];` yields a gate that
+ * `Circuit.assignMissingAngleSymbols` names afterwards. A bare identifier is a
+ * reference to a symbol; anything else is an angle expression. An identifier
+ * that was never declared is accepted rather than rejected, so hand-written
+ * QASM loads; the cost is that a typo becomes a new parameter.
+ */
+function parseAngleParams(paramText: string | undefined, name: string, line: number): Angle[] {
+  if (paramText === undefined) {
+    return [];
+  }
+
+  const text = paramText.trim();
+  if (text === '') {
+    throw new QasmParseError(`gate '${name}' has an empty parameter list`, line);
+  }
+  if (text.includes(',')) {
+    throw new QasmParseError(`gate '${name}' takes a single parameter`, line);
+  }
+  if (Angle.isValidSymbol(text)) {
+    return [new Angle(text)];
+  }
+
+  try {
+    return [Angle.unnamed(parseAngleExpression(text))];
   } catch (err) {
     throw new QasmParseError(err instanceof Error ? err.message : String(err), line);
   }

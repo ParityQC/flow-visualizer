@@ -102,14 +102,15 @@ export const MathHelp: React.FC = () => (
       <p>
         Refer to the image below for a visual representation of how physical rotations can be
         interpreted with the help of the labels. <br />
-        The Pauli Rotations below are defined as{' '}
-        <InlineMath math="R_P (\alpha) = \exp(iP \alpha/2)" />. <br />
+        Pauli rotations follow the OpenQASM convention,{' '}
+        <InlineMath math="R_P (\alpha) = \exp(-iP \alpha/2)" />, so the angle shown on a gate is
+        exactly the parameter written to the QASM panel. <br />
         For example for the first <InlineMath math="R_Z(2\gamma)" /> rotation, just read off the Z
         label <InlineMath math={zc('12')} /> which corresponds to <InlineMath math="Z_1Z_2" />{' '}
         giving the rotation <InlineMath math="\bar{R}_{Z_1Z_2}(2\gamma)" />. <br />
         Since the flow labels at the end of the circuit equal those at the beginning, the circuit
         below is equivalent to{' '}
-        <InlineMath math="e^{i\bar{Z}_1\bar{Z}_2\gamma}e^{i\bar{X}_1\bar{X}_2\beta}e^{i\bar{Y}_1\bar{Y}_2\alpha}" />
+        <InlineMath math="e^{-i\bar{Z}_1\bar{Z}_2\gamma}e^{-i\bar{X}_1\bar{X}_2\beta}e^{-i\bar{Y}_1\bar{Y}_2\alpha}" />
         .
         <br />
         Note that{' '}
@@ -163,6 +164,11 @@ export const MathHelp: React.FC = () => (
         </li>
       </ul>
       <img className="math-help-formalism-img" src={FlowFormalism} alt="Figure 1" />
+      <p className="math-help-figure-note">
+        Note: the figure above is reproduced from the paper, which uses the opposite sign convention{' '}
+        <InlineMath math="R_P(\alpha) = \exp(+iP\alpha/2)" />. Reading a logical rotation off the
+        labels works the same either way — only the sign in the exponentials differs.
+      </p>
     </div>
   </ModalButton>
 );

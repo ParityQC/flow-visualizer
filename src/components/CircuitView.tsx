@@ -8,7 +8,7 @@ import { InlineMath } from './InlineMath';
 import 'katex/dist/katex.min.css';
 import { Gate } from '../models/Gates';
 import { Circuit } from '../models/Circuit';
-import { lineHeight, padding, qubitLabelWidth } from '../utils/LayoutConstants';
+import { gateAreaLeftMargin, lineHeight, padding, qubitLabelWidth } from '../utils/LayoutConstants';
 import { Fragment, useMemo, useState } from 'react';
 import { QubitLabelDisplay, FadingLabel } from '../utils/QubitLabelDisplay';
 import {
@@ -24,7 +24,11 @@ import { getInitialState, useDisplaySettings } from '../utils/DisplaySettings';
 export const mimeMoveGate = 'application/x-move-gate';
 interface CircuitViewProps {
   circuit: Circuit;
-  onGateContextMenu?: (_gate: Gate, _momentIndex: number) => void;
+  onGateContextMenu?: (
+    _gate: Gate,
+    _momentIndex: number,
+    _position: { x: number; y: number }
+  ) => void;
   gatePreview?: GatePreview | null;
 }
 
@@ -40,10 +44,11 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
   const numMoments = Math.max(Array.from(circuit.moments()).length + 3, 3);
 
   const [qubitMenu, setQubitMenu] = useState<QubitMenuState | null>(null);
-  const { isLabelXVisible, isLabelZVisible, momentWidth } = useDisplaySettings();
+  const { isLabelXVisible, isLabelZVisible, momentWidth, angleDisplay } = useDisplaySettings();
 
   const { initialLabels, labelChangesByMoment, momentOffsets } = useMemo(() => {
     const config: RenderConfig = {
+      angleDisplay,
       padding,
       lineHeight,
       momentWidth,
@@ -64,7 +69,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
       labelChangesByMoment,
       momentOffsets: result.momentOffsets,
     };
-  }, [circuit, momentWidth]);
+  }, [circuit, momentWidth, angleDisplay]);
   const previewGate = useMemo(() => {
     if (!gatePreview) return null;
     if (gatePreview.controlQubit === null) return null;
@@ -92,7 +97,8 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
     return total;
   }, [momentOffsets]);
 
-  const canvasWidth = padding + qubitLabelWidth + numMoments * momentWidth + totalOffset;
+  const canvasWidth =
+    padding + qubitLabelWidth + gateAreaLeftMargin + numMoments * momentWidth + totalOffset;
   const canvasHeight = padding * 2 + numQubits * lineHeight;
 
   const getGateContainerTop = (gate: Gate): number => {
@@ -136,7 +142,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   className="circuit-cell"
                   style={{
                     top: `${padding + qubitIndex * lineHeight}px`,
-                    left: `${padding + qubitLabelWidth + momentIndex * momentWidth + cumulativeOffset}px`,
+                    left: `${padding + qubitLabelWidth + gateAreaLeftMargin + momentIndex * momentWidth + cumulativeOffset}px`,
                     width: `${momentWidth}px`,
                     height: `${lineHeight}px`,
                   }}
@@ -179,7 +185,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   style={{
                     position: 'absolute',
                     top: `${getGateContainerTop(gate)}px`,
-                    left: `${padding + qubitLabelWidth + momentIndex * momentWidth + cumulativeOffset + gateOffset}px`,
+                    left: `${padding + qubitLabelWidth + gateAreaLeftMargin + momentIndex * momentWidth + cumulativeOffset + gateOffset}px`,
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -190,7 +196,9 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   onDragStart={handleDragStart}
                   onContextMenu={(e) => {
                     e.preventDefault();
-                    if (onGateContextMenu) onGateContextMenu(gate, momentIndex);
+                    if (onGateContextMenu) {
+                      onGateContextMenu(gate, momentIndex, { x: e.clientX, y: e.clientY });
+                    }
                   }}
                 >
                   <GateComponent gate={gate} />
@@ -224,7 +232,7 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
               style={{
                 position: 'absolute',
                 top: `${getGateContainerTop(previewGate)}px`,
-                left: `${padding + qubitLabelWidth + gatePreview.momentIndex * momentWidth + (momentOffsets.get(gatePreview.momentIndex)?.cumulativeOffset || 0)}px`,
+                left: `${padding + qubitLabelWidth + gateAreaLeftMargin + gatePreview.momentIndex * momentWidth + (momentOffsets.get(gatePreview.momentIndex)?.cumulativeOffset || 0)}px`,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',

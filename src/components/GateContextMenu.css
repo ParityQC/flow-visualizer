@@ -1,0 +1,51 @@
+/* ParityQC © 2026. See the LICENSE file in the top level directory for details. */
+.gate-context-menu {
+  min-width: 220px;
+}
+
+.gate-angle-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border-divider);
+}
+
+.gate-angle-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gate-angle-label {
+  width: 48px;
+  color: var(--color-text-faint);
+  font-size: var(--font-size-base);
+}
+
+.gate-angle-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+}
+
+.gate-angle-input:focus {
+  outline: none;
+  border-color: var(--color-text-muted);
+}
+
+.gate-angle-input-invalid {
+  border-color: var(--color-z-label);
+}
+
+.gate-angle-hint {
+  color: var(--color-text-faint);
+  font-size: var(--font-size-sm);
+  min-height: 1.2em;
+}

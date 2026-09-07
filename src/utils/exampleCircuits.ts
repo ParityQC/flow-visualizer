@@ -2,6 +2,7 @@
 /**
  *  stores hardcoded example circuits
  */
+import { Angle } from '../models/Angle';
 import { Circuit } from '../models/Circuit';
 import { Gate } from '../models/Gates';
 import { Moment } from '../models/Moments';
@@ -39,27 +40,30 @@ function x(target: number): Gate {
   });
 }
 
-function rx(target: number): Gate {
+function rx(target: number, angle?: Angle): Gate {
   return new Gate({
     targetType: new RxTargetType(),
     targets: [target],
     controls: [],
+    params: angle ? [angle] : [],
   });
 }
 
-function ry(target: number): Gate {
+function ry(target: number, angle?: Angle): Gate {
   return new Gate({
     targetType: new RyTargetType(),
     targets: [target],
     controls: [],
+    params: angle ? [angle] : [],
   });
 }
 
-function rz(target: number): Gate {
+function rz(target: number, angle?: Angle): Gate {
   return new Gate({
     targetType: new RzTargetType(),
     targets: [target],
     controls: [],
+    params: angle ? [angle] : [],
   });
 }
 
@@ -81,6 +85,11 @@ function sdg(target: number): Gate {
 //------------------------------------------//
 // Examples
 //------------------------------------------//
+
+// Rotations may be given a concrete angle -- `rz(1, new Angle('theta_1', Math.PI / 4))`.
+// Left without one, they are named theta_1, theta_2, ... when the circuit is
+// loaded (`Circuit.assignMissingAngleSymbols`), which is what the examples below
+// rely on.
 
 export const emptyCircuit = new Circuit();
 

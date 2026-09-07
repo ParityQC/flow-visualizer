@@ -1,4 +1,5 @@
 // ParityQC © 2026. See the LICENSE file in the top level directory for details.
+import { Angle } from './Angle';
 import { Gate } from './Gates';
 import { Moment } from './Moments';
 
@@ -45,6 +46,49 @@ export class Circuit {
 
   get depth(): number {
     return this._moments.length;
+  }
+
+  /**
+   * Give every rotation gate that still lacks one a fresh symbolic angle.
+   *
+   * A `Gate` cannot name its own angle: "the next free theta index" is a
+   * property of the whole circuit. So the invariant "every rotation in a circuit
+   * has an angle" is established here, at the circuit boundary, and callers that
+   * introduce gates (palette drop, QASM import, example load) call this once
+   * afterwards.
+   *
+   * The next index is `max + 1` rather than the lowest free one. Gaps are
+   * allowed on purpose -- reusing the index of a just-deleted gate would
+   * silently tie a new rotation to whatever else still carries that symbol.
+   */
+  public assignMissingAngleSymbols(): void {
+    let maxIndex = 0;
+    for (const moment of this.moments()) {
+      for (const gate of moment.gates()) {
+        for (const param of gate.params) {
+          const match = param.symbol.match(/^theta_(\d+)$/);
+          if (match) {
+            maxIndex = Math.max(maxIndex, Number(match[1]));
+          }
+        }
+      }
+    }
+
+    for (const moment of this.moments()) {
+      // Snapshot: replaceGate writes into the array we are iterating.
+      for (const gate of [...moment.gates()]) {
+        const angle = gate.angle;
+        if (gate.isRotation && (angle === undefined || !angle.isNamed)) {
+          maxIndex += 1;
+          // Keep any value the gate already carries -- an angle read from QASM
+          // arrives with a value but no name.
+          moment.replaceGate(
+            gate,
+            gate.withAngle(new Angle(`theta_${maxIndex}`, angle?.value ?? null))
+          );
+        }
+      }
+    }
   }
 
   /**

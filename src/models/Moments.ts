@@ -65,6 +65,37 @@ export class Moment {
     }
   }
 
+  /**
+   * Swap a gate for another one occupying exactly the same qubits, keeping the
+   * gate order stable.
+   *
+   * This is the seam for edits that change a gate's parameters but not its
+   * position -- setting a rotation angle. Requiring an identical qubit set keeps
+   * `addGate`'s overlap rules from being bypassed: nothing about the moment's
+   * occupancy changes, only which object sits in the slot.
+   */
+  replaceGate(oldGate: Gate, newGate: Gate): void {
+    const index = this._gates.findIndex((g) => g === oldGate);
+
+    if (index === -1) {
+      throw new Error(`Gate does not exist in current Moment`);
+    }
+
+    const oldQubits = new Set(oldGate.qubits());
+    const newQubits = new Set(newGate.qubits());
+    const sameQubits =
+      oldQubits.size === newQubits.size && [...oldQubits].every((q) => newQubits.has(q));
+    if (!sameQubits) {
+      throw new Error(`replaceGate must not move a gate: remove and add it instead`);
+    }
+
+    this._gates[index] = newGate;
+
+    for (const qubit of newQubits) {
+      this._qubitToGate.set(qubit, newGate);
+    }
+  }
+
   clone(): Moment {
     const m = new Moment();
     for (const g of this.gates()) {

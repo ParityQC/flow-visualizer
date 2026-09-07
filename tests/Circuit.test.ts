@@ -4,6 +4,7 @@ import { Circuit } from '../src/models/Circuit';
 import { Gate } from '../src/models/Gates';
 import { Moment } from '../src/models/Moments';
 import { RzTargetType, XTargetType } from '../src/models/Targets';
+import { Angle } from '../src/models/Angle';
 
 function parameterizedTestCircuit() {
   const circuit = new Circuit();
@@ -76,5 +77,76 @@ describe('Circuit', () => {
 
       expect(circuit.clone()).toEqual(circuit);
     });
+  });
+});
+
+describe('Circuit.assignMissingAngleSymbols', () => {
+  function rz(target: number, angle?: Angle) {
+    return new Gate({
+      targetType: new RzTargetType(),
+      controls: [],
+      targets: [target],
+      params: angle ? [angle] : [],
+    });
+  }
+
+  function symbolsOf(circuit: Circuit): string[] {
+    return [...circuit.moments()].flatMap((m) =>
+      [...m.gates()].flatMap((g) => g.params.map((p) => p.symbol))
+    );
+  }
+
+  it('numbers unnamed rotations in circuit order', () => {
+    const circuit = new Circuit([new Moment([rz(0), rz(1)]), new Moment([rz(0)])]);
+
+    circuit.assignMissingAngleSymbols();
+
+    expect(symbolsOf(circuit)).toEqual(['theta_1', 'theta_2', 'theta_3']);
+  });
+
+  it('leaves gates that already have an angle untouched', () => {
+    const existing = new Angle('theta_1', 0.5);
+    const circuit = new Circuit([new Moment([rz(0, existing), rz(1)])]);
+
+    circuit.assignMissingAngleSymbols();
+
+    const [first, second] = [...[...circuit.moments()][0].gates()];
+    expect(first.angle).toBe(existing);
+    expect(second.angle?.symbol).toBe('theta_2');
+    expect(second.angle?.value).toBeNull();
+  });
+
+  it('continues from the highest existing index rather than filling gaps', () => {
+    const circuit = new Circuit([new Moment([rz(0, new Angle('theta_3'))]), new Moment([rz(0)])]);
+
+    circuit.assignMissingAngleSymbols();
+
+    expect(symbolsOf(circuit)).toEqual(['theta_3', 'theta_4']);
+  });
+
+  it('ignores symbols that are not of the theta_n form when numbering', () => {
+    const circuit = new Circuit([new Moment([rz(0, new Angle('beta'))]), new Moment([rz(0)])]);
+
+    circuit.assignMissingAngleSymbols();
+
+    expect(symbolsOf(circuit)).toEqual(['beta', 'theta_1']);
+  });
+
+  it('does not touch gates that take no angle', () => {
+    const xGate = new Gate({ targetType: new XTargetType(), controls: [], targets: [0] });
+    const circuit = new Circuit([new Moment([xGate])]);
+
+    circuit.assignMissingAngleSymbols();
+
+    expect([...[...circuit.moments()][0].gates()][0]).toBe(xGate);
+  });
+
+  it('is idempotent', () => {
+    const circuit = new Circuit([new Moment([rz(0), rz(1)])]);
+
+    circuit.assignMissingAngleSymbols();
+    circuit.assignMissingAngleSymbols();
+
+    expect(symbolsOf(circuit)).toEqual(['theta_1', 'theta_2']);
   });
 });

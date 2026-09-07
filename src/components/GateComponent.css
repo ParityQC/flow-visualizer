@@ -124,3 +124,8 @@
   font-size: var(--font-size-sm);
   z-index: var(--z-iswap-label);
 }
+
+.gate-box {
+  /* A pathologically long symbol clips rather than breaking the layout. */
+  overflow: hidden;
+}

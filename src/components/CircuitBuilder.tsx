@@ -10,6 +10,8 @@ import { mimeGateType, Toolbar, GateDragPayload } from './ToolBox';
 import { Circuit } from '../models/Circuit';
 import { Moment } from '../models/Moments';
 import { Gate } from '../models/Gates';
+import { Angle } from '../models/Angle';
+import { GateContextMenu } from './GateContextMenu';
 import './CircuitBuilder.css';
 import {
   getHoveredQubitIndex,
@@ -27,7 +29,14 @@ import { CircuitSelector } from './CircuitSelector';
 import MathHelp from './MathHelp';
 
 export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } = {}) {
-  const [circuit, setCircuit] = useState<Circuit>(() => initialCircuit ?? new Circuit());
+  const [circuit, setCircuit] = useState<Circuit>(() => {
+    // Same treatment as the other load paths: never share the caller's circuit,
+    // and give every rotation an angle before anything renders it. Otherwise a
+    // gate would show a bare `R_z` while the QASM panel named it.
+    const initial = initialCircuit?.clone() ?? new Circuit();
+    initial.assignMissingAngleSymbols();
+    return initial;
+  });
   // Two-step placement state for controlled/two-qubit gates: target is dropped
   // first (sets pendingGate), control/second qubit is placed on the next click.
   const [pendingGate, setPendingGate] = useState<pendingGate | null>(null);
@@ -36,6 +45,9 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   const [gatePreview, setGatePreview] = useState<GatePreview | null>(null);
+
+  // Right-clicked gate, whose context menu offers the angle fields and delete.
+  const [gateMenu, setGateMenu] = useState<GateMenuState | null>(null);
 
   const clickIndicesRef = useRef<GridHit | undefined>(undefined);
 
@@ -189,10 +201,47 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
         momentBefore.addGate(gate);
       }
 
+      // A rotation dropped from the palette arrives unnamed.
+      circuit.assignMissingAngleSymbols();
       setCircuit(circuit.shallowCopy());
     },
     [circuit]
   );
+
+  const handleGateContextMenu = (
+    gate: Gate,
+    momentIndex: number,
+    position: { x: number; y: number }
+  ) => {
+    setGateMenu({ gate, momentIndex, position });
+  };
+
+  /**
+   * Apply an edited angle. A symbol is the identity of a parameter, so every
+   * gate carrying the old symbol moves to the new angle together -- that is what
+   * makes two gates a single tied parameter rather than two coincidental ones.
+   */
+  const handleGateAngleChange = (gate: Gate, angle: Angle) => {
+    const oldSymbol = gate.angle?.symbol;
+    if (oldSymbol === undefined) return;
+
+    let replacement: Gate | undefined;
+    for (const moment of circuit.moments()) {
+      // Snapshot: replaceGate writes into the array being iterated.
+      for (const g of [...moment.gates()]) {
+        if (g.angle?.symbol === oldSymbol) {
+          const next = g.withAngle(angle);
+          if (g === gate) replacement = next;
+          moment.replaceGate(g, next);
+        }
+      }
+    }
+    setCircuit(circuit.shallowCopy());
+    // Keep the menu open and pointed at the gate that replaced the clicked one,
+    // so committing a field on blur (tabbing from Symbol to Value) does not
+    // dismiss the menu or leave it holding a gate no longer in the circuit.
+    setGateMenu((menu) => (menu && replacement ? { ...menu, gate: replacement } : menu));
+  };
 
   const handleGateRemove = (gate: Gate, momentIndex: number) => {
     const moment = circuit.momentOfIndex(momentIndex);
@@ -228,7 +277,10 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
 
   const handleCircuitSelect = (newCircuit: Circuit, initAuxQubits?: number[]) => {
     resetVisibilityState();
-    setCircuit(newCircuit.clone());
+    const loaded = newCircuit.clone();
+    // Examples are written without angles, so name their rotations on load.
+    loaded.assignMissingAngleSymbols();
+    setCircuit(loaded);
     initAuxQubits?.forEach((q) => setAuxLabelX(q, false));
   };
 
@@ -290,11 +342,25 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
         >
           <CircuitView
             circuit={circuit}
-            onGateContextMenu={handleGateRemove}
+            onGateContextMenu={handleGateContextMenu}
             gatePreview={gatePreview}
           />
         </div>
       </div>
+      {gateMenu && (
+        <GateContextMenu
+          gate={gateMenu.gate}
+          position={gateMenu.position}
+          boundGateCount={countGatesWithSymbol(circuit, gateMenu.gate.angle?.symbol)}
+          onAngleChange={(angle) => handleGateAngleChange(gateMenu.gate, angle)}
+          onDelete={() => {
+            handleGateRemove(gateMenu.gate, gateMenu.momentIndex);
+            setGateMenu(null);
+          }}
+          onClose={() => setGateMenu(null)}
+        />
+      )}
+
       <QasmDisplay circuit={circuit} onCircuitLoad={handleCircuitUpload} />
     </div>
   );
@@ -308,6 +374,24 @@ function getMomentAndGate(circuit: Circuit, hit: GridHit): [Moment, Gate] {
   if (gate === undefined) throw Error('gate should be defined');
 
   return [moment, gate];
+}
+
+interface GateMenuState {
+  gate: Gate;
+  momentIndex: number;
+  position: { x: number; y: number };
+}
+
+/** How many gates in the circuit carry `symbol` as their angle. */
+function countGatesWithSymbol(circuit: Circuit, symbol: string | undefined): number {
+  if (symbol === undefined) return 0;
+  let count = 0;
+  for (const moment of circuit.moments()) {
+    for (const gate of moment.gates()) {
+      if (gate.angle?.symbol === symbol) count += 1;
+    }
+  }
+  return count;
 }
 
 interface pendingGate {
