@@ -43,16 +43,23 @@
   background-color: var(--color-raised);
 }
 
-.dropdown-slider {
+/* Groups are sections of the menu rather than menu items: they hold their own
+   controls, so they are neither clickable nor hoverable themselves. */
+.dropdown-slider,
+.dropdown-radio-group {
   flex-direction: column;
   align-items: stretch;
-  gap: 4px;
   cursor: default;
   border-top: 1px solid var(--color-border-divider);
 }
 
-.dropdown-slider:hover {
+.dropdown-slider:hover,
+.dropdown-radio-group:hover {
   background: none;
+}
+
+.dropdown-slider {
+  gap: 4px;
 }
 
 .slider-label {
@@ -69,29 +76,15 @@
   width: 100%;
 }
 
-/* Rotation-angle mode picker: a labelled group of radio rows, sharing the
-   slider's "not itself clickable" treatment. */
+/* Rotation-angle mode picker. The rows carry their own horizontal padding. */
 .dropdown-radio-group {
-  flex-direction: column;
-  align-items: stretch;
   gap: 2px;
   padding: 8px 0 4px;
-  cursor: default;
-  border-top: 1px solid var(--color-border-divider);
-}
-
-.dropdown-radio-group:hover {
-  background: none;
 }
 
 .dropdown-group-label {
   padding: 0 12px 4px;
   color: var(--color-text-faint);
-}
-
-.dropdown-radio {
-  width: 100%;
-  gap: 8px;
 }
 
 .dropdown-radio-example {

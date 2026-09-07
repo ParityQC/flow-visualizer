@@ -9,10 +9,9 @@
  *     expr   := ['-'] factor (('*' | '/') factor)*
  *     factor := number | 'pi'
  *
- * No addition and no parentheses. That covers every angle anyone writes on a
- * circuit diagram (`pi/4`, `3*pi/4`, `-pi/2`, plain decimals) while keeping the
- * implementation free of operator-precedence surface and giving one error
- * message instead of a family of them. Widening it later is purely additive.
+ * No addition and no parentheses: that covers every angle anyone writes on a
+ * circuit diagram while keeping the parser free of precedence handling and
+ * giving one error message instead of a family of them.
  */
 
 export class AngleExpressionError extends Error {

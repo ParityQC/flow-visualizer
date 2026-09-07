@@ -7,9 +7,8 @@ import { Angle } from '../models/Angle';
 import { Gate } from '../models/Gates';
 
 export function circuitToQasm(circuit: Circuit): string {
-  // Work on a copy so the panel can render an unnamed rotation without mutating
-  // the circuit mid-render. The pass is idempotent, so for a circuit that came
-  // through the drop handler or the parser this is a no-op.
+  // A copy, so rendering the panel cannot mutate the circuit mid-render. The
+  // pass is idempotent, so it is a no-op for a circuit that is already named.
   const named = circuit.clone();
   named.assignMissingAngleSymbols();
 
@@ -94,10 +93,8 @@ function gateToQasm(gate: Gate): string {
 }
 
 /**
- * `input float[64] theta_1;` for every angle that has no numeric value.
- *
- * A symbol is the identity of a parameter, so two gates sharing one are declared
- * once. Valued angles need no declaration -- they are emitted as literals.
+ * `input float[64] theta_1;` for every angle with no numeric value. A symbol is
+ * the identity of a parameter, so two gates sharing one are declared once.
  */
 function inputDeclarations(circuit: Circuit): string {
   const symbols = new Set<string>();
@@ -120,10 +117,9 @@ function inputDeclarations(circuit: Circuit): string {
 
 /**
  * A symbolic angle becomes its symbol; a valued one becomes a float literal.
- *
- * `String` already prints the shortest decimal that parses back to the same
- * double, which is what makes the QASM round trip lossless. Integers get a
- * decimal point so they read as floats rather than ints.
+ * `String` prints the shortest decimal that parses back to the same double,
+ * which is what makes the round trip lossless; integers get a decimal point so
+ * they read as floats rather than ints.
  */
 function qasmParam(angle: Angle): string {
   if (angle.value === null) {

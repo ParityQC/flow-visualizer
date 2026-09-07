@@ -324,11 +324,9 @@ function parseGateCall(statement: Statement, register: Register | undefined): Ga
 }
 
 /**
- * Validate an `input float[64] name;` declaration.
- *
- * The declaration carries no value, so nothing needs to be remembered: a gate
- * referencing the symbol produces a valueless `Angle` either way. Accepting the
- * statement is what matters, so our own export can be read back.
+ * Validate an `input float[64] name;` declaration. Nothing is remembered from
+ * it: a gate referencing the symbol produces a valueless `Angle` either way, so
+ * accepting the statement is all that is needed to read our own export back.
  */
 function checkInputDeclaration(statement: Statement): void {
   const { text, line } = statement;
@@ -342,13 +340,11 @@ function checkInputDeclaration(statement: Statement): void {
 }
 
 /**
- * Turn the text inside a gate's parentheses into the gate's params.
- *
- * An absent parameter list is allowed -- `rz q[0];` yields a gate that
+ * Turn the text inside a gate's parentheses into the gate's params. An absent
+ * list is allowed: `rz q[0];` yields a gate that
  * `Circuit.assignMissingAngleSymbols` names afterwards. A bare identifier is a
- * reference to a symbol; anything else is an angle expression. An identifier
- * that was never declared is accepted rather than rejected, so hand-written
- * QASM loads; the cost is that a typo becomes a new parameter.
+ * symbol reference, accepted even when undeclared so that hand-written QASM
+ * loads; the cost is that a typo becomes a new parameter.
  */
 function parseAngleParams(paramText: string | undefined, name: string, line: number): Angle[] {
   if (paramText === undefined) {

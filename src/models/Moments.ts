@@ -66,13 +66,11 @@ export class Moment {
   }
 
   /**
-   * Swap a gate for another one occupying exactly the same qubits, keeping the
-   * gate order stable.
-   *
-   * This is the seam for edits that change a gate's parameters but not its
-   * position -- setting a rotation angle. Requiring an identical qubit set keeps
-   * `addGate`'s overlap rules from being bypassed: nothing about the moment's
-   * occupancy changes, only which object sits in the slot.
+   * Swap a gate for another one on exactly the same qubits, keeping the gate
+   * order stable. This is the seam for edits that change a gate's parameters but
+   * not its position, such as setting a rotation angle. Requiring an identical
+   * qubit set means the moment's occupancy cannot change here, so `addGate`'s
+   * overlap rules stay in force.
    */
   replaceGate(oldGate: Gate, newGate: Gate): void {
     const index = this._gates.findIndex((g) => g === oldGate);

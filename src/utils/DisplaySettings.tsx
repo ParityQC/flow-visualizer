@@ -48,7 +48,6 @@ export function DisplaySettingsProvider({ children }: { children: ReactNode }) {
 
   const [momentWidth, setMomentWidth] = useState<number>(defaultMomentWidth);
 
-  // Symbolic by default: an angle is a theta index until someone gives it a value.
   const [angleDisplay, setAngleDisplay] = useState<AngleDisplayMode>('symbolic');
 
   const togglePhysX = useCallback(() => {

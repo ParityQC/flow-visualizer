@@ -30,9 +30,8 @@ import MathHelp from './MathHelp';
 
 export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } = {}) {
   const [circuit, setCircuit] = useState<Circuit>(() => {
-    // Same treatment as the other load paths: never share the caller's circuit,
-    // and give every rotation an angle before anything renders it. Otherwise a
-    // gate would show a bare `R_z` while the QASM panel named it.
+    // Never share the caller's circuit, and name every rotation before anything
+    // renders it -- otherwise a gate shows a bare `R_z` that the QASM panel names.
     const initial = initialCircuit?.clone() ?? new Circuit();
     initial.assignMissingAngleSymbols();
     return initial;
@@ -217,9 +216,8 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
   };
 
   /**
-   * Apply an edited angle. A symbol is the identity of a parameter, so every
-   * gate carrying the old symbol moves to the new angle together -- that is what
-   * makes two gates a single tied parameter rather than two coincidental ones.
+   * Apply an edited angle. A symbol is the identity of a parameter, so every gate
+   * carrying the old symbol moves to the new angle together.
    */
   const handleGateAngleChange = (gate: Gate, angle: Angle) => {
     const oldSymbol = gate.angle?.symbol;
@@ -237,9 +235,9 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
       }
     }
     setCircuit(circuit.shallowCopy());
-    // Keep the menu open and pointed at the gate that replaced the clicked one,
-    // so committing a field on blur (tabbing from Symbol to Value) does not
-    // dismiss the menu or leave it holding a gate no longer in the circuit.
+    // Re-point the menu at the gate that replaced the clicked one, so committing
+    // on blur (tabbing from Symbol to Value) neither dismisses the menu nor
+    // leaves it holding a gate that is no longer in the circuit.
     setGateMenu((menu) => (menu && replacement ? { ...menu, gate: replacement } : menu));
   };
 

@@ -86,10 +86,9 @@ function sdg(target: number): Gate {
 // Examples
 //------------------------------------------//
 
-// Rotations may be given a concrete angle -- `rz(1, new Angle('theta_1', Math.PI / 4))`.
-// Left without one, they are named theta_1, theta_2, ... when the circuit is
-// loaded (`Circuit.assignMissingAngleSymbols`), which is what the examples below
-// rely on.
+// A rotation may be given a concrete angle -- `rz(1, new Angle('theta_1', Math.PI / 4))`.
+// Left without one, it is named on load by `Circuit.assignMissingAngleSymbols`,
+// which is what the examples below rely on.
 
 export const emptyCircuit = new Circuit();
 

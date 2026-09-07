@@ -27,9 +27,8 @@ export function GateComponent({ gate }: GateProps) {
         : `${gate.targetType.latexName}(${formatAngle(angle, angleDisplay)})`;
     return (
       <div className="gate-wrapper-single">
-        {/* Rotation boxes are wider; the width has to match the value the label
-            geometry in QubitLabelDisplayUtils assumes, so both read it from
-            `gateWidth`. */}
+        {/* Both this box and the label geometry in QubitLabelDisplayUtils size
+            rotations from `gateWidth`, so the two cannot drift. */}
         <div className="gate-box" style={{ width: `${gateWidth(gate, angleDisplay)}px` }}>
           <InlineMath math={gateLabel} />
         </div>

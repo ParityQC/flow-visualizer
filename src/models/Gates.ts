@@ -10,10 +10,8 @@ import { combineLabels } from '../utils/labelTrackingUtils';
  * For example a CNOT gate has target type "X-Gate", one control, and one target qubit.
  *
  * Rotation gates additionally carry one `Angle` in `params`. Params are optional
- * because a gate cannot name its own angle -- "the next free theta index" is a
- * property of the whole circuit. A rotation constructed without params is
- * therefore legal but incomplete; `Circuit.assignMissingAngleSymbols` closes the
- * gap whenever gates enter a circuit.
+ * because a gate cannot name its own angle; a rotation built without one is
+ * legal but incomplete until `Circuit.assignMissingAngleSymbols` names it.
  */
 export class Gate implements QubitIterable {
   readonly _targetType: TargetType;
@@ -116,8 +114,8 @@ export class Gate implements QubitIterable {
       targetType: this.targetType,
       controls: this.controls.map((c) => c + offset),
       targets: this.targets.map((t) => t + offset),
-      // `Angle` is immutable, so sharing the instances is safe -- and a moved
-      // gate must keep its symbol, or dragging would silently retie it.
+      // Shared, not copied: `Angle` is immutable, and a moved gate has to keep
+      // its symbol or dragging would silently retie it.
       params: this.params,
     });
   }

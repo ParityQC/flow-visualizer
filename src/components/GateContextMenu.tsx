@@ -1,11 +1,9 @@
 // ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
  * Right-click menu for a gate: edit a rotation's angle, or delete the gate.
- *
- * Right-clicking a gate used to delete it outright. Angles need somewhere to be
- * edited, and a left click is already spoken for by two-step placement of
- * multi-qubit gates, so the delete moved in here alongside the angle fields --
- * mirroring the qubit right-click menu.
+ * Right-clicking used to delete outright, but a left click is already spoken for
+ * by two-step placement of multi-qubit gates, so the delete moved in here
+ * alongside the angle fields -- mirroring the qubit right-click menu.
  */
 import { useEffect, useRef, useState } from 'react';
 import './QubitContextMenu.css';
@@ -73,9 +71,7 @@ export function GateContextMenu({
   }, [onClose]);
 
   const symbolValid = Angle.isValidSymbol(symbol);
-  // An empty value field means "symbolic": the angle keeps its name and no number.
-  const trimmedValue = valueText.trim();
-  const parsedValue = parseValue(trimmedValue);
+  const parsedValue = parseValue(valueText.trim());
   const valueValid = parsedValue !== 'invalid';
 
   const commit = () => {
@@ -101,7 +97,7 @@ export function GateContextMenu({
       role="presentation"
     >
       <div className="context-menu-header">
-        <InlineMath math={gate.targetType.latexName} /> on qubit {gate.targets[0]}
+        <InlineMath math={gate.targetType.latexName} /> on {describeQubits(gate)}
       </div>
 
       {angle !== undefined && (
@@ -143,7 +139,13 @@ export function GateContextMenu({
   );
 }
 
-/** `null` for an empty field (symbolic), a number, or `'invalid'`. */
+/** Names every qubit the gate acts on, control included: "qubits 0, 2". */
+function describeQubits(gate: Gate): string {
+  const qubits = [...gate.qubits()];
+  return `${qubits.length === 1 ? 'qubit' : 'qubits'} ${qubits.join(', ')}`;
+}
+
+/** An empty field means symbolic, so it parses to `null` rather than failing. */
 function parseValue(text: string): number | null | 'invalid' {
   if (text === '') return null;
   try {

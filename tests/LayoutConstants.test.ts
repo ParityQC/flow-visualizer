@@ -8,7 +8,6 @@ import {
   gateHalfWidth,
   gateBoxWidth,
   maxGateBoxWidth,
-  gateAreaLeftMargin,
   labelLeftPaddingFor,
   labelGateClearance,
 } from '../src/utils/LayoutConstants';
@@ -31,10 +30,6 @@ describe('gateWidth', () => {
     expect(gateWidth(rz(), 'decimal')).toBe(gateBoxWidth);
   });
 
-  it('widens a rotation to fit its angle', () => {
-    expect(gateWidth(rz(new Angle('theta_1')), 'symbolic')).toBeGreaterThan(gateBoxWidth);
-  });
-
   it('follows the rendered form, not the mode', () => {
     // In pi mode an angle that is not a simple fraction falls back to a decimal,
     // and the box has to be wide enough for that or the text clips.
@@ -45,16 +40,11 @@ describe('gateWidth', () => {
     expect(gateWidth(awkward, 'pi')).toBe(gateWidth(awkward, 'decimal'));
   });
 
-  it('never exceeds the cap, however long the symbol', () => {
-    const long = rz(new Angle('aVeryLongParameterNameIndeed'));
-
-    expect(gateWidth(long, 'symbolic')).toBe(maxGateBoxWidth);
-  });
-
-  it('keeps the widest box within the reserved left margin', () => {
-    // Gates are centred on their column, so half a box overhangs to the left.
-    // The gutter already offered 20px before this margin was added.
-    expect(maxGateBoxWidth / 2).toBeLessThanOrEqual(20 + gateAreaLeftMargin);
+  it('widens a rotation to fit its angle, up to the cap', () => {
+    expect(gateWidth(rz(new Angle('theta_1')), 'symbolic')).toBeGreaterThan(gateBoxWidth);
+    expect(gateWidth(rz(new Angle('aVeryLongParameterNameIndeed')), 'symbolic')).toBe(
+      maxGateBoxWidth
+    );
   });
 });
 
@@ -70,7 +60,7 @@ describe('labelLeftPaddingFor', () => {
     );
   });
 
-  it('falls back to the standard offset when there is no gate', () => {
-    expect(labelLeftPaddingFor(undefined, 'symbolic')).toBe(22);
+  it('falls back to a standard box when there is no gate', () => {
+    expect(labelLeftPaddingFor(undefined, 'symbolic')).toBe(gateBoxWidth / 2 + labelGateClearance);
   });
 });

@@ -49,17 +49,14 @@ export class Circuit {
   }
 
   /**
-   * Give every rotation gate that still lacks one a fresh symbolic angle.
+   * Give every rotation gate that still lacks one a fresh symbolic angle. A
+   * `Gate` cannot name its own angle -- "the next free theta index" is a property
+   * of the whole circuit -- so every path that introduces gates (palette drop,
+   * QASM import, example load) calls this once afterwards.
    *
-   * A `Gate` cannot name its own angle: "the next free theta index" is a
-   * property of the whole circuit. So the invariant "every rotation in a circuit
-   * has an angle" is established here, at the circuit boundary, and callers that
-   * introduce gates (palette drop, QASM import, example load) call this once
-   * afterwards.
-   *
-   * The next index is `max + 1` rather than the lowest free one. Gaps are
-   * allowed on purpose -- reusing the index of a just-deleted gate would
-   * silently tie a new rotation to whatever else still carries that symbol.
+   * The next index is `max + 1` rather than the lowest free one: reusing the
+   * index of a deleted gate would silently tie a new rotation to whatever else
+   * still carries that symbol.
    */
   public assignMissingAngleSymbols(): void {
     let maxIndex = 0;

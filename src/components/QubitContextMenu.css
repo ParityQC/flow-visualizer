@@ -35,7 +35,7 @@
 }
 
 .context-menu-item-danger {
-  color: var(--color-z-label);
+  color: var(--color-error-text);
 }
 
 .context-menu-item-danger:hover {

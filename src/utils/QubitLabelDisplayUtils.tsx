@@ -11,6 +11,7 @@ import {
   gateHalfWidth,
   labelGateClearance,
   gateAreaLeftMargin,
+  minLabelWidth,
   labelTopOffset,
   gateOverlapOffset,
   iswapGateOverlapOffset,
@@ -33,8 +34,8 @@ export interface RenderConfig {
   lineHeight: number;
   momentWidth: number;
   qubitLabelWidth: number;
-  // Rotation boxes are wider than Clifford ones, and how much wider depends on
-  // the form the angle is shown in, so label geometry has to know the mode.
+  // Rotation boxes are wider, by an amount that depends on the form the angle is
+  // shown in, so label geometry has to know the mode.
   angleDisplay: AngleDisplayMode;
 }
 
@@ -206,8 +207,6 @@ export function computeLabelChangePositions(
       }
       if (!previousLabel?.equals(currentLabel)) {
         // cumulativeOffset + maxOffset so all labels align with rightmost CNOT
-        // The label belongs after the gate at this moment, so it has to clear
-        // that gate's box -- which is wider when the gate is a rotation.
         const currentGate = circuit.momentOfIndex(moment)?.getGate(qubit);
         const left =
           padding +
@@ -221,7 +220,7 @@ export function computeLabelChangePositions(
         const maxWidth =
           gateLeft === Number.POSITIVE_INFINITY
             ? Number.POSITIVE_INFINITY
-            : Math.max(20, gateLeft - left - labelGateClearance);
+            : Math.max(minLabelWidth, gateLeft - left - labelGateClearance);
         positions.push({
           key: `initial-label-${moment}-${qubit}`,
           qubitIndex: qubit,

@@ -41,7 +41,7 @@
 }
 
 .gate-angle-input-invalid {
-  border-color: var(--color-z-label);
+  border-color: var(--color-error-text);
 }
 
 .gate-angle-hint {

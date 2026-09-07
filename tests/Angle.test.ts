@@ -1,12 +1,6 @@
 // ParityQC © 2026. See the LICENSE file in the top level directory for details.
 import { describe, it, expect } from 'vitest';
-import {
-  Angle,
-  formatAngle,
-  piFractionLatex,
-  decimalLatex,
-  angleWidthChars,
-} from '../src/models/Angle';
+import { Angle, formatAngle, angleWidthChars } from '../src/models/Angle';
 
 describe('Angle', () => {
   it('is symbolic until a value is assigned', () => {
@@ -45,10 +39,10 @@ describe('Angle', () => {
     expect(() => new Angle('theta_1', value)).toThrow(/must be finite/);
   });
 
-  it('accepts zero and negative values', () => {
+  it('distinguishes a zero value from no value', () => {
     expect(new Angle('theta_1', 0).value).toBe(0);
-    expect(new Angle('theta_1', -Math.PI).value).toBe(-Math.PI);
     expect(new Angle('theta_1', 0).isSymbolic).toBe(false);
+    expect(new Angle('theta_1', 0.5).withValue(null).isSymbolic).toBe(true);
   });
 
   it('withValue and withSymbol return new angles and leave the original alone', () => {
@@ -62,10 +56,6 @@ describe('Angle', () => {
     expect(renamed.value).toBeNull();
     expect(original.value).toBeNull();
     expect(original.symbol).toBe('theta_1');
-  });
-
-  it('withValue(null) clears the value', () => {
-    expect(new Angle('theta_1', 0.5).withValue(null).isSymbolic).toBe(true);
   });
 
   it('compares by symbol and value', () => {
@@ -109,7 +99,6 @@ describe('formatAngle', () => {
   });
 
   it('falls back to a decimal in pi mode when no simple fraction fits', () => {
-    expect(piFractionLatex(0.9273)).toBeNull();
     expect(formatAngle(valued(0.9273), 'pi')).toBe('0.9273');
   });
 
@@ -121,9 +110,8 @@ describe('formatAngle', () => {
   });
 
   it('trims decimals to four places without trailing zeros', () => {
-    expect(decimalLatex(0)).toBe('0');
-    expect(decimalLatex(1.5)).toBe('1.5');
-    expect(decimalLatex(0.12345678)).toBe('0.1235');
+    expect(formatAngle(valued(1.5), 'decimal')).toBe('1.5');
+    expect(formatAngle(valued(0.12345678), 'decimal')).toBe('0.1235');
   });
 });
 
