@@ -1,6 +1,6 @@
 // ParityQC © 2026. See the LICENSE file in the top level directory for details.
 /**
- * "Math Background" modal: written explainer of the parity flow
+ * "Theoretical Background" modal: written explainer of the parity flow
  * formalism, label-update rules per gate, and how to read off
  * physical rotations from the labels.
  */
@@ -16,10 +16,10 @@ import './MathHelp.css';
 const xc = (s: string) => `\\textcolor{${X_LABEL_COLOR}}{${s}}`;
 const zc = (s: string) => `\\textcolor{${Z_LABEL_COLOR}}{${s}}`;
 
-export const MathHelp: React.FC = () => (
-  <ModalButton buttonLabel="Math Background" modalClassName="math-help-modal">
+export const TheoryHelp: React.FC = () => (
+  <ModalButton buttonLabel="Theoretical Background" modalClassName="math-help-modal">
     <div>
-      <h3 className="math-help-heading">Math Background</h3>
+      <h3 className="math-help-heading">Theoretical Background</h3>
       <h4 className="math-help-heading">Core Concept</h4>
 
       <p>
@@ -164,6 +164,11 @@ export const MathHelp: React.FC = () => (
         </li>
       </ul>
       <img className="math-help-formalism-img" src={FlowFormalism} alt="Figure 1" />
+      <p>
+        Sometimes you do not want that certain Cliffords like <InlineMath math="S" /> are tracked.
+        In that case just express them in terms of rotations (e.g. <InlineMath math="R_Z(\pi/2)" />{' '}
+        in case of an <InlineMath math="S" /> gate).
+      </p>
       <p className="math-help-figure-note">
         Note: the figure above is reproduced from the paper, which uses the opposite sign convention{' '}
         <InlineMath math="R_P(\alpha) = \exp(+iP\alpha/2)" />. Reading a logical rotation off the
@@ -173,4 +178,4 @@ export const MathHelp: React.FC = () => (
   </ModalButton>
 );
 
-export default MathHelp;
+export default TheoryHelp;

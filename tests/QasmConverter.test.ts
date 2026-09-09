@@ -118,6 +118,34 @@ describe('circuitToQasm — rotation angles', () => {
     expect(gateBefore.params).toEqual([]);
   });
 
+  it('writes a multiple of pi as such in pi mode', () => {
+    const pi = (angle: Angle) => circuitToQasm(rotationCircuit(angle), 'pi');
+
+    expect(pi(new Angle('theta_1', Math.PI / 2))).toContain('rz(pi/2) q[0];');
+    expect(pi(new Angle('theta_1', (3 * Math.PI) / 4))).toContain('rz(3*pi/4) q[0];');
+    expect(pi(new Angle('theta_1', -Math.PI))).toContain('rz(-pi) q[0];');
+  });
+
+  it('falls back to the float literal in pi mode when no simple fraction fits', () => {
+    expect(circuitToQasm(rotationCircuit(new Angle('theta_1', 0.5)), 'pi')).toContain(
+      'rz(0.5) q[0];'
+    );
+    expect(circuitToQasm(rotationCircuit(new Angle('theta_1', 0)), 'pi')).toContain(
+      'rz(0.0) q[0];'
+    );
+  });
+
+  it('keeps the float literal in the other display modes', () => {
+    const angle = new Angle('theta_1', Math.PI / 2);
+
+    expect(circuitToQasm(rotationCircuit(angle), 'symbolic')).toContain(
+      'rz(1.5707963267948966) q[0];'
+    );
+    expect(circuitToQasm(rotationCircuit(angle), 'decimal')).toContain(
+      'rz(1.5707963267948966) q[0];'
+    );
+  });
+
   it('puts the input block after the qubit declaration', () => {
     const qasm = circuitToQasm(rotationCircuit(new Angle('theta_1')));
 

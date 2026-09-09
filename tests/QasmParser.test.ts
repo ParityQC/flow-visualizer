@@ -174,6 +174,23 @@ describe('parseQasm — angle round trip', () => {
 
     expect(onlyGate(parseQasm(circuitToQasm(circuit))).angle?.value).toBe(value);
   });
+
+  it('reads back an angle exported in pi mode', () => {
+    const circuit = new Circuit([
+      new Moment([
+        new Gate({
+          targetType: new RzTargetType(),
+          controls: [],
+          targets: [0],
+          params: [new Angle('theta_1', (3 * Math.PI) / 4)],
+        }),
+      ]),
+    ]);
+
+    const exported = circuitToQasm(circuit, 'pi');
+    expect(exported).toContain('rz(3*pi/4) q[0];');
+    expect(onlyGate(parseQasm(exported)).angle?.value).toBeCloseTo((3 * Math.PI) / 4, 12);
+  });
 });
 
 describe('parseQasm — input declarations', () => {

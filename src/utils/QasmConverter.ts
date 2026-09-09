@@ -3,10 +3,17 @@
  * Handles conversion of gate data into qasm text
  */
 import { Circuit } from '../models/Circuit';
-import { Angle } from '../models/Angle';
+import { Angle, AngleDisplayMode, formatAngleExpression } from '../models/Angle';
 import { Gate } from '../models/Gates';
 
-export function circuitToQasm(circuit: Circuit): string {
+/**
+ * @param angleDisplay how rotation angles are written. In `'pi'` mode it emits
+ * things like `rz(pi/2)` if the value is a simple fraction of pi.
+ */
+export function circuitToQasm(
+  circuit: Circuit,
+  angleDisplay: AngleDisplayMode = 'decimal'
+): string {
   // A copy, so rendering the panel cannot mutate the circuit mid-render. The
   // pass is idempotent, so it is a no-op for a circuit that is already named.
   const named = circuit.clone();
@@ -65,7 +72,7 @@ export function circuitToQasm(circuit: Circuit): string {
 
   for (const moment of named.moments()) {
     for (const gate of moment.gates()) {
-      qasm += `${gateToQasm(gate)}\n`;
+      qasm += `${gateToQasm(gate, angleDisplay)}\n`;
     }
 
     if (moment.empty()) {
@@ -76,14 +83,14 @@ export function circuitToQasm(circuit: Circuit): string {
   return qasm;
 }
 
-function gateToQasm(gate: Gate): string {
+function gateToQasm(gate: Gate, angleDisplay: AngleDisplayMode): string {
   const targetType = gate.targetType;
   if (gate.numTargets === 2) {
     return `${targetType.name.toLowerCase()} q[${gate.targets[0]}], q[${gate.targets[1]}];`;
   } else if (gate.numControls === 1) {
     return `c${targetType.name.toLowerCase()} q[${gate.controls[0]}], q[${gate.targets[0]}];`;
   } else if (!gate.isControlled() && gate.isSingleTarget()) {
-    const params = gate.params.map(qasmParam).join(', ');
+    const params = gate.params.map((param) => qasmParam(param, angleDisplay)).join(', ');
     const paramList = params === '' ? '' : `(${params})`;
     return `${targetType.name.toLowerCase()}${paramList} q[${gate.targets[0]}];`;
   }
@@ -116,14 +123,24 @@ function inputDeclarations(circuit: Circuit): string {
 }
 
 /**
- * A symbolic angle becomes its symbol; a valued one becomes a float literal.
- * `String` prints the shortest decimal that parses back to the same double,
- * which is what makes the round trip lossless; integers get a decimal point so
- * they read as floats rather than ints.
+ * A symbolic angle becomes its symbol; a valued one becomes a literal.
+ *
+ * In pi mode a value that is a simple multiple of pi is written as such --
+ * `pi/2`, `3*pi/4` -- which `parseAngleExpression` reads back on import. That
+ * round trip is exact to within the fraction tolerance rather than bit for bit,
+ * so every other mode keeps the float: `String` prints the shortest decimal that
+ * parses back to the same double, and integers get a decimal point so they read
+ * as floats rather than ints.
  */
-function qasmParam(angle: Angle): string {
+function qasmParam(angle: Angle, angleDisplay: AngleDisplayMode): string {
   if (angle.value === null) {
     return angle.symbol;
+  }
+  if (angleDisplay === 'pi') {
+    const expression = formatAngleExpression(angle.value);
+    if (expression.includes('pi')) {
+      return expression;
+    }
   }
   return Number.isInteger(angle.value) ? angle.value.toFixed(1) : String(angle.value);
 }

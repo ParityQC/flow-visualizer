@@ -28,10 +28,11 @@ export const HelpButton: React.FC = () => (
       </p>
       <p>
         To generate simplified QASM 3 Code from your circuit, either copy it to your clipboard or
-        download a text document containing the code.
+        download a text document containing the code. You can also upload your QASM file if it is in
+        the simplified format we also output (e.g. no control-flow).
       </p>
       <h3>Features</h3>
-      <p>To remove gates, right click on them.</p>
+      <p>Right-click on a gate to adjust parameters or remove the gate.</p>
       <p>
         To choose a hardcoded Circuit, select one from the &quot;Load Example Circuit&quot; button
         located at the top left of the page.
@@ -45,7 +46,10 @@ export const HelpButton: React.FC = () => (
         To delete the current circuit, press the &quot;Delete Circuit&quot; button located at the
         bottom left of the page.
       </p>
-      <p>Global label visibility can be toggled under &quot;Settings&quot;.</p>
+      <p>
+        Global label visibility, display format of the rotation angles and width of the moments can
+        be toggled under &quot;Settings&quot;.
+      </p>
       <p>
         To toggle the Label Visibility of single qubits, right click on the desired qubit label (q1,
         q2, ...) and select if the X or Z label should be visible.

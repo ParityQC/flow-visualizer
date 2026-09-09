@@ -9,6 +9,7 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Circuit } from '../models/Circuit';
 import { circuitToQasm } from '../utils/QasmConverter';
 import { parseQasm } from '../utils/QasmParser';
+import { useDisplaySettings } from '../utils/DisplaySettings';
 import { Modal } from './Modal';
 import './QasmDisplay.css';
 
@@ -26,11 +27,12 @@ export function QasmDisplay({ circuit, onCircuitLoad }: QasmDisplayProps) {
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { angleDisplay } = useDisplaySettings();
 
   let qasmCode = '';
   let conversionError: string | null = null;
   try {
-    qasmCode = circuitToQasm(circuit);
+    qasmCode = circuitToQasm(circuit, angleDisplay);
   } catch (err) {
     conversionError = err instanceof Error ? err.message : String(err);
   }

@@ -26,7 +26,7 @@ import HelpButton from './HelpButton';
 import { useDisplaySettings } from '../utils/DisplaySettings';
 import { SettingsMenu } from './SettingsMenu';
 import { CircuitSelector } from './CircuitSelector';
-import MathHelp from './MathHelp';
+import TheoryHelp from './TheoryHelp';
 
 export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } = {}) {
   const [circuit, setCircuit] = useState<Circuit>(() => {
@@ -318,7 +318,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
           <h1 className="circuit-title">Parity Flow Visualizer</h1>
           <div className="circuit-top-bar-end">
             <SettingsMenu />
-            <MathHelp />
+            <TheoryHelp />
             <HelpButton />
             <a href="https://parityqc.com" target="_blank" rel="noopener noreferrer">
               <img className="corner-logo" src={logo} alt="ParityQC" />
