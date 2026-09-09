@@ -49,3 +49,7 @@
   font-size: var(--font-size-sm);
   min-height: 1.2em;
 }
+
+.gate-angle-hint-invalid {
+  color: var(--color-error-text);
+}

@@ -128,7 +128,11 @@ export function GateContextMenu({
             />
           </label>
 
-          <div className="gate-angle-hint">{hintFor(symbolValid, parsedValue, boundGateCount)}</div>
+          <div
+            className={`gate-angle-hint ${symbolValid && valueValid ? '' : 'gate-angle-hint-invalid'}`}
+          >
+            {hintFor(symbolValid, parsedValue, boundGateCount)}
+          </div>
         </div>
       )}
 
@@ -161,7 +165,7 @@ function hintFor(
   boundGateCount: number
 ): string {
   if (!symbolValid) {
-    return 'A symbol must start with a letter or underscore.';
+    return 'Symbols: letters, digits and underscore; no leading digit.';
   }
   if (parsedValue === 'invalid') {
     return 'Try pi/4, -pi/2, 3*pi/4 or 0.7854.';
