@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { Circuit } from '../src/models/Circuit';
 import { Gate } from '../src/models/Gates';
+import { Angle } from '../src/models/Angle';
 import { Moment } from '../src/models/Moments';
 import {
   HTargetType,
@@ -36,14 +37,28 @@ function qasm(body: string, numQubits = 4): string {
 }
 
 /** Gate descriptors of a parsed circuit, moment by moment. */
-function layout(circuit: Circuit): { name: string; controls: number[]; targets: number[] }[][] {
+function layout(
+  circuit: Circuit
+): { name: string; controls: number[]; targets: number[]; params: string[] }[][] {
   return Array.from(circuit.moments()).map((moment) =>
     Array.from(moment.gates()).map((gate) => ({
       name: gate.targetType.name,
       controls: [...gate.controls],
       targets: [...gate.targets],
+      params: gate.params.map((p) => `${p.symbol}=${p.value ?? 'symbolic'}`),
     }))
   );
+}
+
+/**
+ * Angle symbols are assigned when gates enter a circuit, which for a hand-built
+ * example happens only on export. Compare against a named copy so the round trip
+ * is judged on structure and angles, not on when the naming pass ran.
+ */
+function named(circuit: Circuit): Circuit {
+  const copy = circuit.clone();
+  copy.assignMissingAngleSymbols();
+  return copy;
 }
 
 /** The single gate of a single-gate circuit. */
@@ -97,25 +112,136 @@ describe('parseQasm — round trip with circuitToQasm', () => {
   });
 });
 
+describe('parseQasm — angle round trip', () => {
+  it('preserves a numeric angle exactly', () => {
+    const circuit = new Circuit([
+      new Moment([
+        new Gate({
+          targetType: new RzTargetType(),
+          controls: [],
+          targets: [0],
+          params: [new Angle('theta_1', Math.PI / 4)],
+        }),
+      ]),
+    ]);
+
+    const reparsed = parseQasm(circuitToQasm(circuit));
+
+    // Exact equality, not toBeCloseTo: the float must survive the text form.
+    expect(onlyGate(reparsed).angle?.value).toBe(Math.PI / 4);
+  });
+
+  it('preserves a shared symbol and declares it once', () => {
+    const shared = new Angle('theta_1');
+    const circuit = new Circuit([
+      new Moment([
+        new Gate({
+          targetType: new RzTargetType(),
+          controls: [],
+          targets: [0],
+          params: [shared],
+        }),
+        new Gate({
+          targetType: new RxTargetType(),
+          controls: [],
+          targets: [1],
+          params: [shared],
+        }),
+      ]),
+    ]);
+
+    const exported = circuitToQasm(circuit);
+    expect(exported.match(/input float\[64\] theta_1;/g)).toHaveLength(1);
+
+    const symbols = Array.from(parseQasm(exported).moments()).flatMap((m) =>
+      Array.from(m.gates()).map((g) => g.angle?.symbol)
+    );
+    expect(symbols).toEqual(['theta_1', 'theta_1']);
+    expect(circuitToQasm(parseQasm(exported))).toBe(exported);
+  });
+
+  it.each([0, 2, -0.125, Math.PI / 3, 1e-7])('round trips the value %s unchanged', (value) => {
+    const circuit = new Circuit([
+      new Moment([
+        new Gate({
+          targetType: new RzTargetType(),
+          controls: [],
+          targets: [0],
+          params: [new Angle('theta_1', value)],
+        }),
+      ]),
+    ]);
+
+    expect(onlyGate(parseQasm(circuitToQasm(circuit))).angle?.value).toBe(value);
+  });
+
+  it('reads back an angle exported in pi mode', () => {
+    const circuit = new Circuit([
+      new Moment([
+        new Gate({
+          targetType: new RzTargetType(),
+          controls: [],
+          targets: [0],
+          params: [new Angle('theta_1', (3 * Math.PI) / 4)],
+        }),
+      ]),
+    ]);
+
+    const exported = circuitToQasm(circuit, 'pi');
+    expect(exported).toContain('rz(3*pi/4) q[0];');
+    expect(onlyGate(parseQasm(exported)).angle?.value).toBeCloseTo((3 * Math.PI) / 4, 12);
+  });
+});
+
+describe('parseQasm — input declarations', () => {
+  it.each([
+    'input float[64] theta_1;',
+    'input float[32] theta_1;',
+    'input float theta_1;',
+    'input   float [ 64 ]   theta_1;',
+  ])('accepts "%s"', (declaration) => {
+    const source = `${HEADER}qubit[4] q;\n\n${declaration}\n\nrz(theta_1) q[0];\n`;
+    expect(onlyGate(parseQasm(source)).angle?.symbol).toBe('theta_1');
+  });
+
+  it('accepts a declaration that no gate references', () => {
+    const source = `${HEADER}qubit[4] q;\n\ninput float[64] unused;\n\nh q[0];\n`;
+    expect(parseQasm(source).depth).toBe(1);
+  });
+
+  it.each([
+    ['a non-float input', 'input int[32] n;'],
+    ['a missing name', 'input float[64];'],
+  ])('rejects %s', (_name, declaration) => {
+    const source = `${HEADER}qubit[4] q;\n\n${declaration}\n\nh q[0];\n`;
+    expect(() => parseQasm(source)).toThrow(/only 'input float\[n\] name;' declarations/);
+  });
+
+  it('still rejects a bare float declaration with its own message', () => {
+    const source = `${HEADER}qubit[4] q;\n\nfloat x = 3;\n\nh q[0];\n`;
+    expect(() => parseQasm(source)).toThrow(/classical variables are not supported/);
+  });
+});
+
 describe('parseQasm — moment reconstruction', () => {
   it('rebuilds the moment layout of testCircuit exactly', () => {
-    expect(layout(parseQasm(circuitToQasm(testCircuit)))).toEqual(layout(testCircuit));
+    expect(layout(parseQasm(circuitToQasm(testCircuit)))).toEqual(layout(named(testCircuit)));
   });
 
   it('rebuilds the moment layout of oneDHeisenberg exactly', () => {
-    expect(layout(parseQasm(circuitToQasm(oneDHeisenberg)))).toEqual(layout(oneDHeisenberg));
+    expect(layout(parseQasm(circuitToQasm(oneDHeisenberg)))).toEqual(layout(named(oneDHeisenberg)));
   });
 
   it('compacts oneDHeisenbergAuxiliary, pulling rx q[1] one moment earlier', () => {
     const parsed = layout(parseQasm(circuitToQasm(oneDHeisenbergAuxiliary)));
     expect(parsed).toHaveLength(oneDHeisenbergAuxiliary.depth);
     expect(parsed[2]).toEqual([
-      { name: 'X', controls: [2], targets: [3] },
-      { name: 'Rx', controls: [], targets: [1] },
+      { name: 'X', controls: [2], targets: [3], params: [] },
+      { name: 'Rx', controls: [], targets: [1], params: ['theta_1=symbolic'] },
     ]);
     expect(parsed[3]).toEqual([
-      { name: 'Rz', controls: [], targets: [2] },
-      { name: 'Ry', controls: [], targets: [3] },
+      { name: 'Rz', controls: [], targets: [2], params: ['theta_2=symbolic'] },
+      { name: 'Ry', controls: [], targets: [3], params: ['theta_3=symbolic'] },
     ]);
   });
 
@@ -180,12 +306,58 @@ describe('parseQasm — gates', () => {
     expect(gate.targets).toEqual([0, 2]);
   });
 
-  it.each(['rz q[0];', 'rz(pi/2) q[0];', 'rz(0.5) q[0];', 'rz( 2 * pi ) q[0];'])(
-    'accepts "%s" and discards any angle',
-    (statement) => {
-      expect(onlyGate(parseQasm(qasm(statement))).targetType.name).toBe('Rz');
-    }
-  );
+  it.each<[string, number]>([
+    ['rz(pi/2) q[0];', Math.PI / 2],
+    ['rz(0.5) q[0];', 0.5],
+    ['rz( 2 * pi ) q[0];', 2 * Math.PI],
+    ['rz(-pi/4) q[0];', -Math.PI / 4],
+    ['rz(3*pi/4) q[0];', (3 * Math.PI) / 4],
+  ])('reads the angle out of "%s"', (statement, expected) => {
+    const gate = onlyGate(parseQasm(qasm(statement)));
+
+    expect(gate.targetType.name).toBe('Rz');
+    expect(gate.angle?.value).toBeCloseTo(expected, 12);
+    // A value read from QASM still gets a theta index at the circuit boundary.
+    expect(gate.angle?.symbol).toBe('theta_1');
+  });
+
+  it('gives a rotation written without a parameter a symbolic angle', () => {
+    const gate = onlyGate(parseQasm(qasm('rz q[0];')));
+
+    expect(gate.angle?.symbol).toBe('theta_1');
+    expect(gate.angle?.value).toBeNull();
+  });
+
+  it('treats a bare identifier as a reference to a symbol', () => {
+    const source = `${HEADER}qubit[4] q;\n\ninput float[64] beta;\n\nrz(beta) q[0];\n`;
+    const gate = onlyGate(parseQasm(source));
+
+    expect(gate.angle?.symbol).toBe('beta');
+    expect(gate.angle?.value).toBeNull();
+  });
+
+  it('accepts an identifier that was never declared', () => {
+    const gate = onlyGate(parseQasm(qasm('rz(gamma) q[0];')));
+
+    expect(gate.angle?.symbol).toBe('gamma');
+  });
+
+  it('ties two gates that reference the same symbol', () => {
+    const circuit = parseQasm(qasm('rz(theta_1) q[0];\nrz(theta_1) q[1];\n'));
+    const symbols = Array.from(circuit.moments()).flatMap((m) =>
+      Array.from(m.gates()).map((g) => g.angle?.symbol)
+    );
+
+    expect(symbols).toEqual(['theta_1', 'theta_1']);
+  });
+
+  it.each([
+    ['empty parameter list', 'rz() q[0];', /empty parameter list/],
+    ['two parameters', 'rz(pi, pi) q[0];', /takes a single parameter/],
+    ['an unparseable angle', 'rz(pi+1) q[0];', /Cannot read "pi\+1" as an angle/],
+  ])('rejects %s', (_name, body, message) => {
+    expect(() => parseQasm(qasm(body))).toThrow(message);
+  });
 
   it('accepts a bare "qubit q;" declaration as a one-qubit register', () => {
     expect(onlyGate(parseQasm(`${HEADER}qubit q;\n\nh q[0];\n`)).targets).toEqual([0]);
@@ -204,8 +376,8 @@ x q[1];
 `;
     expect(layout(parseQasm(source))).toEqual([
       [
-        { name: 'H', controls: [], targets: [0] },
-        { name: 'X', controls: [], targets: [1] },
+        { name: 'H', controls: [], targets: [0], params: [] },
+        { name: 'X', controls: [], targets: [1], params: [] },
       ],
     ]);
   });
@@ -214,10 +386,10 @@ x q[1];
     const circuit = parseQasm(qasm('h q[0]; x q[1];\ncx q[0],\n   q[1];\n'));
     expect(layout(circuit)).toEqual([
       [
-        { name: 'H', controls: [], targets: [0] },
-        { name: 'X', controls: [], targets: [1] },
+        { name: 'H', controls: [], targets: [0], params: [] },
+        { name: 'X', controls: [], targets: [1], params: [] },
       ],
-      [{ name: 'X', controls: [0], targets: [1] }],
+      [{ name: 'X', controls: [0], targets: [1], params: [] }],
     ]);
   });
 
@@ -241,7 +413,9 @@ gate iswap q0, q1 {
 
 sdg q[0];
 `;
-    expect(layout(parseQasm(source))).toEqual([[{ name: 'SDG', controls: [], targets: [0] }]]);
+    expect(layout(parseQasm(source))).toEqual([
+      [{ name: 'SDG', controls: [], targets: [0], params: [] }],
+    ]);
   });
 
   it('parses without the optional version and include statements', () => {

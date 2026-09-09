@@ -2,13 +2,30 @@
 import { useRef, useState, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useDisplaySettings } from '../utils/DisplaySettings';
+import { AngleDisplayMode } from '../models/Angle';
+import { InlineMath } from './InlineMath';
 import './SettingsMenu.css';
+
+/** The three ways an angle can be shown, each with a worked example. */
+const ANGLE_DISPLAY_OPTIONS: { mode: AngleDisplayMode; label: string; example: string }[] = [
+  { mode: 'symbolic', label: 'Symbolic', example: 'R_z(\\theta_{1})' },
+  { mode: 'pi', label: 'Multiple of \u03c0', example: 'R_z(\\frac{\\pi}{4})' },
+  { mode: 'decimal', label: 'Decimal', example: 'R_z(0.7854)' },
+];
 
 export function SettingsMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { state, togglePhysX, togglePhysZ, momentWidth, setMomentWidth } = useDisplaySettings();
+  const {
+    state,
+    togglePhysX,
+    togglePhysZ,
+    momentWidth,
+    setMomentWidth,
+    angleDisplay,
+    setAngleDisplay,
+  } = useDisplaySettings();
 
   useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
@@ -52,6 +69,26 @@ export function SettingsMenu() {
                 <span className="checkbox">{state.showPhysZ ? '☑' : '☐'}</span>
                 Show all Z labels
               </button>
+              <div
+                className="dropdown-item dropdown-radio-group"
+                onClick={(e) => e.stopPropagation()}
+                role="presentation"
+              >
+                <div className="dropdown-group-label">Rotation angles</div>
+                {ANGLE_DISPLAY_OPTIONS.map(({ mode, label, example }) => (
+                  <button
+                    key={mode}
+                    className="dropdown-item dropdown-radio"
+                    onClick={() => setAngleDisplay(mode)}
+                  >
+                    <span className="checkbox">{angleDisplay === mode ? '\u25c9' : '\u25cb'}</span>
+                    {label}
+                    <span className="dropdown-radio-example">
+                      <InlineMath math={example} />
+                    </span>
+                  </button>
+                ))}
+              </div>
               <div
                 className="dropdown-item dropdown-slider"
                 onClick={(e) => e.stopPropagation()}

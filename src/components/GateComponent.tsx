@@ -6,19 +6,30 @@
 import './GateComponent.css';
 import { InlineMath } from './InlineMath';
 import { Gate } from '../models/Gates';
-import { lineHeight } from '../utils/LayoutConstants';
+import { formatAngle } from '../models/Angle';
+import { useDisplaySettings } from '../utils/DisplaySettings';
+import { gateWidth, lineHeight } from '../utils/LayoutConstants';
 
 interface GateProps {
   gate: Gate;
 }
 
 export function GateComponent({ gate }: GateProps) {
+  const { angleDisplay } = useDisplaySettings();
+
   // Single qubit gates
   if (gate.numControls === 0 && gate.targetType.numTargets === 1) {
-    const gateLabel = gate.targetType.latexName;
+    const angle = gate.angle;
+    // A rotation shows its angle: `R_z(\theta_1)`, `R_z(\frac{\pi}{4})`, ...
+    const gateLabel =
+      angle === undefined
+        ? gate.targetType.latexName
+        : `${gate.targetType.latexName}(${formatAngle(angle, angleDisplay)})`;
     return (
       <div className="gate-wrapper-single">
-        <div className="gate-box">
+        {/* Both this box and the label geometry in QubitLabelDisplayUtils size
+            rotations from `gateWidth`, so the two cannot drift. */}
+        <div className="gate-box" style={{ width: `${gateWidth(gate, angleDisplay)}px` }}>
           <InlineMath math={gateLabel} />
         </div>
       </div>

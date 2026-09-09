@@ -3,10 +3,15 @@
  * Returns the xz coordinates of where the labels should be positioned and offsets if 2-qubit gates overlap
  */
 import { Circuit } from '../models/Circuit';
+import { AngleDisplayMode } from '../models/Angle';
 import { XZLabelPair, LabelTracker } from './labelTracking';
 import {
   qubitLabelWidth,
-  labelLeftPadding,
+  labelLeftPaddingFor,
+  gateHalfWidth,
+  labelGateClearance,
+  gateAreaLeftMargin,
+  minLabelWidth,
   labelTopOffset,
   gateOverlapOffset,
   iswapGateOverlapOffset,
@@ -24,19 +29,14 @@ export interface PositionedLabel {
   maxWidth: number;
 }
 
-// Gates are centred on their column: a 40px single-qubit box (and the 2-qubit gate
-// wrapper) sits half its width left of the column position, so its visual left edge is
-// `columnLeft - gateHalfWidth`.
-const gateHalfWidth = 20;
-// Extra gap kept between a faded label and that left edge. Just enough to clear the
-// box's 4px shadow halo so labels use as much of the gap as possible.
-const nextGateClearance = 2;
-
 export interface RenderConfig {
   padding: number;
   lineHeight: number;
   momentWidth: number;
   qubitLabelWidth: number;
+  // Rotation boxes are wider, by an amount that depends on the form the angle is
+  // shown in, so label geometry has to know the mode.
+  angleDisplay: AngleDisplayMode;
 }
 
 export interface MomentOffsetData {
@@ -163,7 +163,7 @@ export function computeLabelChangePositions(
   circuit: Circuit,
   momentOffsets: Map<number, MomentOffsetData>
 ): PositionedLabel[] {
-  const { padding, lineHeight, momentWidth } = config;
+  const { padding, lineHeight, momentWidth, angleDisplay } = config;
   const positions: PositionedLabel[] = [];
   const moments = tracker.getMomentIndices();
   const numMoments = Array.from(circuit.moments()).length;
@@ -173,9 +173,17 @@ export function computeLabelChangePositions(
   // positioning in CircuitView, where gates are centred on their column.
   const nextGateLeftEdge = (qubit: number, fromMoment: number): number => {
     for (let m = fromMoment + 1; m < numMoments; m++) {
-      if (circuit.momentOfIndex(m)?.getGate(qubit) !== undefined) {
+      const nextGate = circuit.momentOfIndex(m)?.getGate(qubit);
+      if (nextGate !== undefined) {
         const nextCumulative = momentOffsets.get(m)?.cumulativeOffset || 0;
-        return padding + qubitLabelWidth + momentWidth * m + nextCumulative - gateHalfWidth;
+        return (
+          padding +
+          qubitLabelWidth +
+          gateAreaLeftMargin +
+          momentWidth * m +
+          nextCumulative -
+          gateHalfWidth(nextGate, angleDisplay)
+        );
       }
     }
     return Number.POSITIVE_INFINITY;
@@ -199,18 +207,20 @@ export function computeLabelChangePositions(
       }
       if (!previousLabel?.equals(currentLabel)) {
         // cumulativeOffset + maxOffset so all labels align with rightmost CNOT
+        const currentGate = circuit.momentOfIndex(moment)?.getGate(qubit);
         const left =
           padding +
           qubitLabelWidth +
+          gateAreaLeftMargin +
           momentWidth * moment +
-          labelLeftPadding +
+          labelLeftPaddingFor(currentGate, angleDisplay) +
           cumulativeOffset +
           maxOffset;
         const gateLeft = nextGateLeftEdge(qubit, moment);
         const maxWidth =
           gateLeft === Number.POSITIVE_INFINITY
             ? Number.POSITIVE_INFINITY
-            : Math.max(20, gateLeft - left - nextGateClearance);
+            : Math.max(minLabelWidth, gateLeft - left - labelGateClearance);
         positions.push({
           key: `initial-label-${moment}-${qubit}`,
           qubitIndex: qubit,

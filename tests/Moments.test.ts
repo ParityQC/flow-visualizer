@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { Moment } from '../src/models/Moments';
 import { Gate } from '../src/models/Gates';
 import { RzTargetType, XTargetType } from '../src/models/Targets';
+import { Angle } from '../src/models/Angle';
 
 function parameterizedTestMoment() {
   const moments = new Moment();
@@ -56,5 +57,56 @@ describe('Moments', () => {
     moments.addGate(gate1);
     const clonedMoment = moments.clone();
     expect(clonedMoment).toEqual(moments);
+  });
+});
+
+describe('Moment.replaceGate', () => {
+  function rotationMoment() {
+    const moment = new Moment();
+    const gate = new Gate({ targetType: new RzTargetType(), controls: [], targets: [1] });
+    moment.addGate(gate);
+    return { moment, gate };
+  }
+
+  it('swaps the gate while keeping the qubit index consistent', () => {
+    const { moment, gate } = rotationMoment();
+    const replacement = gate.withAngle(new Angle('theta_1', 0.5));
+
+    moment.replaceGate(gate, replacement);
+
+    expect([...moment.gates()]).toEqual([replacement]);
+    expect(moment.getGate(1)).toBe(replacement);
+  });
+
+  it('keeps the gate at its original position in the moment', () => {
+    const moment = new Moment();
+    const first = new Gate({ targetType: new XTargetType(), controls: [], targets: [0] });
+    const second = new Gate({ targetType: new RzTargetType(), controls: [], targets: [1] });
+    const third = new Gate({ targetType: new XTargetType(), controls: [], targets: [2] });
+    moment.addGate(first);
+    moment.addGate(second);
+    moment.addGate(third);
+
+    const replacement = second.withAngle(new Angle('theta_1'));
+    moment.replaceGate(second, replacement);
+
+    expect([...moment.gates()]).toEqual([first, replacement, third]);
+  });
+
+  it('throws for a gate that is not in the moment', () => {
+    const { moment } = rotationMoment();
+    const foreign = new Gate({ targetType: new XTargetType(), controls: [], targets: [7] });
+
+    expect(() => moment.replaceGate(foreign, foreign)).toThrow(
+      'Gate does not exist in current Moment'
+    );
+  });
+
+  it('refuses a replacement that would move the gate', () => {
+    const { moment, gate } = rotationMoment();
+    const moved = gate.cloneShifted(1);
+
+    expect(() => moment.replaceGate(gate, moved)).toThrow(/must not move a gate/);
+    expect(moment.getGate(1)).toBe(gate);
   });
 });

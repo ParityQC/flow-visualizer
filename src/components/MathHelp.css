@@ -33,3 +33,8 @@
   display: block;
   margin: 0 auto;
 }
+
+.math-help-figure-note {
+  color: var(--color-text-faint);
+  font-size: var(--font-size-sm);
+}
