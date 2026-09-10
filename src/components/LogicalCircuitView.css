@@ -1,0 +1,77 @@
+/* ParityQC © 2026. See the LICENSE file in the top level directory for details. */
+.logical-panel {
+  flex: 0 1 auto;
+  /* Never let a tall circuit push the main grid out of the viewport. */
+  max-height: 45%;
+  margin-top: 8px;
+  background-color: var(--color-bg);
+}
+
+.logical-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-faint);
+}
+
+.logical-panel-body {
+  padding: 0;
+  overflow: auto;
+}
+
+/* Sized by the row of boxes, so a long Pauli word scrolls instead of shrinking. */
+.logical-canvas {
+  position: relative;
+  width: max-content;
+  min-width: 100%;
+}
+
+.logical-wires {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.logical-wire {
+  position: absolute;
+  right: 20px;
+  border-bottom: 2px solid var(--color-border-wire);
+}
+
+.logical-qubit-label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+}
+
+/* `position: relative` lifts the boxes above the absolutely placed wires. */
+.logical-boxes {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-right: 20px;
+  width: max-content;
+}
+
+.logical-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border: 2px solid black;
+  background-color: var(--color-surface);
+  white-space: nowrap;
+}
+
+.logical-clifford {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+.logical-clifford.is-trivial {
+  color: var(--color-text-faint);
+  border-color: var(--color-border);
+}

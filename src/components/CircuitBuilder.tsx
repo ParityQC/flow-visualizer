@@ -5,6 +5,7 @@
  * panel, and the example-circuit selector.
  */
 import { CircuitView, mimeMoveGate } from './CircuitView';
+import { LogicalCircuitView } from './LogicalCircuitView';
 import React, { useState, useCallback, useRef } from 'react';
 import { mimeGateType, Toolbar, GateDragPayload } from './ToolBox';
 import { Circuit } from '../models/Circuit';
@@ -344,6 +345,8 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
             gatePreview={gatePreview}
           />
         </div>
+
+        <LogicalCircuitView circuit={circuit} />
       </div>
       {gateMenu && (
         <GateContextMenu
