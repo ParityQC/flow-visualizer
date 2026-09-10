@@ -18,7 +18,7 @@ import {
   labelToPauliWord,
   pauliWordToLatex,
 } from '../src/utils/logicalRotations';
-import { oneDHeisenberg } from '../src/utils/exampleCircuits';
+import { oneDHeisenberg, oneDHeisenbergAuxiliary } from '../src/utils/exampleCircuits';
 
 function gate(targetType: TargetType, target: number): Gate {
   return new Gate({ targetType, targets: [target], controls: [] });
@@ -80,6 +80,9 @@ describe('computeLogicalRotations', () => {
     // After S the labels are i³⟨0⟩0 and 0, so i·(i³X_0Z_0)·Z_0 = X_0 -- which is
     // S†YS, the sign check that fixes the order of the two labels.
     expect(generators(new Circuit([new Moment([s(0)]), new Moment([ry(0)])]))).toEqual(['X_{0}']);
+    // H swaps the two labels, so i·Z_0·X_0 = -i·X_0Z_0 = -Y_0 = H†YH. Taking the
+    // labels in the other order would give +Y_0 here.
+    expect(generators(new Circuit([new Moment([h(0)]), new Moment([ry(0)])]))).toEqual(['-Y_{0}']);
   });
 
   it('keeps rotations in circuit order, signs included', () => {
@@ -120,6 +123,20 @@ describe('computeLogicalRotations', () => {
       'Z_{1}Z_{2}',
       'X_{1}X_{2}',
       '-Y_{1}Y_{2}',
+    ]);
+    expect(logical.cliffordIsTrivial).toBe(true);
+  });
+
+  it('transforms an Ry sitting behind several Cliffords', () => {
+    // `oneDHeisenbergAuxiliary` is the interesting case: its Ry follows
+    // CNOT/S/CNOT/CNOT, so its generator picks up two other qubits and a sign.
+    // Checked independently against direct conjugation of the 3-qubit matrices:
+    // C†X₁C = X₁X₂, C†Z₂C = Z₁Z₂, C†Y₃C = -Y₁Y₂X₃ (not +Y₁Y₂X₃).
+    const logical = computeLogicalRotations(oneDHeisenbergAuxiliary);
+    expect(logical.rotations.map((r) => pauliWordToLatex(r.generator))).toEqual([
+      'X_{1}X_{2}',
+      'Z_{1}Z_{2}',
+      '-Y_{1}Y_{2}X_{3}',
     ]);
     expect(logical.cliffordIsTrivial).toBe(true);
   });
