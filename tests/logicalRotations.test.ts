@@ -17,6 +17,7 @@ import {
   computeLogicalRotations,
   labelToPauliWord,
   pauliWordToLatex,
+  PauliVisibility,
 } from '../src/utils/logicalRotations';
 import { oneDHeisenberg, oneDHeisenbergAuxiliary } from '../src/utils/exampleCircuits';
 
@@ -35,9 +36,23 @@ const X = (qubit: string) => new SinglePauli('X', qubit);
 const Z = (qubit: string) => new SinglePauli('Z', qubit);
 
 /** The generators of a circuit's logical rotations, as KaTeX. */
-function generators(circuit: Circuit): string[] {
-  return computeLogicalRotations(circuit).rotations.map((r) => pauliWordToLatex(r.generator));
+function generators(circuit: Circuit, isPauliVisible?: PauliVisibility): string[] {
+  return computeLogicalRotations(circuit, isPauliVisible).rotations.map((r) =>
+    pauliWordToLatex(r.generator)
+  );
 }
+
+/** Qubit `qubit` starts in |+⟩, so its X stabilises the initial state. */
+const plusState =
+  (qubit: number): PauliVisibility =>
+  (q, type) =>
+    !(q === qubit && type === 'X');
+
+/** Qubit `qubit` starts in |0⟩, so its Z stabilises the initial state. */
+const zeroState =
+  (qubit: number): PauliVisibility =>
+  (q, type) =>
+    !(q === qubit && type === 'Z');
 
 describe('labelToPauliWord', () => {
   it('reads a qubit carrying both X and Z as Y', () => {
@@ -139,6 +154,32 @@ describe('computeLogicalRotations', () => {
       '-Y_{1}Y_{2}X_{3}',
     ]);
     expect(logical.cliffordIsTrivial).toBe(true);
+  });
+
+  it('drops the Paulis fixed by an initial state', () => {
+    // Qubit 3 of the auxiliary circuit is the |+⟩ auxiliary: the label in front
+    // of its Ry reduces from -i⟨123⟩3 to -i⟨12⟩3, and the generator with it,
+    // since -Y₁Y₂X₃ · X₃ = -Y₁Y₂.
+    expect(generators(oneDHeisenbergAuxiliary, plusState(3))).toEqual([
+      'X_{1}X_{2}',
+      'Z_{1}Z_{2}',
+      '-Y_{1}Y_{2}',
+    ]);
+  });
+
+  it('reduces a rotation about a stabiliser to the identity', () => {
+    // Rx on |+⟩ and Rz on |0⟩ are global phases on the state declared.
+    expect(generators(new Circuit([new Moment([rx(0)])]), plusState(0))).toEqual(['I']);
+    expect(generators(new Circuit([new Moment([rz(0)])]), zeroState(0))).toEqual(['I']);
+    // The stabiliser of the *other* basis state is untouched.
+    expect(generators(new Circuit([new Moment([rz(0)])]), plusState(0))).toEqual(['Z_{0}']);
+  });
+
+  it('keeps the full generator where the reduction is not allowed', () => {
+    // Ry on a |+⟩ qubit rotates out of the X₀ = +1 subspace -- Y₀ anticommutes
+    // with the stabiliser -- so X₀ cannot be dropped. Reducing anyway would give
+    // the anti-Hermitian iZ₀, which generates no rotation.
+    expect(generators(new Circuit([new Moment([ry(0)])]), plusState(0))).toEqual(['Y_{0}']);
   });
 
   it('carries the angle of the gate it came from', () => {

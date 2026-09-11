@@ -19,7 +19,7 @@
 import { Angle } from '../models/Angle';
 import { Circuit } from '../models/Circuit';
 import { Gate } from '../models/Gates';
-import { Label, LabelTracker, XZLabelPair } from './labelTracking';
+import { Label, LabelTracker, SinglePauli, XZLabelPair } from './labelTracking';
 import { combineLabels } from './labelTrackingUtils';
 
 /** One Pauli of a logical rotation's generator, e.g. the `Y₂` of `-Y₁Y₂`. */
@@ -33,6 +33,14 @@ export interface PauliWord {
   sign: 1 | -1;
   factors: PauliFactor[];
 }
+
+/**
+ * Whether a single Pauli still carries information, given the initial state
+ * fixed for its qubit. A qubit prepared in `|+⟩` is stabilised by its X, so
+ * every X on it is redundant and drops out of the labels; `|0⟩` does the same
+ * for Z. This is the per-qubit toggle behind `isLabelXVisible`/`isLabelZVisible`.
+ */
+export type PauliVisibility = (_qubit: number, _type: 'X' | 'Z') => boolean;
 
 /** A rotation of the front-loaded circuit: `R_{generator}(angle)`. */
 export interface LogicalRotation {
@@ -72,10 +80,12 @@ export function generatorLabel(gate: Gate, labels: XZLabelPair): Label {
  * A label as a signed Pauli word: `i^p · X_S · Z_T` regrouped per qubit, where a
  * qubit carrying both gives `X_q Z_q = i³Y_q`.
  *
- * The remaining prefactor is always `±1`, never `±i`: a label is a conjugated
- * Pauli and so is Hermitian, which forces `p + 3k` to be even.
+ * The remaining prefactor is `±1`, never `±i`, for any Hermitian label -- which
+ * every conjugated Pauli is. `null` reports the exception: a *reduced* label can
+ * come out anti-Hermitian, which is how an illegitimate reduction shows up (see
+ * `computeLogicalRotations`).
  */
-export function labelToPauliWord(label: Label): PauliWord {
+export function tryLabelToPauliWord(label: Label): PauliWord | null {
   const paulis = new Map<number, { x: boolean; z: boolean }>();
 
   for (const op of label.operators) {
@@ -99,18 +109,40 @@ export function labelToPauliWord(label: Label): PauliWord {
   }
   phase %= 4;
 
-  if (phase % 2 !== 0) {
-    throw new Error(`Label is not Hermitian, so it generates no rotation: phase i^${phase}`);
-  }
+  if (phase % 2 !== 0) return null;
 
   factors.sort((a, b) => a.qubit - b.qubit);
   return { sign: phase === 0 ? 1 : -1, factors };
 }
 
+/** As `tryLabelToPauliWord`, for a label that is known to be Hermitian. */
+export function labelToPauliWord(label: Label): PauliWord {
+  const word = tryLabelToPauliWord(label);
+  if (word === null) {
+    throw new Error(`Label is not Hermitian, so it generates no rotation: ${label.phase}`);
+  }
+  return word;
+}
+
 /** `-X_{0}Z_{3}` as KaTeX, for the subscript of `R_{...}`. */
 export function pauliWordToLatex(word: PauliWord): string {
   const sign = word.sign === -1 ? '-' : '';
+  // Everything cancelled: the rotation is a global phase on the states declared.
+  if (word.factors.length === 0) return `${sign}I`;
   return sign + word.factors.map((f) => `${f.pauli}_{${f.qubit}}`).join('');
+}
+
+/**
+ * A label with the Paulis fixed by the initial states struck out, matching the
+ * reduced labels the circuit itself shows. Filtering keeps the order the
+ * operators were in, so no anticommutation phase comes out of the rebuild.
+ */
+function reduceLabel(label: Label, isPauliVisible: PauliVisibility): Label {
+  const kept = label.operators.filter((op: SinglePauli) =>
+    isPauliVisible(Number(op.qubit), op.type)
+  );
+  if (kept.length === label.operators.length) return label;
+  return new Label(kept, label.phase);
 }
 
 /**
@@ -130,8 +162,25 @@ function isCliffordTrivial(tracker: LabelTracker, circuit: Circuit): boolean {
   return true;
 }
 
-/** The equivalent circuit of logical rotations, plus the Clifford left behind. */
-export function computeLogicalRotations(circuit: Circuit): LogicalCircuit {
+/**
+ * The equivalent circuit of logical rotations, plus the Clifford left behind.
+ *
+ * `isPauliVisible` carries the initial states the user has fixed per qubit, and
+ * the generators are read off the same reduced labels the circuit displays: an
+ * auxiliary qubit prepared in `|+⟩` contributes no X, so `-Y₁Y₂X₃` is shown as
+ * `-Y₁Y₂`.
+ *
+ * That reduction -- multiplying the generator by a stabiliser of the initial
+ * state -- only leaves the rotation unchanged where the two commute. Where they
+ * do not, the rotation genuinely rotates out of the stabilised subspace, and
+ * dropping the Pauli is not allowed. Such a reduction always lands on an
+ * anti-Hermitian word, which generates no rotation at all, so it is caught by
+ * asking for the Pauli word and falling back to the full generator.
+ */
+export function computeLogicalRotations(
+  circuit: Circuit,
+  isPauliVisible: PauliVisibility = () => true
+): LogicalCircuit {
   const tracker = new LabelTracker(circuit);
   const rotations: LogicalRotation[] = [];
 
@@ -145,8 +194,14 @@ export function computeLogicalRotations(circuit: Circuit): LogicalCircuit {
       }
       const labels = tracker.getLabelsBeforeGate(momentIndex, gate.targets[0]);
       if (labels === undefined) continue;
+      const reduced = new XZLabelPair(
+        reduceLabel(labels.physX, isPauliVisible),
+        reduceLabel(labels.physZ, isPauliVisible)
+      );
       rotations.push({
-        generator: labelToPauliWord(generatorLabel(gate, labels)),
+        generator:
+          tryLabelToPauliWord(generatorLabel(gate, reduced)) ??
+          labelToPauliWord(generatorLabel(gate, labels)),
         angle: gate.angle,
       });
     }

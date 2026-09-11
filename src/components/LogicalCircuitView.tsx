@@ -31,11 +31,16 @@ const wireY = (qubitIndex: number) => padding + (qubitIndex + 1) * lineHeight;
 const qubitLabelLeft = padding - 5;
 
 export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
-  const { angleDisplay } = useDisplaySettings();
+  const { angleDisplay, isLabelXVisible, isLabelZVisible } = useDisplaySettings();
 
+  // The generators follow the reduced labels the circuit shows, so fixing a
+  // qubit's initial state drops the Paulis it stabilises out of them too.
   const { rotations, cliffordIsTrivial } = useMemo(
-    () => computeLogicalRotations(circuit),
-    [circuit]
+    () =>
+      computeLogicalRotations(circuit, (qubit, type) =>
+        type === 'X' ? isLabelXVisible(qubit) : isLabelZVisible(qubit)
+      ),
+    [circuit, isLabelXVisible, isLabelZVisible]
   );
 
   const numQubits = Math.max(baselineQubits, circuit.maxUsedQubitIndex() + 1);
