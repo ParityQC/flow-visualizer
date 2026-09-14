@@ -14,6 +14,8 @@ import { formatSignedAngle } from '../models/Angle';
 import { useDisplaySettings } from '../utils/DisplaySettings';
 import {
   computeLogicalRotations,
+  isGlobalPhase,
+  LogicalRotation,
   pauliFactorsToLatex,
   pauliWordToLatex,
 } from '../utils/logicalRotations';
@@ -46,6 +48,23 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
       ),
     [circuit, isLabelXVisible, isLabelZVisible]
   );
+
+  // A rotation about the identity is a global phase, so it is left undrawn.
+  const drawnRotations = rotations.filter((rotation) => !isGlobalPhase(rotation));
+
+  /** The state a qubit was fixed to, for a qubit that was fixed to one. */
+  const initialKet = (qubit: number) => (isLabelXVisible(qubit) ? '|0⟩' : '|+⟩');
+
+  /** Why this rotation is not a rotation on the logical qubits. */
+  const destabilizedWarning = (rotation: LogicalRotation) =>
+    'Leaves the code space: ' +
+    rotation.destabilizedQubits
+      .map((qubit) => {
+        const factor = rotation.generator.factors.find((f) => f.qubit === qubit);
+        return `${factor?.pauli}${qubit} does not preserve q${qubit} = ${initialKet(qubit)}`;
+      })
+      .join('; ') +
+    '.';
 
   const numQubits = Math.max(baselineQubits, circuit.maxUsedQubitIndex() + 1);
   // Boxes span every wire, reaching half a line above the first and below the last.
@@ -91,8 +110,9 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
               paddingLeft: `${padding + qubitLabelWidth + gateAreaLeftMargin}px`,
             }}
           >
-            {rotations.map((rotation, index) => {
-              const { generator, angle } = rotation;
+            {drawnRotations.map((rotation, index) => {
+              const { generator, angle, destabilizedQubits } = rotation;
+              const leavesCodeSpace = destabilizedQubits.length > 0;
               // A negative Pauli shows up as a negated angle. With no angle to
               // carry it, the minus has to stay on the word itself.
               const math =
@@ -106,8 +126,9 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
               return (
                 <div
                   key={`logical-rotation-${index}`}
-                  className="logical-box"
+                  className={`logical-box ${leavesCodeSpace ? 'leaves-code-space' : ''}`}
                   style={{ height: `${boxHeight}px` }}
+                  title={leavesCodeSpace ? destabilizedWarning(rotation) : undefined}
                 >
                   <InlineMath math={math} />
                 </div>

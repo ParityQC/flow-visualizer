@@ -37,6 +37,8 @@
   --color-success-text: #1e6b34;
   --color-error-bg: #fdecea;
   --color-error-text: #a4231b;
+  --color-warning: #e07b1a;
+  --color-warning-bg: #fdf4e8;
 
   /* Layering (z-index scale, low → high). Ordered by intent; note that circuit-internal
      tiers and portaled overlays live in separate stacking contexts. */

@@ -15,6 +15,7 @@ import {
 import { Label, SinglePauli } from '../src/utils/labelTracking';
 import {
   computeLogicalRotations,
+  isGlobalPhase,
   labelToPauliWord,
   pauliFactorsToLatex,
   pauliWordToLatex,
@@ -187,6 +188,36 @@ describe('computeLogicalRotations', () => {
     // with the stabiliser -- so X₀ cannot be dropped. Reducing anyway would give
     // the anti-Hermitian iZ₀, which generates no rotation.
     expect(generators(new Circuit([new Moment([ry(0)])]), plusState(0))).toEqual(['Y_{0}']);
+  });
+
+  it('marks a rotation that does not preserve a fixed initial state', () => {
+    const destabilized = (circuit: Circuit, isPauliVisible: PauliVisibility) =>
+      computeLogicalRotations(circuit, isPauliVisible).rotations.map((r) => r.destabilizedQubits);
+    const only = (targetType: TargetType) => new Circuit([new Moment([gate(targetType, 0)])]);
+
+    // |0> is fixed by Z, so X and Y move it -- and Y only reaches the word
+    // through the fallback, since reducing it would break Hermiticity.
+    expect(destabilized(only(new RxTargetType()), zeroState(0))).toEqual([[0]]);
+    expect(destabilized(only(new RyTargetType()), zeroState(0))).toEqual([[0]]);
+    // ... while Z is the stabilizer itself, which reduces away entirely.
+    expect(destabilized(only(new RzTargetType()), zeroState(0))).toEqual([[]]);
+
+    // |+> is fixed by X, so the roles swap.
+    expect(destabilized(only(new RzTargetType()), plusState(0))).toEqual([[0]]);
+    expect(destabilized(only(new RxTargetType()), plusState(0))).toEqual([[]]);
+
+    // A qubit with no initial state fixed is never flagged.
+    expect(destabilized(only(new RyTargetType()), () => true)).toEqual([[]]);
+  });
+
+  it('reports a rotation about the identity as a global phase', () => {
+    const first = (circuit: Circuit, isPauliVisible: PauliVisibility) =>
+      computeLogicalRotations(circuit, isPauliVisible).rotations[0];
+
+    // Rx on |+> reduces to the identity: a global phase, which the panel drops.
+    expect(isGlobalPhase(first(new Circuit([new Moment([rx(0)])]), plusState(0)))).toBe(true);
+    expect(isGlobalPhase(first(new Circuit([new Moment([rz(0)])]), zeroState(0)))).toBe(true);
+    expect(isGlobalPhase(first(new Circuit([new Moment([rz(0)])]), plusState(0)))).toBe(false);
   });
 
   it('carries the angle of the gate it came from', () => {

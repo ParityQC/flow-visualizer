@@ -75,3 +75,13 @@
   color: var(--color-text-faint);
   border-color: var(--color-border);
 }
+
+/* A rotation whose generator still touches an auxiliary qubit's destabilizing
+   Pauli: it does not pull back to a rotation on the logical qubits. Dashed as
+   well as coloured, so the flag does not rest on colour alone. */
+.logical-box.leaves-code-space {
+  border-style: dashed;
+  border-color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+  cursor: help;
+}

@@ -36,7 +36,7 @@ export interface PauliWord {
 
 /**
  * Whether a single Pauli still carries information, given the initial state
- * fixed for its qubit. A qubit prepared in `|+⟩` is stabilised by its X, so
+ * fixed for its qubit. A qubit prepared in `|+⟩` is stabilized by its X, so
  * every X on it is redundant and drops out of the labels; `|0⟩` does the same
  * for Z. This is the per-qubit toggle behind `isLabelXVisible`/`isLabelZVisible`.
  */
@@ -47,6 +47,16 @@ export interface LogicalRotation {
   generator: PauliWord;
   /** Shared with the gate it came from, so both render the same angle. */
   angle: Angle | undefined;
+  /**
+   * Auxiliary qubits whose fixed initial state this rotation fails to preserve,
+   * so that it is no rotation on the logical qubits at all.
+   *
+   * A generator that does respect those states carries either nothing or the
+   * stabilizer on each auxiliary qubit -- and the stabilizer is exactly what the
+   * reduction strikes out, leaving nothing. So every factor still standing on an
+   * auxiliary qubit is a destabilizing one.
+   */
+  destabilizedQubits: number[];
 }
 
 export interface LogicalCircuit {
@@ -134,6 +144,15 @@ export function pauliFactorsToLatex(word: PauliWord): string {
   return word.factors.map((f) => `${f.pauli}_{${f.qubit}}`).join('');
 }
 
+/**
+ * A rotation about `±I` is a global phase: nothing observable, nothing to draw.
+ * Kept in the result rather than dropped, so that what is shown stays a view
+ * decision and the decomposition itself stays complete.
+ */
+export function isGlobalPhase(rotation: LogicalRotation): boolean {
+  return rotation.generator.factors.length === 0;
+}
+
 /** `-X_{0}Z_{3}` as KaTeX: the whole word, sign included. */
 export function pauliWordToLatex(word: PauliWord): string {
   return (word.sign === -1 ? '-' : '') + pauliFactorsToLatex(word);
@@ -177,9 +196,9 @@ function isCliffordTrivial(tracker: LabelTracker, circuit: Circuit): boolean {
  * auxiliary qubit prepared in `|+⟩` contributes no X, so `-Y₁Y₂X₃` is shown as
  * `-Y₁Y₂`.
  *
- * That reduction -- multiplying the generator by a stabiliser of the initial
+ * That reduction -- multiplying the generator by a stabilizer of the initial
  * state -- only leaves the rotation unchanged where the two commute. Where they
- * do not, the rotation genuinely rotates out of the stabilised subspace, and
+ * do not, the rotation genuinely rotates out of the stabilized subspace, and
  * dropping the Pauli is not allowed. Such a reduction always lands on an
  * anti-Hermitian word, which generates no rotation at all, so it is caught by
  * asking for the Pauli word and falling back to the full generator.
@@ -190,6 +209,7 @@ export function computeLogicalRotations(
 ): LogicalCircuit {
   const tracker = new LabelTracker(circuit);
   const rotations: LogicalRotation[] = [];
+  const isAuxiliary = (qubit: number) => !isPauliVisible(qubit, 'X') || !isPauliVisible(qubit, 'Z');
 
   let momentIndex = 0;
   for (const moment of circuit.moments()) {
@@ -205,11 +225,15 @@ export function computeLogicalRotations(
         reduceLabel(labels.physX, isPauliVisible),
         reduceLabel(labels.physZ, isPauliVisible)
       );
+      const generator =
+        tryLabelToPauliWord(generatorLabel(gate, reduced)) ??
+        labelToPauliWord(generatorLabel(gate, labels));
       rotations.push({
-        generator:
-          tryLabelToPauliWord(generatorLabel(gate, reduced)) ??
-          labelToPauliWord(generatorLabel(gate, labels)),
+        generator,
         angle: gate.angle,
+        destabilizedQubits: generator.factors
+          .filter((factor) => isAuxiliary(factor.qubit))
+          .map((factor) => factor.qubit),
       });
     }
     momentIndex += 1;
