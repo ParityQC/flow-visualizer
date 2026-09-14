@@ -257,7 +257,6 @@ export function CircuitView({ circuit, onGateContextMenu, gatePreview }: Circuit
                   top: `${padding + qubitIndex * lineHeight}px`,
                   left: `${qubitLabelWidth}px`,
                   right: `${padding}px`,
-                  borderBottom: '2px solid blanchedalmond',
                 }}
               >
                 <span
