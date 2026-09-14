@@ -7,7 +7,7 @@
  * Not a `Circuit`, so it shares no components with `CircuitView` -- only the
  * wire geometry from `LayoutConstants`, so the two views read as one system.
  */
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { InlineMath } from './InlineMath';
 import { Circuit } from '../models/Circuit';
 import { formatSignedAngle } from '../models/Angle';
@@ -46,14 +46,17 @@ const qubitLabelLeft = padding - 5;
 export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
   const { angleDisplay, isLabelXVisible, isLabelZVisible } = useDisplaySettings();
 
+  const isPauliVisible = useCallback(
+    (qubit: number, type: 'X' | 'Z') =>
+      type === 'X' ? isLabelXVisible(qubit) : isLabelZVisible(qubit),
+    [isLabelXVisible, isLabelZVisible]
+  );
+
   // The generators follow the reduced labels the circuit shows, so fixing a
-  // qubit's initial state drops the Paulis it stabilises out of them too.
+  // qubit's initial state drops the Paulis it stabilizes out of them too.
   const { rotations, cliffordIsTrivial } = useMemo(
-    () =>
-      computeLogicalRotations(circuit, (qubit, type) =>
-        type === 'X' ? isLabelXVisible(qubit) : isLabelZVisible(qubit)
-      ),
-    [circuit, isLabelXVisible, isLabelZVisible]
+    () => computeLogicalRotations(circuit, isPauliVisible),
+    [circuit, isPauliVisible]
   );
 
   // A rotation about the identity is a global phase, so it is left undrawn.
@@ -79,9 +82,7 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
   // Auxiliaries are prepared, not handed in, so they get no wire until the
   // Clifford; they are drawn below the logical qubits, which keeps the rows a
   // rotation box spans contiguous.
-  const { logical, auxiliary } = splitRegister(qubits, (qubit, type) =>
-    type === 'X' ? isLabelXVisible(qubit) : isLabelZVisible(qubit)
-  );
+  const { logical, auxiliary } = splitRegister(qubits, isPauliVisible, rotations);
 
   // Boxes start half a row above the first wire. Rotations reach down over the
   // logical qubits; the Clifford reaches over the whole register.

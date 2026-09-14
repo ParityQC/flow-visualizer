@@ -247,23 +247,43 @@ describe('computeLogicalRotations', () => {
 
 describe('splitRegister', () => {
   it('keeps every qubit an input when no initial state is fixed', () => {
-    expect(splitRegister([0, 2, 5], () => true)).toEqual({ logical: [0, 2, 5], auxiliary: [] });
+    expect(splitRegister([0, 2, 5], () => true, [])).toEqual({ logical: [0, 2, 5], auxiliary: [] });
   });
 
   it('moves the qubits with a fixed state to the end', () => {
     // q2 = |+>, so the rotation boxes span q0 and q5 -- which have to be adjacent.
-    expect(splitRegister([0, 2, 5], plusState(2))).toEqual({ logical: [0, 5], auxiliary: [2] });
-    expect(splitRegister([0, 2, 5], zeroState(0))).toEqual({ logical: [2, 5], auxiliary: [0] });
+    expect(splitRegister([0, 2, 5], plusState(2), [])).toEqual({ logical: [0, 5], auxiliary: [2] });
+    expect(splitRegister([0, 2, 5], zeroState(0), [])).toEqual({ logical: [2, 5], auxiliary: [0] });
   });
 
   it('falls back to one register when every qubit is prepared', () => {
     // Nothing is handed in, so there is no input half to split off; drawing an
     // empty rotation register would give the boxes no height.
     const allPlus: PauliVisibility = (_q, type) => type !== 'X';
-    expect(splitRegister([0, 1], allPlus)).toEqual({ logical: [0, 1], auxiliary: [] });
+    expect(splitRegister([0, 1], allPlus, [])).toEqual({ logical: [0, 1], auxiliary: [] });
+  });
+
+  it('gives up the split as soon as one rotation destabilizes an auxiliary', () => {
+    // q1 = |+>, and a rotation reaching it means its preparation cannot be
+    // deferred past the rotations, so it is an input like any other. One such
+    // rotation is enough, whatever the others do.
+    const { rotations } = computeLogicalRotations(
+      new Circuit([new Moment([rz(1)]), new Moment([rx(0)])]),
+      plusState(1)
+    );
+    expect(rotations.map((r) => r.destabilizedQubits)).toEqual([[1], []]);
+    expect(splitRegister([0, 1], plusState(1), rotations)).toEqual({
+      logical: [0, 1],
+      auxiliary: [],
+    });
+    // ... where none of them reaches it, the split stands.
+    expect(splitRegister([0, 1], plusState(1), [rotations[1]])).toEqual({
+      logical: [0],
+      auxiliary: [1],
+    });
   });
 
   it('is empty for an empty register', () => {
-    expect(splitRegister([], () => true)).toEqual({ logical: [], auxiliary: [] });
+    expect(splitRegister([], () => true, [])).toEqual({ logical: [], auxiliary: [] });
   });
 });

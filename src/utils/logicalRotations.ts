@@ -159,17 +159,29 @@ export function isAuxiliaryQubit(qubit: number, isPauliVisible: PauliVisibility)
  * Auxiliaries come last so that the logical qubits are contiguous: a rotation is
  * drawn as one box spanning them, and a box cannot have a hole in it.
  *
- * A register of nothing but auxiliaries would leave no rows to draw a rotation
- * over, so it falls back to one undivided register -- the circuit is then pure
- * state preparation, and there is nothing to call an input.
+ * Two cases drop the split and give back one undivided register:
+ *
+ *  - Nothing but auxiliaries. There is no input to separate off, and an empty
+ *    input half would leave a rotation box no rows to span. The circuit is pure
+ *    state preparation.
+ *  - Any rotation destabilizes an auxiliary. Deferring a preparation to just
+ *    before the Clifford is only sound while the rotations commute past it, and
+ *    such a rotation does not -- it acts on the auxiliary, which therefore is an
+ *    input after all. One is enough: drawing part of the register one way and
+ *    part the other would be harder to read than drawing all of it plainly.
  */
 export function splitRegister(
   qubits: number[],
-  isPauliVisible: PauliVisibility
+  isPauliVisible: PauliVisibility,
+  rotations: readonly LogicalRotation[]
 ): { logical: number[]; auxiliary: number[] } {
+  const undivided = { logical: qubits, auxiliary: [] };
+  if (rotations.some((rotation) => rotation.destabilizedQubits.length > 0)) {
+    return undivided;
+  }
   const logical = qubits.filter((qubit) => !isAuxiliaryQubit(qubit, isPauliVisible));
   if (logical.length === 0) {
-    return { logical: qubits, auxiliary: [] };
+    return undivided;
   }
   return { logical, auxiliary: qubits.filter((qubit) => isAuxiliaryQubit(qubit, isPauliVisible)) };
 }
