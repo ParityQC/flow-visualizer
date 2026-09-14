@@ -11,11 +11,12 @@ import { useMemo } from 'react';
 import { InlineMath } from './InlineMath';
 import { Circuit } from '../models/Circuit';
 import { formatSignedAngle } from '../models/Angle';
-import { useDisplaySettings } from '../utils/DisplaySettings';
+import { getInitialState, useDisplaySettings } from '../utils/DisplaySettings';
 import {
   computeLogicalRotations,
   isGlobalPhase,
   LogicalRotation,
+  splitRegister,
   pauliFactorsToLatex,
   pauliWordToLatex,
 } from '../utils/logicalRotations';
@@ -75,10 +76,21 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
   // Only the qubits the circuit actually touches: a qubit with no gate cannot
   // appear in any generator, and the leftover Clifford is the identity on it.
   const qubits = useMemo(() => circuit.usedQubits(), [circuit]);
-  // Boxes span every wire, reaching half a row above the first and below the last.
+  // Auxiliaries are prepared, not handed in, so they get no wire until the
+  // Clifford; they are drawn below the logical qubits, which keeps the rows a
+  // rotation box spans contiguous.
+  const { logical, auxiliary } = splitRegister(qubits, (qubit, type) =>
+    type === 'X' ? isLabelXVisible(qubit) : isLabelZVisible(qubit)
+  );
+
+  // Boxes start half a row above the first wire. Rotations reach down over the
+  // logical qubits; the Clifford reaches over the whole register.
   const boxTop = rowY(0) - logicalLineHeight / 2;
-  const boxHeight = qubits.length * logicalLineHeight;
-  const canvasHeight = boxTop + boxHeight + padding;
+  const rotationHeight = logical.length * logicalLineHeight;
+  const cliffordHeight = qubits.length * logicalLineHeight;
+  const canvasHeight = boxTop + cliffordHeight + padding;
+  /** Centre of a row, measured inside a box that starts at `boxTop`. */
+  const rowCentreInBox = (row: number) => row * logicalLineHeight + logicalLineHeight / 2;
 
   return (
     <div className="panel logical-panel">
@@ -92,7 +104,7 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
         ) : (
           <div className="logical-canvas" style={{ minHeight: `${canvasHeight}px` }}>
             <div className="logical-wires">
-              {qubits.map((qubitIndex, row) => (
+              {logical.map((qubitIndex, row) => (
                 <div key={`wire-${qubitIndex}`}>
                   <div
                     className="logical-wire"
@@ -107,6 +119,9 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
                     }}
                   >
                     <InlineMath math={`q_{${qubitIndex}}`} />
+                    {/* Only shows where the register could not be split, and the
+                        prepared qubits are drawn as inputs after all. */}
+                    {getInitialState(isLabelXVisible(qubitIndex), isLabelZVisible(qubitIndex))}
                   </span>
                 </div>
               ))}
@@ -137,19 +152,48 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
                   <div
                     key={`logical-rotation-${index}`}
                     className={`logical-box ${leavesCodeSpace ? 'leaves-code-space' : ''}`}
-                    style={{ height: `${boxHeight}px` }}
+                    style={{ height: `${rotationHeight}px` }}
                     title={leavesCodeSpace ? destabilizedWarning(rotation) : undefined}
                   >
                     <InlineMath math={math} />
                   </div>
                 );
               })}
+              {auxiliary.length > 0 && (
+                <div className="logical-aux-lead" style={{ height: `${cliffordHeight}px` }}>
+                  {auxiliary.map((qubitIndex, index) => (
+                    <span
+                      key={`aux-in-${qubitIndex}`}
+                      className="logical-aux-input"
+                      style={{ top: `${rowCentreInBox(logical.length + index)}px` }}
+                    >
+                      <InlineMath math={`q_{${qubitIndex}}`} />
+                      {getInitialState(isLabelXVisible(qubitIndex), isLabelZVisible(qubitIndex))}
+                      <span className="logical-aux-stub" />
+                    </span>
+                  ))}
+                </div>
+              )}
               <div
                 className={`logical-box logical-clifford ${cliffordIsTrivial ? 'is-trivial' : ''}`}
-                style={{ height: `${boxHeight}px` }}
+                style={{ height: `${cliffordHeight}px` }}
               >
                 {cliffordIsTrivial ? 'trivial Clifford' : 'non-trivial Clifford'}
               </div>
+              {auxiliary.length > 0 && (
+                // The auxiliaries leave the Clifford as ordinary outputs; their
+                // wires exist only from here on, so they are drawn in this tail
+                // rather than in the full-width wires layer.
+                <div className="logical-tail" style={{ height: `${cliffordHeight}px` }}>
+                  {auxiliary.map((qubitIndex, index) => (
+                    <span
+                      key={`aux-out-${qubitIndex}`}
+                      className="logical-aux-output"
+                      style={{ top: `${rowCentreInBox(logical.length + index)}px` }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

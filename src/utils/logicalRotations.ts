@@ -145,6 +145,36 @@ export function pauliFactorsToLatex(word: PauliWord): string {
 }
 
 /**
+ * True for a qubit whose initial state has been fixed to `|0⟩` or `|+⟩`: the
+ * circuit prepares it rather than being handed it, so it is not an input.
+ */
+export function isAuxiliaryQubit(qubit: number, isPauliVisible: PauliVisibility): boolean {
+  return !isPauliVisible(qubit, 'X') || !isPauliVisible(qubit, 'Z');
+}
+
+/**
+ * The drawn register, split into the qubits the logical circuit takes as input
+ * and the auxiliaries it prepares for itself.
+ *
+ * Auxiliaries come last so that the logical qubits are contiguous: a rotation is
+ * drawn as one box spanning them, and a box cannot have a hole in it.
+ *
+ * A register of nothing but auxiliaries would leave no rows to draw a rotation
+ * over, so it falls back to one undivided register -- the circuit is then pure
+ * state preparation, and there is nothing to call an input.
+ */
+export function splitRegister(
+  qubits: number[],
+  isPauliVisible: PauliVisibility
+): { logical: number[]; auxiliary: number[] } {
+  const logical = qubits.filter((qubit) => !isAuxiliaryQubit(qubit, isPauliVisible));
+  if (logical.length === 0) {
+    return { logical: qubits, auxiliary: [] };
+  }
+  return { logical, auxiliary: qubits.filter((qubit) => isAuxiliaryQubit(qubit, isPauliVisible)) };
+}
+
+/**
  * A rotation about `±I` is a global phase: nothing observable, nothing to draw.
  * Kept in the result rather than dropped, so that what is shown stays a view
  * decision and the decomposition itself stays complete.
@@ -209,8 +239,6 @@ export function computeLogicalRotations(
 ): LogicalCircuit {
   const tracker = new LabelTracker(circuit);
   const rotations: LogicalRotation[] = [];
-  const isAuxiliary = (qubit: number) => !isPauliVisible(qubit, 'X') || !isPauliVisible(qubit, 'Z');
-
   let momentIndex = 0;
   for (const moment of circuit.moments()) {
     // Rotations in one moment act on disjoint qubits and are conjugated by the
@@ -232,7 +260,7 @@ export function computeLogicalRotations(
         generator,
         angle: gate.angle,
         destabilizedQubits: generator.factors
-          .filter((factor) => isAuxiliary(factor.qubit))
+          .filter((factor) => isAuxiliaryQubit(factor.qubit, isPauliVisible))
           .map((factor) => factor.qubit),
       });
     }

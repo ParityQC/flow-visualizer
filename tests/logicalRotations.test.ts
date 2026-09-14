@@ -20,6 +20,7 @@ import {
   pauliFactorsToLatex,
   pauliWordToLatex,
   PauliVisibility,
+  splitRegister,
 } from '../src/utils/logicalRotations';
 import { oneDHeisenberg, oneDHeisenbergAuxiliary } from '../src/utils/exampleCircuits';
 
@@ -220,9 +221,49 @@ describe('computeLogicalRotations', () => {
     expect(isGlobalPhase(first(new Circuit([new Moment([rz(0)])]), plusState(0)))).toBe(false);
   });
 
+  it('never hides a rotation that leaves the code space', () => {
+    // The panel drops global phases, so the two must never coincide -- and they
+    // cannot: a destabilized qubit is a factor, and a global phase has none.
+    const circuits: [Circuit, PauliVisibility][] = [
+      [new Circuit([new Moment([rx(0)])]), plusState(0)],
+      [new Circuit([new Moment([ry(0)])]), plusState(0)],
+      [new Circuit([new Moment([rz(0)])]), zeroState(0)],
+      [new Circuit([new Moment([rz(0)])]), plusState(0)],
+      [oneDHeisenbergAuxiliary, plusState(3)],
+    ];
+    for (const [circuit, isPauliVisible] of circuits) {
+      for (const rotation of computeLogicalRotations(circuit, isPauliVisible).rotations) {
+        expect(isGlobalPhase(rotation) && rotation.destabilizedQubits.length > 0).toBe(false);
+      }
+    }
+  });
+
   it('carries the angle of the gate it came from', () => {
     const circuit = new Circuit([new Moment([rz(0)])]);
     circuit.assignMissingAngleSymbols();
     expect(computeLogicalRotations(circuit).rotations[0].angle?.symbol).toBe('theta_1');
+  });
+});
+
+describe('splitRegister', () => {
+  it('keeps every qubit an input when no initial state is fixed', () => {
+    expect(splitRegister([0, 2, 5], () => true)).toEqual({ logical: [0, 2, 5], auxiliary: [] });
+  });
+
+  it('moves the qubits with a fixed state to the end', () => {
+    // q2 = |+>, so the rotation boxes span q0 and q5 -- which have to be adjacent.
+    expect(splitRegister([0, 2, 5], plusState(2))).toEqual({ logical: [0, 5], auxiliary: [2] });
+    expect(splitRegister([0, 2, 5], zeroState(0))).toEqual({ logical: [2, 5], auxiliary: [0] });
+  });
+
+  it('falls back to one register when every qubit is prepared', () => {
+    // Nothing is handed in, so there is no input half to split off; drawing an
+    // empty rotation register would give the boxes no height.
+    const allPlus: PauliVisibility = (_q, type) => type !== 'X';
+    expect(splitRegister([0, 1], allPlus)).toEqual({ logical: [0, 1], auxiliary: [] });
+  });
+
+  it('is empty for an empty register', () => {
+    expect(splitRegister([], () => true)).toEqual({ logical: [], auxiliary: [] });
   });
 });

@@ -1,4 +1,10 @@
 /* ParityQC © 2026. See the LICENSE file in the top level directory for details. */
+:root {
+  /* Gap between boxes. The auxiliary wires reach across it to touch the
+     Clifford box, so the two have to agree. */
+  --logical-box-gap: 16px;
+}
+
 .logical-panel {
   flex: 0 1 auto;
   /* Never let a tall circuit push the main grid out of the viewport. */
@@ -57,10 +63,14 @@
 .logical-boxes {
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 16px;
+  /* Tops align, so the taller Clifford box hangs below the rotation boxes. */
+  align-items: flex-start;
+  gap: var(--logical-box-gap);
   padding-right: 20px;
+  /* max-content so a long Pauli word widens the canvas; min-width so the tail
+     still reaches the right edge when the panel is wider than the content. */
   width: max-content;
+  min-width: 100%;
 }
 
 .logical-box {
@@ -91,4 +101,51 @@
   border-color: var(--color-warning);
   background-color: var(--color-warning-bg);
   cursor: help;
+}
+
+/* The auxiliary inputs: `q_1 |0> ---` entering the Clifford box, occupying real
+   space before it so nothing has to be measured to place them. */
+.logical-aux-lead {
+  position: relative;
+  /* Wide enough for a ket; a longer one overflows leftward into empty rows. */
+  width: 64px;
+  flex: 0 0 auto;
+}
+
+.logical-aux-input {
+  position: absolute;
+  /* Anchored to the box edge and growing leftward, so the ket never collides
+     with it however wide the label gets. */
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+}
+
+.logical-aux-stub,
+.logical-aux-output {
+  border-bottom: 2px solid var(--color-border-wire);
+}
+
+/* Crosses the flex gap so the wire meets the box. */
+.logical-aux-stub {
+  width: calc(16px + var(--logical-box-gap));
+  margin-right: calc(-1 * var(--logical-box-gap));
+}
+
+.logical-tail {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.logical-aux-output {
+  position: absolute;
+  left: calc(-1 * var(--logical-box-gap));
+  right: 0;
+  transform: translateY(-50%);
 }
