@@ -16,6 +16,7 @@ import { Label, SinglePauli } from '../src/utils/labelTracking';
 import {
   computeLogicalRotations,
   labelToPauliWord,
+  pauliFactorsToLatex,
   pauliWordToLatex,
   PauliVisibility,
 } from '../src/utils/logicalRotations';
@@ -76,6 +77,12 @@ describe('labelToPauliWord', () => {
 
   it('orders factors by qubit', () => {
     expect(pauliWordToLatex(labelToPauliWord(new Label([X('3'), Z('0')], 0)))).toBe('Z_{0}X_{3}');
+  });
+
+  it('leaves the sign out of the subscript, where the angle carries it', () => {
+    const word = labelToPauliWord(new Label([X('0'), Z('0')], 3));
+    expect(pauliWordToLatex(word)).toBe('-Y_{0}');
+    expect(pauliFactorsToLatex(word)).toBe('Y_{0}');
   });
 
   it('rejects a label that is not Hermitian', () => {

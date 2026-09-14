@@ -10,9 +10,13 @@
 import { useMemo } from 'react';
 import { InlineMath } from './InlineMath';
 import { Circuit } from '../models/Circuit';
-import { formatAngle } from '../models/Angle';
+import { formatSignedAngle } from '../models/Angle';
 import { useDisplaySettings } from '../utils/DisplaySettings';
-import { computeLogicalRotations, pauliWordToLatex } from '../utils/logicalRotations';
+import {
+  computeLogicalRotations,
+  pauliFactorsToLatex,
+  pauliWordToLatex,
+} from '../utils/logicalRotations';
 import { gateAreaLeftMargin, lineHeight, padding, qubitLabelWidth } from '../utils/LayoutConstants';
 import './LogicalCircuitView.css';
 
@@ -88,15 +92,24 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
             }}
           >
             {rotations.map((rotation, index) => {
-              const angle = rotation.angle;
-              const argument = angle === undefined ? '' : `(${formatAngle(angle, angleDisplay)})`;
+              const { generator, angle } = rotation;
+              // A negative Pauli shows up as a negated angle. With no angle to
+              // carry it, the minus has to stay on the word itself.
+              const math =
+                angle === undefined
+                  ? `R_{${pauliWordToLatex(generator)}}`
+                  : `R_{${pauliFactorsToLatex(generator)}}(${formatSignedAngle(
+                      angle,
+                      angleDisplay,
+                      generator.sign
+                    )})`;
               return (
                 <div
                   key={`logical-rotation-${index}`}
                   className="logical-box"
                   style={{ height: `${boxHeight}px` }}
                 >
-                  <InlineMath math={`R_{${pauliWordToLatex(rotation.generator)}}${argument}`} />
+                  <InlineMath math={math} />
                 </div>
               );
             })}

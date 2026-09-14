@@ -124,12 +124,19 @@ export function labelToPauliWord(label: Label): PauliWord {
   return word;
 }
 
-/** `-X_{0}Z_{3}` as KaTeX, for the subscript of `R_{...}`. */
-export function pauliWordToLatex(word: PauliWord): string {
-  const sign = word.sign === -1 ? '-' : '';
+/**
+ * `X_{0}Z_{3}` as KaTeX, for the subscript of `R_{...}`. The word's sign is left
+ * out: it belongs on the angle, since `R_{-P}(θ) = R_P(-θ)` reads better.
+ */
+export function pauliFactorsToLatex(word: PauliWord): string {
   // Everything cancelled: the rotation is a global phase on the states declared.
-  if (word.factors.length === 0) return `${sign}I`;
-  return sign + word.factors.map((f) => `${f.pauli}_{${f.qubit}}`).join('');
+  if (word.factors.length === 0) return 'I';
+  return word.factors.map((f) => `${f.pauli}_{${f.qubit}}`).join('');
+}
+
+/** `-X_{0}Z_{3}` as KaTeX: the whole word, sign included. */
+export function pauliWordToLatex(word: PauliWord): string {
+  return (word.sign === -1 ? '-' : '') + pauliFactorsToLatex(word);
 }
 
 /**

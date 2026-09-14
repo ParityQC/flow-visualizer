@@ -1,6 +1,6 @@
 // ParityQC © 2026. See the LICENSE file in the top level directory for details.
 import { describe, it, expect } from 'vitest';
-import { Angle, formatAngle, angleWidthChars } from '../src/models/Angle';
+import { Angle, formatAngle, formatSignedAngle, angleWidthChars } from '../src/models/Angle';
 
 describe('Angle', () => {
   it('is symbolic until a value is assigned', () => {
@@ -112,6 +112,38 @@ describe('formatAngle', () => {
   it('trims decimals to four places without trailing zeros', () => {
     expect(formatAngle(valued(1.5), 'decimal')).toBe('1.5');
     expect(formatAngle(valued(0.12345678), 'decimal')).toBe('0.1235');
+  });
+});
+
+describe('formatSignedAngle', () => {
+  const valued = (value: number) => new Angle('theta_1', value);
+
+  it('is the plain angle for a positive sign', () => {
+    expect(formatSignedAngle(valued(Math.PI / 4), 'pi', 1)).toBe('\\frac{\\pi}{4}');
+    expect(formatSignedAngle(new Angle('theta_1'), 'symbolic', 1)).toBe('\\theta_{1}');
+  });
+
+  it('negates the value rather than prefixing a minus', () => {
+    expect(formatSignedAngle(valued(Math.PI / 4), 'pi', -1)).toBe('-\\frac{\\pi}{4}');
+    expect(formatSignedAngle(valued(0.7854), 'decimal', -1)).toBe('-0.7854');
+  });
+
+  it('cancels a minus against an already negative angle', () => {
+    expect(formatSignedAngle(valued(-Math.PI / 4), 'pi', -1)).toBe('\\frac{\\pi}{4}');
+    expect(formatSignedAngle(valued(-0.7854), 'decimal', -1)).toBe('0.7854');
+  });
+
+  it('prefixes a minus where there is no value to negate', () => {
+    expect(formatSignedAngle(new Angle('theta_1'), 'symbolic', -1)).toBe('-\\theta_{1}');
+    // A symbol is what pi and decimal mode fall back to as well.
+    expect(formatSignedAngle(new Angle('theta_1'), 'pi', -1)).toBe('-\\theta_{1}');
+    // ... and symbolic mode ignores a value it does have.
+    expect(formatSignedAngle(valued(Math.PI / 4), 'symbolic', -1)).toBe('-\\theta_{1}');
+  });
+
+  it('leaves a zero angle unsigned', () => {
+    expect(formatSignedAngle(valued(0), 'pi', -1)).toBe('0');
+    expect(formatSignedAngle(valued(0), 'decimal', -1)).toBe('0');
   });
 });
 
