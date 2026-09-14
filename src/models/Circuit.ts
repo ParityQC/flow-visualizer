@@ -99,6 +99,21 @@ export class Circuit {
     }
     return maxQubit;
   }
+  /**
+   * Indices of the qubits carrying at least one gate, ascending. Gaps are real:
+   * a qubit with no gate keeps trivial labels, so nothing in the circuit's
+   * logical reading depends on it.
+   */
+  public usedQubits(): number[] {
+    const used = new Set<number>();
+    for (const moment of this.moments()) {
+      for (const qubit of moment.qubits()) {
+        used.add(qubit);
+      }
+    }
+    return [...used].sort((a, b) => a - b);
+  }
+
   public parallelizeGates(): number {
     let totalRemoved = 0;
     let removedThisPass: number;

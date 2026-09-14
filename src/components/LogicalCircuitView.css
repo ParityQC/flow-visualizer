@@ -17,6 +17,13 @@
   overflow: auto;
 }
 
+.logical-empty {
+  margin: 0;
+  padding: 12px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-faint);
+}
+
 /* Sized by the row of boxes, so a long Pauli word scrolls instead of shrinking. */
 .logical-canvas {
   position: relative;

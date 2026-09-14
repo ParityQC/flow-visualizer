@@ -19,18 +19,24 @@ import {
   pauliFactorsToLatex,
   pauliWordToLatex,
 } from '../utils/logicalRotations';
-import { gateAreaLeftMargin, lineHeight, padding, qubitLabelWidth } from '../utils/LayoutConstants';
+import {
+  gateAreaLeftMargin,
+  logicalLineHeight,
+  padding,
+  qubitLabelWidth,
+} from '../utils/LayoutConstants';
 import './LogicalCircuitView.css';
 
 interface LogicalCircuitViewProps {
   circuit: Circuit;
 }
 
-/** Same baseline as `CircuitView`, so both views show the same wires. */
-const baselineQubits = 5;
-
-/** Vertical centre of a qubit's wire, matching `CircuitView`. */
-const wireY = (qubitIndex: number) => padding + (qubitIndex + 1) * lineHeight;
+/**
+ * Vertical centre of the wire in row `row`. Rows are positions in the drawn
+ * register, not qubit indices: only qubits carrying a gate get a wire, so q_5
+ * can sit directly under q_0. The wire's own label says which qubit it is.
+ */
+const rowY = (row: number) => padding + (row + 1) * logicalLineHeight;
 
 // `CircuitView` shifts its whole wires area 5px left, so its qubit names sit
 // here; mirror that rather than let the two gutters drift apart.
@@ -66,12 +72,13 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
       .join('; ') +
     '.';
 
-  const numQubits = Math.max(baselineQubits, circuit.maxUsedQubitIndex() + 1);
-  // Boxes span every wire, reaching half a line above the first and below the last.
-  const boxTop = wireY(0) - lineHeight / 2;
-  const boxHeight = numQubits * lineHeight;
+  // Only the qubits the circuit actually touches: a qubit with no gate cannot
+  // appear in any generator, and the leftover Clifford is the identity on it.
+  const qubits = useMemo(() => circuit.usedQubits(), [circuit]);
+  // Boxes span every wire, reaching half a row above the first and below the last.
+  const boxTop = rowY(0) - logicalLineHeight / 2;
+  const boxHeight = qubits.length * logicalLineHeight;
   const canvasHeight = boxTop + boxHeight + padding;
-  const isEmpty = circuit.maxUsedQubitIndex() < 0;
 
   return (
     <div className="panel logical-panel">
@@ -80,70 +87,72 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
         <span className="logical-hint">Every rotation commuted to the front of the circuit</span>
       </div>
       <div className="panel-body logical-panel-body">
-        <div className="logical-canvas" style={{ minHeight: `${canvasHeight}px` }}>
-          <div className="logical-wires">
-            {Array.from({ length: numQubits }).map((_, qubitIndex) => (
-              <div key={`wire-${qubitIndex}`}>
-                <div
-                  className="logical-wire"
-                  style={{ top: `${wireY(qubitIndex)}px`, left: `${qubitLabelWidth}px` }}
-                />
-                <span
-                  className="logical-qubit-label"
-                  style={{
-                    top: `${wireY(qubitIndex)}px`,
-                    left: `${qubitLabelLeft}px`,
-                    width: `${qubitLabelWidth}px`,
-                  }}
-                >
-                  <InlineMath math={`q_{${qubitIndex}}`} />
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div
-            className="logical-boxes"
-            style={{
-              paddingTop: `${boxTop}px`,
-              paddingBottom: `${padding}px`,
-              paddingLeft: `${padding + qubitLabelWidth + gateAreaLeftMargin}px`,
-            }}
-          >
-            {drawnRotations.map((rotation, index) => {
-              const { generator, angle, destabilizedQubits } = rotation;
-              const leavesCodeSpace = destabilizedQubits.length > 0;
-              // A negative Pauli shows up as a negated angle. With no angle to
-              // carry it, the minus has to stay on the word itself.
-              const math =
-                angle === undefined
-                  ? `R_{${pauliWordToLatex(generator)}}`
-                  : `R_{${pauliFactorsToLatex(generator)}}(${formatSignedAngle(
-                      angle,
-                      angleDisplay,
-                      generator.sign
-                    )})`;
-              return (
-                <div
-                  key={`logical-rotation-${index}`}
-                  className={`logical-box ${leavesCodeSpace ? 'leaves-code-space' : ''}`}
-                  style={{ height: `${boxHeight}px` }}
-                  title={leavesCodeSpace ? destabilizedWarning(rotation) : undefined}
-                >
-                  <InlineMath math={math} />
+        {qubits.length === 0 ? (
+          <p className="logical-empty">No gates yet.</p>
+        ) : (
+          <div className="logical-canvas" style={{ minHeight: `${canvasHeight}px` }}>
+            <div className="logical-wires">
+              {qubits.map((qubitIndex, row) => (
+                <div key={`wire-${qubitIndex}`}>
+                  <div
+                    className="logical-wire"
+                    style={{ top: `${rowY(row)}px`, left: `${qubitLabelWidth}px` }}
+                  />
+                  <span
+                    className="logical-qubit-label"
+                    style={{
+                      top: `${rowY(row)}px`,
+                      left: `${qubitLabelLeft}px`,
+                      width: `${qubitLabelWidth}px`,
+                    }}
+                  >
+                    <InlineMath math={`q_{${qubitIndex}}`} />
+                  </span>
                 </div>
-              );
-            })}
-            {!isEmpty && (
+              ))}
+            </div>
+
+            <div
+              className="logical-boxes"
+              style={{
+                paddingTop: `${boxTop}px`,
+                paddingBottom: `${padding}px`,
+                paddingLeft: `${padding + qubitLabelWidth + gateAreaLeftMargin}px`,
+              }}
+            >
+              {drawnRotations.map((rotation, index) => {
+                const { generator, angle, destabilizedQubits } = rotation;
+                const leavesCodeSpace = destabilizedQubits.length > 0;
+                // A negative Pauli shows up as a negated angle. With no angle to
+                // carry it, the minus has to stay on the word itself.
+                const math =
+                  angle === undefined
+                    ? `R_{${pauliWordToLatex(generator)}}`
+                    : `R_{${pauliFactorsToLatex(generator)}}(${formatSignedAngle(
+                        angle,
+                        angleDisplay,
+                        generator.sign
+                      )})`;
+                return (
+                  <div
+                    key={`logical-rotation-${index}`}
+                    className={`logical-box ${leavesCodeSpace ? 'leaves-code-space' : ''}`}
+                    style={{ height: `${boxHeight}px` }}
+                    title={leavesCodeSpace ? destabilizedWarning(rotation) : undefined}
+                  >
+                    <InlineMath math={math} />
+                  </div>
+                );
+              })}
               <div
                 className={`logical-box logical-clifford ${cliffordIsTrivial ? 'is-trivial' : ''}`}
                 style={{ height: `${boxHeight}px` }}
               >
                 {cliffordIsTrivial ? 'trivial Clifford' : 'non-trivial Clifford'}
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
