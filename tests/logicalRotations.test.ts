@@ -23,6 +23,7 @@ import {
   splitRegister,
 } from '../src/utils/logicalRotations';
 import { oneDHeisenberg, oneDHeisenbergAuxiliary } from '../src/utils/exampleCircuits';
+import { parseQasm } from '../src/utils/QasmParser';
 
 function gate(targetType: TargetType, target: number): Gate {
   return new Gate({ targetType, targets: [target], controls: [] });
@@ -285,5 +286,111 @@ describe('splitRegister', () => {
 
   it('is empty for an empty register', () => {
     expect(splitRegister([], () => true, [])).toEqual({ logical: [], auxiliary: [] });
+  });
+});
+
+/**
+ * A circuit exercising every rotation type against H, X, S and CX, read in the
+ * way the app reads one: parsed from QASM, then commuted to the front. The
+ * expected generators were checked by hand against the label rules for the
+ * first two blocks -- `h q[1]` leaves `Z_1`/`X_1`, so `rx(theta_1)` generates
+ * `Z_1` and `ry(theta_3)` generates `i*Z_1*X_1 = -Y_1` -- and the whole panel
+ * was confirmed on screen.
+ */
+const mixedRotationsQasm = `OPENQASM 3;
+include "stdgates.inc";
+qubit[4] q;
+input float[64] theta_1;
+input float[64] theta_2;
+input float[64] theta_3;
+input float[64] theta_4;
+input float[64] theta_5;
+input float[64] theta_6;
+input float[64] theta_7;
+input float[64] theta_8;
+input float[64] theta_9;
+input float[64] theta_10;
+input float[64] theta_11;
+input float[64] theta_12;
+input float[64] theta_13;
+input float[64] theta_14;
+input float[64] theta_15;
+input float[64] theta_16;
+input float[64] theta_17;
+input float[64] theta_18;
+input float[64] theta_19;
+h q[1];
+x q[3];
+rx(theta_1) q[1];
+rx(theta_2) q[3];
+ry(theta_3) q[1];
+ry(theta_4) q[3];
+rz(theta_5) q[1];
+rz(theta_6) q[3];
+cx q[3], q[1];
+rx(theta_7) q[1];
+rx(theta_8) q[3];
+ry(theta_9) q[1];
+ry(theta_10) q[3];
+rz(theta_11) q[1];
+rz(theta_12) q[3];
+s q[1];
+rx(theta_13) q[1];
+ry(theta_14) q[1];
+rz(theta_15) q[1];
+x q[1];
+cx q[1], q[3];
+rx(theta_16) q[1];
+rx(theta_17) q[3];
+ry(theta_18) q[3];
+rz(theta_19) q[3];`;
+
+describe('a QASM circuit end to end', () => {
+  const logical = () => computeLogicalRotations(parseQasm(mixedRotationsQasm));
+
+  it('draws only the qubits the circuit uses', () => {
+    expect(parseQasm(mixedRotationsQasm).usedQubits()).toEqual([1, 3]);
+  });
+
+  it('commutes all nineteen rotations to the front, in order', () => {
+    expect(logical().rotations.map((r) => pauliWordToLatex(r.generator))).toEqual([
+      'Z_{1}',
+      'X_{3}',
+      '-Y_{1}',
+      '-Y_{3}',
+      'X_{1}',
+      '-Z_{3}',
+      'Z_{1}',
+      'Z_{1}X_{3}',
+      'Y_{1}Z_{3}',
+      '-Z_{1}Y_{3}',
+      '-X_{1}Z_{3}',
+      '-Z_{3}',
+      '-Y_{1}Z_{3}',
+      'Z_{1}',
+      '-X_{1}Z_{3}',
+      'X_{1}Y_{3}',
+      'Z_{1}X_{3}',
+      'Y_{1}X_{3}',
+      '-X_{1}',
+    ]);
+  });
+
+  it('keeps each rotation tied to the angle it came from', () => {
+    expect(logical().rotations.map((r) => r.angle?.symbol)).toEqual(
+      Array.from({ length: 19 }, (_, i) => `theta_${i + 1}`)
+    );
+  });
+
+  it('leaves a Clifford that does not cancel', () => {
+    expect(logical().cliffordIsTrivial).toBe(false);
+  });
+
+  it('draws every rotation: none is a global phase, none leaves the code space', () => {
+    // QASM fixes no initial states, so there are no auxiliaries to destabilize.
+    for (const rotation of logical().rotations) {
+      expect(isGlobalPhase(rotation)).toBe(false);
+      expect(rotation.destabilizedQubits).toEqual([]);
+    }
   });
 });
