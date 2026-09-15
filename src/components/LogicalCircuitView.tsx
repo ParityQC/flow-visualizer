@@ -7,7 +7,7 @@
  * Not a `Circuit`, so it shares no components with `CircuitView` -- only the
  * wire geometry from `LayoutConstants`, so the two views read as one system.
  */
-import { useCallback, useMemo } from 'react';
+import { CSSProperties, useCallback, useMemo } from 'react';
 import { InlineMath } from './InlineMath';
 import { Circuit } from '../models/Circuit';
 import { formatSignedAngle } from '../models/Angle';
@@ -43,6 +43,15 @@ const rowY = (row: number) => padding + (row + 1) * logicalLineHeight;
 // `CircuitView` shifts its whole wires area 5px left, so its qubit names sit
 // here; mirror that rather than let the two gutters drift apart.
 const qubitLabelLeft = padding - 5;
+
+/**
+ * Run of bare wire before the first box. The wires start at `qubitLabelWidth`
+ * and stop `padding` short of the right edge, so padding the box row by
+ * `padding + wireLead` leaves exactly this much wire after the last box too.
+ * Without it the row's padding cancels the wires' inset and a circuit wide
+ * enough to scroll ends flush with the Clifford box instead of running past it.
+ */
+const wireLead = padding + gateAreaLeftMargin;
 
 export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
   const { angleDisplay, isLabelXVisible, isLabelZVisible } = useDisplaySettings();
@@ -138,11 +147,17 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
 
             <div
               className="logical-boxes"
-              style={{
-                paddingTop: `${boxTop}px`,
-                paddingBottom: `${padding}px`,
-                paddingLeft: `${padding + qubitLabelWidth + gateAreaLeftMargin}px`,
-              }}
+              style={
+                {
+                  paddingTop: `${boxTop}px`,
+                  paddingBottom: `${padding}px`,
+                  paddingLeft: `${qubitLabelWidth + wireLead}px`,
+                  paddingRight: `${padding + wireLead}px`,
+                  // Lets the auxiliary outputs reach past that padding, so they
+                  // end level with the wires above them.
+                  '--logical-wire-lead': `${wireLead}px`,
+                } as CSSProperties
+              }
             >
               {drawnRotations.map((rotation, index) => {
                 const { generator, angle, destabilizedQubits } = rotation;

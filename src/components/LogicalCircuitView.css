@@ -66,7 +66,6 @@
   /* Tops align, so the taller Clifford box hangs below the rotation boxes. */
   align-items: flex-start;
   gap: var(--logical-box-gap);
-  padding-right: 20px;
   /* max-content so a long Pauli word widens the canvas; min-width so the tail
      still reaches the right edge when the panel is wider than the content. */
   width: max-content;
@@ -141,11 +140,15 @@
   position: relative;
   flex: 1 1 auto;
   min-width: 0;
+  /* Starts flush against the Clifford box: the gap belongs between boxes, and
+     counting it here would make the trailing wire longer than the lead. */
+  margin-left: calc(-1 * var(--logical-box-gap));
 }
 
 .logical-aux-output {
   position: absolute;
-  left: calc(-1 * var(--logical-box-gap));
-  right: 0;
+  left: 0;
+  /* Out through the row's right padding, so it ends where the wires above do. */
+  right: calc(-1 * var(--logical-wire-lead));
   transform: translateY(-50%);
 }
