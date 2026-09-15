@@ -40,8 +40,8 @@ function applyCnot(state: State, control: number, target: number): void {
 }
 
 /**
- * Run `circuit` on the basis state `basis`. Only the gate types the examples use
- * are implemented; anything else is a bug in the test's reading of the circuit.
+ * Run `circuit` on the basis state `basis`. Covers the gate types the examples
+ * reach for; anything else throws rather than being silently skipped.
  */
 function simulate(circuit: Circuit, numQubits: number, basis: number): State {
   const state: State = {
@@ -102,21 +102,36 @@ describe('twineQft', () => {
     expect(twineQft.usedQubits()).toEqual([0, 1, 2, 3, 4]);
   });
 
-  it('uses one CNOT pair per label step plus the closing ladder', () => {
-    let cnots = 0;
-    let rotations = 0;
+  it('is built from CNOTs and rotations only', () => {
+    const counts = new Map<string, number>();
     for (const moment of twineQft.moments()) {
       for (const gate of moment.gates()) {
-        if (gate.isControlled()) cnots += 1;
-        if (gate.isRotation) rotations += 1;
+        const name = gate.isControlled() ? `C${gate.targetType.name}` : gate.targetType.name;
+        counts.set(name, (counts.get(name) ?? 0) + 1);
       }
     }
-    // Two CNOTs per label step, n - 1 rounds of n - r steps each, then the ladder.
-    expect(cnots).toBe(2 * ((numQubits * (numQubits - 1)) / 2) + (numQubits - 1));
-    // One Rz per controlled phase, the two end columns, and the Rx Hadamards.
-    expect(rotations).toBe(
-      (numQubits * (numQubits - 1)) / 2 + 2 * (numQubits - 1) + (numQubits - 2)
+    const pairs = (numQubits * (numQubits - 1)) / 2;
+    expect(counts).toEqual(
+      new Map([
+        // Two CNOTs per label step, one step per controlled phase, then the ladder.
+        ['CX', 2 * pairs + (numQubits - 1)],
+        // One Hadamard per qubit, none of them left as a Clifford `H`.
+        ['Rx', numQubits],
+        // One Rz per controlled phase, the two full end columns, and the outer
+        // halves of the two Hadamards written out at the circuit's edges.
+        ['Rz', pairs + 2 * numQubits + 2],
+      ])
     );
+  });
+
+  it('keeps each end column in a single moment', () => {
+    const moments = [...twineQft.moments()];
+    // Third from the front and third from the back; the Hadamards on wire 1
+    // (the bottom qubit) take the two moments outside each of them.
+    for (const column of [moments[2], moments[moments.length - 3]]) {
+      expect([...column.qubits()].sort((a, b) => a - b)).toEqual([0, 1, 2, 3, 4]);
+      expect([...column.gates()].every((gate) => gate.targetType.name === 'Rz')).toBe(true);
+    }
   });
 
   it('implements the quantum Fourier transform up to a global phase', () => {

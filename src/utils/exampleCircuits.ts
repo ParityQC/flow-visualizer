@@ -145,14 +145,21 @@ export const oneDHeisenbergAuxiliary = new Circuit([
  * single `Rz(-pi/2^(k+1))` sitting right there. Each round is one shorter than
  * the last, and together they cover all `n(n-1)/2` controlled phases.
  *
- * A controlled phase also has two one-qubit halves. Those are diagonal and
- * commute with everything diagonal, so they are collected into the `Rz` columns
- * at either end -- before a qubit's own Hadamard for the partners below it,
- * after it for the ones above. The Hadamard itself is the `Rx(pi/2)` on the
- * bottom wire, using `H = i Rz(pi/2) Rx(pi/2) Rz(pi/2)` with the two `Rz(pi/2)`
- * absorbed into those same columns -- which is why a column entry reads
- * `pi - pi/2^w` rather than just the collected `pi/2 - pi/2^w`. The first and
- * last qubit keep a literal `H` and so contribute no `pi/2`.
+ * Every Hadamard here is an `Rx(pi/2)` on the bottom wire, written out rather
+ * than dropped in as an `H`: the app tracks `H` as a Clifford and folds it into
+ * the labels, while it leaves a rotation alone, so spelling it out keeps CNOTs
+ * as the only label-moving gates and every label a plain parity word. The two
+ * `Rz(pi/2)` that `H = i Rz(pi/2) Rx(pi/2) Rz(pi/2)` needs on either side are
+ * diagonal, so they travel out to the `Rz` columns at the two ends.
+ *
+ * Those columns also collect the one-qubit halves of the controlled phases,
+ * which are diagonal as well: the halves from a qubit's partners below it land
+ * in the opening column, the ones from above in the closing column. So a column
+ * entry on wire `w` reads `pi/2 - pi/2^w` collected plus `pi/2` for a Hadamard
+ * half. Wire 1 collects nothing and carries only the half; wire `n` is the one
+ * slot at each end with no half to carry, because the Hadamards at the very
+ * edges of the circuit have to spend their outer `Rz(pi/2)` on a moment of
+ * their own -- an `Rz` on wire 1 does not commute past the CNOT that targets it.
  *
  * The closing CNOT ladder divides the leftover single-qubit label back out of
  * every wire. What is left is the register in reverse order -- exactly the bit
@@ -160,27 +167,32 @@ export const oneDHeisenbergAuxiliary = new Circuit([
  */
 function buildTwineQft(numQubits: number): Circuit {
   const qubit = (wire: number) => numQubits - wire;
-  const circuit = new Circuit();
-  const step = (gate: Gate) => circuit.appendMoment(new Moment([gate]));
+  const quarterTurn = Math.PI / 2;
 
-  /** The end column on `wire`, identical at both ends of the circuit. */
   const columnAngle = (wire: number) =>
     Math.PI / 2 - Math.PI / 2 ** wire + (wire === numQubits ? 0 : Math.PI / 2);
 
-  step(h(qubit(1)));
-  for (let wire = 2; wire <= numQubits; wire++) {
-    step(rz(qubit(wire), Angle.unnamed(columnAngle(wire))));
-  }
+  /** The `Rz` column standing at either end, one gate per wire, one moment. */
+  const endColumn = () =>
+    new Moment(
+      Array.from({ length: numQubits }, (_, index) =>
+        rz(qubit(index + 1), Angle.unnamed(columnAngle(index + 1)))
+      )
+    );
+
+  // The twine itself, compacted on its own so that the end columns stay put.
+  const body = new Circuit();
+  const step = (gate: Gate) => body.appendMoment(new Moment([gate]));
 
   for (let round = 1; round < numQubits; round++) {
     for (let k = 1; k <= numQubits - round; k++) {
       step(cnot(qubit(k), qubit(k + 1)));
       step(cnot(qubit(k + 1), qubit(k)));
       step(rz(qubit(k), Angle.unnamed(-Math.PI / 2 ** (k + 1))));
-      // The Hadamard opening the next round. The last round is followed by the
-      // closing `H` instead, so it needs none.
+      // The Hadamard opening the next round. After the last round the closing
+      // one takes over, so that round needs none.
       if (k === 1 && round < numQubits - 1) {
-        step(rx(qubit(1), Angle.unnamed(Math.PI / 2)));
+        step(rx(qubit(1), Angle.unnamed(quarterTurn)));
       }
     }
   }
@@ -189,12 +201,22 @@ function buildTwineQft(numQubits: number): Circuit {
     step(cnot(qubit(wire), qubit(wire + 1)));
   }
 
-  for (let wire = numQubits; wire >= 2; wire--) {
-    step(rz(qubit(wire), Angle.unnamed(columnAngle(wire))));
-  }
-  step(h(qubit(1)));
+  body.parallelizeGates();
 
-  circuit.parallelizeGates();
+  const circuit = new Circuit();
+  // Opening Hadamard: its trailing Rz(pi/2) is wire 1's entry in the column,
+  // which is why the column comes third and the twine starts against a full one.
+  circuit.appendMoment(new Moment([rz(qubit(1), Angle.unnamed(quarterTurn))]));
+  circuit.appendMoment(new Moment([rx(qubit(1), Angle.unnamed(quarterTurn))]));
+  circuit.appendMoment(endColumn());
+  for (const moment of body.moments()) {
+    circuit.appendMoment(moment);
+  }
+  // Closing Hadamard, the mirror image: the column supplies its leading Rz(pi/2).
+  circuit.appendMoment(endColumn());
+  circuit.appendMoment(new Moment([rx(qubit(1), Angle.unnamed(quarterTurn))]));
+  circuit.appendMoment(new Moment([rz(qubit(1), Angle.unnamed(quarterTurn))]));
+
   return circuit;
 }
 
