@@ -14,6 +14,7 @@ import { formatSignedAngle } from '../models/Angle';
 import { getInitialState, useDisplaySettings } from '../utils/DisplaySettings';
 import {
   computeLogicalRotations,
+  hasDestabilizingRotation,
   isGlobalPhase,
   LogicalRotation,
   splitRegister,
@@ -79,17 +80,24 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
   // Only the qubits the circuit actually touches: a qubit with no gate cannot
   // appear in any generator, and the leftover Clifford is the identity on it.
   const qubits = useMemo(() => circuit.usedQubits(), [circuit]);
-  // Auxiliaries are prepared, not handed in, so they get no wire until the
-  // Clifford; they are drawn below the logical qubits, which keeps the rows a
-  // rotation box spans contiguous.
-  const { logical, auxiliary } = splitRegister(qubits, isPauliVisible, rotations);
+  // Logical qubits on top, auxiliaries below, each group by index.
+  const { logical, auxiliary } = splitRegister(qubits, isPauliVisible);
+  const rows = [...logical, ...auxiliary];
 
-  // Boxes start half a row above the first wire. Rotations reach down over the
-  // logical qubits; the Clifford reaches over the whole register.
+  // An auxiliary is normally prepared rather than handed in, so it gets no wire
+  // until the Clifford. Once any rotation reaches one, that deferral is off and
+  // every auxiliary is drawn as an input.
+  const defersPreparation = !hasDestabilizingRotation(drawnRotations);
+  const inputs = defersPreparation ? logical : rows;
+  const preparedAtClifford = defersPreparation ? auxiliary : [];
+
+  // Boxes start half a row above the first wire. A rotation that stays in the
+  // code space spans the logical qubits; one that does not, and the Clifford,
+  // span the whole register.
   const boxTop = rowY(0) - logicalLineHeight / 2;
-  const rotationHeight = logical.length * logicalLineHeight;
-  const cliffordHeight = qubits.length * logicalLineHeight;
-  const canvasHeight = boxTop + cliffordHeight + padding;
+  const logicalHeight = logical.length * logicalLineHeight;
+  const fullHeight = rows.length * logicalLineHeight;
+  const canvasHeight = boxTop + fullHeight + padding;
   /** Centre of a row, measured inside a box that starts at `boxTop`. */
   const rowCentreInBox = (row: number) => row * logicalLineHeight + logicalLineHeight / 2;
 
@@ -105,7 +113,7 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
         ) : (
           <div className="logical-canvas" style={{ minHeight: `${canvasHeight}px` }}>
             <div className="logical-wires">
-              {logical.map((qubitIndex, row) => (
+              {inputs.map((qubitIndex, row) => (
                 <div key={`wire-${qubitIndex}`}>
                   <div
                     className="logical-wire"
@@ -120,8 +128,8 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
                     }}
                   >
                     <InlineMath math={`q_{${qubitIndex}}`} />
-                    {/* Only shows where the register could not be split, and the
-                        prepared qubits are drawn as inputs after all. */}
+                    {/* Only shows for an auxiliary drawn as an input, which is
+                        what a rotation reaching it forces. */}
                     {getInitialState(isLabelXVisible(qubitIndex), isLabelZVisible(qubitIndex))}
                   </span>
                 </div>
@@ -153,16 +161,16 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
                   <div
                     key={`logical-rotation-${index}`}
                     className={`logical-box ${leavesCodeSpace ? 'leaves-code-space' : ''}`}
-                    style={{ height: `${rotationHeight}px` }}
+                    style={{ height: `${leavesCodeSpace ? fullHeight : logicalHeight}px` }}
                     title={leavesCodeSpace ? destabilizedWarning(rotation) : undefined}
                   >
                     <InlineMath math={math} />
                   </div>
                 );
               })}
-              {auxiliary.length > 0 && (
-                <div className="logical-aux-lead" style={{ height: `${cliffordHeight}px` }}>
-                  {auxiliary.map((qubitIndex, index) => (
+              {preparedAtClifford.length > 0 && (
+                <div className="logical-aux-lead" style={{ height: `${fullHeight}px` }}>
+                  {preparedAtClifford.map((qubitIndex, index) => (
                     <span
                       key={`aux-in-${qubitIndex}`}
                       className="logical-aux-input"
@@ -177,16 +185,16 @@ export function LogicalCircuitView({ circuit }: LogicalCircuitViewProps) {
               )}
               <div
                 className={`logical-box logical-clifford ${cliffordIsTrivial ? 'is-trivial' : ''}`}
-                style={{ height: `${cliffordHeight}px` }}
+                style={{ height: `${fullHeight}px` }}
               >
                 {cliffordIsTrivial ? 'trivial Clifford' : 'non-trivial Clifford'}
               </div>
-              {auxiliary.length > 0 && (
+              {preparedAtClifford.length > 0 && (
                 // The auxiliaries leave the Clifford as ordinary outputs; their
                 // wires exist only from here on, so they are drawn in this tail
                 // rather than in the full-width wires layer.
-                <div className="logical-tail" style={{ height: `${cliffordHeight}px` }}>
-                  {auxiliary.map((qubitIndex, index) => (
+                <div className="logical-tail" style={{ height: `${fullHeight}px` }}>
+                  {preparedAtClifford.map((qubitIndex, index) => (
                     <span
                       key={`aux-out-${qubitIndex}`}
                       className="logical-aux-output"

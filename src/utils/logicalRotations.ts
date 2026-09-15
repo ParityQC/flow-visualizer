@@ -154,36 +154,31 @@ export function isAuxiliaryQubit(qubit: number, isPauliVisible: PauliVisibility)
 
 /**
  * The drawn register, split into the qubits the logical circuit takes as input
- * and the auxiliaries it prepares for itself.
+ * and the auxiliaries it prepares for itself, each group ordered by index.
  *
- * Auxiliaries come last so that the logical qubits are contiguous: a rotation is
- * drawn as one box spanning them, and a box cannot have a hole in it.
- *
- * Two cases drop the split and give back one undivided register:
- *
- *  - Nothing but auxiliaries. There is no input to separate off, and an empty
- *    input half would leave a rotation box no rows to span. The circuit is pure
- *    state preparation.
- *  - Any rotation destabilizes an auxiliary. Deferring a preparation to just
- *    before the Clifford is only sound while the rotations commute past it, and
- *    such a rotation does not -- it acts on the auxiliary, which therefore is an
- *    input after all. One is enough: drawing part of the register one way and
- *    part the other would be harder to read than drawing all of it plainly.
+ * Auxiliaries come last so that the logical qubits are contiguous: a rotation
+ * that stays in the code space is drawn as one box spanning exactly them, and a
+ * box cannot have a hole in it.
  */
 export function splitRegister(
   qubits: number[],
-  isPauliVisible: PauliVisibility,
-  rotations: readonly LogicalRotation[]
+  isPauliVisible: PauliVisibility
 ): { logical: number[]; auxiliary: number[] } {
-  const undivided = { logical: qubits, auxiliary: [] };
-  if (rotations.some((rotation) => rotation.destabilizedQubits.length > 0)) {
-    return undivided;
-  }
-  const logical = qubits.filter((qubit) => !isAuxiliaryQubit(qubit, isPauliVisible));
-  if (logical.length === 0) {
-    return undivided;
-  }
-  return { logical, auxiliary: qubits.filter((qubit) => isAuxiliaryQubit(qubit, isPauliVisible)) };
+  return {
+    logical: qubits.filter((qubit) => !isAuxiliaryQubit(qubit, isPauliVisible)),
+    auxiliary: qubits.filter((qubit) => isAuxiliaryQubit(qubit, isPauliVisible)),
+  };
+}
+
+/**
+ * True when some rotation reaches an auxiliary qubit.
+ *
+ * Such a rotation acts on the auxiliary, so the auxiliary's preparation cannot
+ * be deferred past the rotations to just before the Clifford: it is an input
+ * like any other and has to be drawn with a wire of its own from the start.
+ */
+export function hasDestabilizingRotation(rotations: readonly LogicalRotation[]): boolean {
+  return rotations.some((rotation) => rotation.destabilizedQubits.length > 0);
 }
 
 /**
