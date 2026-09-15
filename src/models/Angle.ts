@@ -194,6 +194,20 @@ export function formatAngle(angle: Angle, mode: AngleDisplayMode): string {
 }
 
 /**
+ * An angle carrying the sign of the Pauli it rotates about, so that a negative
+ * logical Pauli reads `R_{X_0Z_1}(-theta_1)` rather than `R_{-X_0Z_1}(theta_1)`.
+ */
+export function formatSignedAngle(angle: Angle, mode: AngleDisplayMode, sign: 1 | -1): string {
+  if (sign === 1) {
+    return formatAngle(angle, mode);
+  }
+  if (mode !== 'symbolic' && angle.value !== null) {
+    return formatAngle(angle.withValue(-angle.value), mode);
+  }
+  return `-${formatAngle(angle, mode)}`; // assuming symbolic
+}
+
+/**
  * Approximate width of the rendered angle, in characters, for sizing the gate
  * box. It has to follow what is actually rendered rather than the mode, since
  * pi mode falls back to a much wider decimal for an awkward value.

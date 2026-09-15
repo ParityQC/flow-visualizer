@@ -1,0 +1,154 @@
+/* ParityQC © 2026. See the LICENSE file in the top level directory for details. */
+:root {
+  /* Gap between boxes. The auxiliary wires reach across it to touch the
+     Clifford box, so the two have to agree. */
+  --logical-box-gap: 16px;
+}
+
+.logical-panel {
+  flex: 0 1 auto;
+  /* Never let a tall circuit push the main grid out of the viewport. */
+  max-height: 45%;
+  margin-top: 8px;
+  background-color: var(--color-bg);
+}
+
+.logical-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-faint);
+}
+
+.logical-panel-body {
+  padding: 0;
+  overflow: auto;
+}
+
+.logical-empty {
+  margin: 0;
+  padding: 12px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-faint);
+}
+
+/* Sized by the row of boxes, so a long Pauli word scrolls instead of shrinking. */
+.logical-canvas {
+  position: relative;
+  width: max-content;
+  min-width: 100%;
+}
+
+.logical-wires {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.logical-wire {
+  position: absolute;
+  right: 20px;
+  border-bottom: 2px solid var(--color-border-wire);
+}
+
+.logical-qubit-label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+}
+
+/* `position: relative` lifts the boxes above the absolutely placed wires. */
+.logical-boxes {
+  position: relative;
+  display: flex;
+  /* Tops align, so the taller Clifford box hangs below the rotation boxes. */
+  align-items: flex-start;
+  gap: var(--logical-box-gap);
+  /* max-content so a long Pauli word widens the canvas; min-width so the tail
+     still reaches the right edge when the panel is wider than the content. */
+  width: max-content;
+  min-width: 100%;
+}
+
+.logical-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border: 2px solid black;
+  background-color: var(--color-surface);
+  white-space: nowrap;
+}
+
+.logical-clifford {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+.logical-clifford.is-trivial {
+  color: var(--color-text-faint);
+  border-color: var(--color-border);
+}
+
+/* A rotation whose generator still touches an auxiliary qubit's destabilizing
+   Pauli: it does not pull back to a rotation on the logical qubits. Dashed as
+   well as coloured, so the flag does not rest on colour alone. */
+.logical-box.leaves-code-space {
+  border-style: dashed;
+  border-color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+  cursor: help;
+}
+
+/* The auxiliary inputs: `q_1 |0> ---` entering the Clifford box, occupying real
+   space before it so nothing has to be measured to place them. */
+.logical-aux-lead {
+  position: relative;
+  /* Wide enough for a ket; a longer one overflows leftward into empty rows. */
+  width: 64px;
+  flex: 0 0 auto;
+}
+
+.logical-aux-input {
+  position: absolute;
+  /* Anchored to the box edge and growing leftward, so the ket never collides
+     with it however wide the label gets. */
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+}
+
+.logical-aux-stub,
+.logical-aux-output {
+  border-bottom: 2px solid var(--color-border-wire);
+}
+
+/* Crosses the flex gap so the wire meets the box. */
+.logical-aux-stub {
+  width: calc(16px + var(--logical-box-gap));
+  margin-right: calc(-1 * var(--logical-box-gap));
+}
+
+.logical-tail {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  /* Starts flush against the Clifford box: the gap belongs between boxes, and
+     counting it here would make the trailing wire longer than the lead. */
+  margin-left: calc(-1 * var(--logical-box-gap));
+}
+
+.logical-aux-output {
+  position: absolute;
+  left: 0;
+  /* Out through the row's right padding, so it ends where the wires above do. */
+  right: calc(-1 * var(--logical-wire-lead));
+  transform: translateY(-50%);
+}

@@ -5,6 +5,11 @@ import { AngleDisplayMode, angleWidthChars } from '../models/Angle';
 export const padding = 20;
 export const lineHeight = 60;
 export const defaultMomentWidth = 140;
+
+// Row pitch of the logical-rotations panel. Tighter than `lineHeight`, which is
+// sized for a gate box with Pauli labels above and below it; nothing at all is
+// drawn between the wires down there, so the extra room is pure inheritance.
+export const logicalLineHeight = 36;
 export const qubitLabelWidth = 80;
 export const gateRadius = 30;
 

@@ -16,7 +16,7 @@
   --color-border: #ccc;
   --color-border-subtle: #e2e8f0;
   --color-border-divider: #eee;
-  --color-border-wire: blanchedalmond;
+  --color-border-wire: #050e1f;
 
   /* Text */
   --color-text: #333;
@@ -25,8 +25,8 @@
   --color-text-link: #4a5568;
 
   /* Pauli label colors */
-  --color-x-label: #2563eb;
-  --color-z-label: #dc2626;
+  --color-x-label: #6974b3;
+  --color-z-label: #c83c4f;
 
   /* Interactive / status */
   --color-interactive: #3182ce;
@@ -37,6 +37,8 @@
   --color-success-text: #1e6b34;
   --color-error-bg: #fdecea;
   --color-error-text: #a4231b;
+  --color-warning: #e85903;
+  --color-warning-bg: #fdeee6;
 
   /* Layering (z-index scale, low → high). Ordered by intent; note that circuit-internal
      tiers and portaled overlays live in separate stacking contexts. */

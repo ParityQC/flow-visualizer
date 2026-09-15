@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { Circuit } from '../src/models/Circuit';
 import { Gate } from '../src/models/Gates';
 import { Moment } from '../src/models/Moments';
-import { RzTargetType, XTargetType } from '../src/models/Targets';
+import { HTargetType, RzTargetType, XTargetType } from '../src/models/Targets';
 import { Angle } from '../src/models/Angle';
 
 function parameterizedTestCircuit() {
@@ -148,5 +148,28 @@ describe('Circuit.assignMissingAngleSymbols', () => {
     circuit.assignMissingAngleSymbols();
 
     expect(symbolsOf(circuit)).toEqual(['theta_1', 'theta_2']);
+  });
+});
+
+describe('usedQubits', () => {
+  const h = (target: number) =>
+    new Gate({ targetType: new HTargetType(), targets: [target], controls: [] });
+  const cnot = (target: number, control: number) =>
+    new Gate({ targetType: new XTargetType(), targets: [target], controls: [control] });
+
+  it('is empty for a circuit with no gates', () => {
+    expect(new Circuit().usedQubits()).toEqual([]);
+  });
+
+  it('collects controls and targets, sorted and deduplicated', () => {
+    const circuit = new Circuit([new Moment([cnot(5, 0)]), new Moment([h(5), h(2)])]);
+    expect(circuit.usedQubits()).toEqual([0, 2, 5]);
+  });
+
+  it('leaves gaps where a qubit carries no gate', () => {
+    const circuit = new Circuit([new Moment([h(1), h(3)])]);
+    expect(circuit.usedQubits()).toEqual([1, 3]);
+    // ... unlike maxUsedQubitIndex, which only bounds the range.
+    expect(circuit.maxUsedQubitIndex()).toBe(3);
   });
 });
