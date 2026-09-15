@@ -11,6 +11,7 @@ import {
   twineChain,
   oneDHeisenberg,
   oneDHeisenbergAuxiliary,
+  twineQft,
 } from '../utils/exampleCircuits';
 import './CircuitSelector.css';
 
@@ -47,6 +48,11 @@ const circuitOptions: CircuitOption[] = [
     description: 'Heisenberg model with auxiliary qubit',
     circuit: oneDHeisenbergAuxiliary,
     initAuxQubits: [3],
+  },
+  {
+    name: 'Twine QFT',
+    description: 'Quantum Fourier transform on a line of 5 qubits',
+    circuit: twineQft,
   },
 ];
 

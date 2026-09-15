@@ -131,3 +131,71 @@ export const oneDHeisenbergAuxiliary = new Circuit([
   new Moment([cnot(1, 3)]),
   new Moment([cnot(2, 1), sdg(3)]),
 ]);
+
+/**
+ * QFT on a nearest-neighbour line, after Fig. 14(a) of arXiv:2501.14020, which
+ * draws it for six qubits.
+ *
+ * The figure's wire `w` (1 at the bottom) is qubit `numQubits - w` here, so the
+ * twine still runs upwards across the grid.
+ *
+ * Round `r` walks a parity label up the chain: the pair `CX(k+1 -> k)`,
+ * `CX(k -> k+1)` leaves wire `k` carrying the parity of qubit `r` with the qubit
+ * `k` steps along it, so the controlled phase between those two qubits is the
+ * single `Rz(-pi/2^(k+1))` sitting right there. Each round is one shorter than
+ * the last, and together they cover all `n(n-1)/2` controlled phases.
+ *
+ * A controlled phase also has two one-qubit halves. Those are diagonal and
+ * commute with everything diagonal, so they are collected into the `Rz` columns
+ * at either end -- before a qubit's own Hadamard for the partners below it,
+ * after it for the ones above. The Hadamard itself is the `Rx(pi/2)` on the
+ * bottom wire, using `H = i Rz(pi/2) Rx(pi/2) Rz(pi/2)` with the two `Rz(pi/2)`
+ * absorbed into those same columns -- which is why a column entry reads
+ * `pi - pi/2^w` rather than just the collected `pi/2 - pi/2^w`. The first and
+ * last qubit keep a literal `H` and so contribute no `pi/2`.
+ *
+ * The closing CNOT ladder divides the leftover single-qubit label back out of
+ * every wire. What is left is the register in reverse order -- exactly the bit
+ * reversal the QFT ends on.
+ */
+function buildTwineQft(numQubits: number): Circuit {
+  const qubit = (wire: number) => numQubits - wire;
+  const circuit = new Circuit();
+  const step = (gate: Gate) => circuit.appendMoment(new Moment([gate]));
+
+  /** The end column on `wire`, identical at both ends of the circuit. */
+  const columnAngle = (wire: number) =>
+    Math.PI / 2 - Math.PI / 2 ** wire + (wire === numQubits ? 0 : Math.PI / 2);
+
+  step(h(qubit(1)));
+  for (let wire = 2; wire <= numQubits; wire++) {
+    step(rz(qubit(wire), Angle.unnamed(columnAngle(wire))));
+  }
+
+  for (let round = 1; round < numQubits; round++) {
+    for (let k = 1; k <= numQubits - round; k++) {
+      step(cnot(qubit(k), qubit(k + 1)));
+      step(cnot(qubit(k + 1), qubit(k)));
+      step(rz(qubit(k), Angle.unnamed(-Math.PI / 2 ** (k + 1))));
+      // The Hadamard opening the next round. The last round is followed by the
+      // closing `H` instead, so it needs none.
+      if (k === 1 && round < numQubits - 1) {
+        step(rx(qubit(1), Angle.unnamed(Math.PI / 2)));
+      }
+    }
+  }
+
+  for (let wire = numQubits - 1; wire >= 1; wire--) {
+    step(cnot(qubit(wire), qubit(wire + 1)));
+  }
+
+  for (let wire = numQubits; wire >= 2; wire--) {
+    step(rz(qubit(wire), Angle.unnamed(columnAngle(wire))));
+  }
+  step(h(qubit(1)));
+
+  circuit.parallelizeGates();
+  return circuit;
+}
+
+export const twineQft = buildTwineQft(5);
