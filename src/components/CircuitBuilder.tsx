@@ -24,6 +24,7 @@ import logo from '../assets/parityqc_4c_pos.png';
 import { QasmDisplay } from './QasmDisplay';
 import { instantiateTargetType, TargetType } from '../models/Targets';
 import HelpButton from './HelpButton';
+import AboutButton from './AboutButton';
 import { useDisplaySettings } from '../utils/DisplaySettings';
 import { SettingsMenu } from './SettingsMenu';
 import { CircuitSelector } from './CircuitSelector';
@@ -321,6 +322,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
             <SettingsMenu />
             <TheoryHelp />
             <HelpButton />
+            <AboutButton />
             <a href="https://parityqc.com" target="_blank" rel="noopener noreferrer">
               <img className="corner-logo" src={logo} alt="ParityQC" />
             </a>

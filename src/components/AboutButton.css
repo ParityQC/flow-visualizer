@@ -1,0 +1,9 @@
+/* ParityQC © 2026. See the LICENSE file in the top level directory for details. */
+.about-modal {
+  max-width: 440px;
+  max-height: 80vh;
+}
+
+.about-modal a {
+  color: var(--color-text-link);
+}
