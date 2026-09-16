@@ -135,45 +135,6 @@ export const oneDHeisenbergAuxiliary = new Circuit([
 /**
  * QFT on a nearest-neighbour line, after Fig. 14(a) of arXiv:2501.14020, which
  * draws it for six qubits.
- *
- * Qubit `q(w - 1)` is the figure's wire `w`, so wire 1 -- the one the twine is
- * driven from -- is `q0`. That turns the twine triangle upside down relative to
- * the figure, but it numbers the qubits the way the papers do, and it is what
- * makes the logical rotations come out in a readable order: the single-qubit
- * rotations first, then the two-body terms with `Z0`.
- *
- * Round `r` walks a parity label up the chain: the pair `CX(k+1 -> k)`,
- * `CX(k -> k+1)` leaves wire `k` carrying the parity of qubit `r` with the qubit
- * `k` steps along it, so the controlled phase between those two qubits is the
- * single `Rz(pi/2^(k+1))` sitting right there. Each round is one shorter than
- * the last, and together they cover all `n(n-1)/2` controlled phases.
- *
- * Every Hadamard here is an `Rx` on wire 1, written out rather than dropped in
- * as an `H`: the app tracks `H` as a Clifford and folds it into the labels,
- * while it leaves a rotation alone, so spelling it out keeps CNOTs as the only
- * label-moving gates and every label a plain parity word. The two `Rz` that
- * `H = i Rz(pi/2) Rx(pi/2) Rz(pi/2)` needs on either side are diagonal, so they
- * travel out to the `Rz` columns at the two ends.
- *
- * Those columns also collect the one-qubit halves of the controlled phases,
- * which are diagonal as well: for qubit `m`, the halves shared with the qubits
- * ahead of it in the chain land in the opening column, the ones behind it in
- * the closing column. Wire `n` is
- * the one slot at each end with no Hadamard half to carry, because the two
- * Hadamards at the very edges of the circuit have to spend their outer `Rz` on
- * a moment of their own -- an `Rz` on wire 1 does not commute past the CNOT
- * that targets it.
- *
- * Angles follow the sign convention of the papers, which take
- * `R_z(theta) = exp(+i Z theta / 2)` where OpenQASM takes the opposite sign.
- * Read as QASM, the circuit is therefore the *inverse* QFT -- and the two edge
- * Hadamards are written with positive angles because `H` is its own inverse, so
- * the decomposition's sign does not matter there.
- *
- * The closing CNOT chain decodes the leftover single-qubit label back out of
- * every wire, which leaves the register in reverse order -- exactly the bit
- * reversal the QFT ends on. It is placed as late as its dependencies allow, so
- * that it reads as one diagonal run into the closing column.
  */
 function buildTwineQft(numQubits: number): Circuit {
   const qubit = (wire: number) => wire - 1;
