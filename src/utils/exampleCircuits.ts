@@ -137,25 +137,20 @@ export const oneDHeisenbergAuxiliary = new Circuit([
  * draws it for six qubits.
  */
 function buildTwineQft(numQubits: number): Circuit {
-  const qubit = (wire: number) => wire - 1;
   const quarterTurn = Math.PI / 2;
+  const lastQubit = numQubits - 1;
 
-  /**
-   * Wire `wire`'s entry in either end column: the collected one-qubit halves of
-   * the controlled phases, plus the `Rz` half of the wire's Hadamard. Wire 1
-   * carries no collected phases and belongs to an edge Hadamard, so it is that
-   * Hadamard's positive `Rz` alone.
-   */
-  const columnAngle = (wire: number) =>
-    wire === 1
+  /** The angles of the rotations in the Rz column at either end. */
+  const RzColumnAngle = (qubit: number) =>
+    qubit === 0
       ? quarterTurn
-      : Math.PI / 2 ** wire - quarterTurn - (wire === numQubits ? 0 : quarterTurn);
+      : Math.PI / 2 ** (qubit + 1) - quarterTurn - (qubit === lastQubit ? 0 : quarterTurn);
 
-  /** The `Rz` column standing at either end, one gate per wire, one moment. */
-  const endColumn = () =>
+  /** The Rz column standing at either end, one gate per qubit, one moment. */
+  const RzColumn = () =>
     new Moment(
-      Array.from({ length: numQubits }, (_, index) =>
-        rz(qubit(index + 1), Angle.unnamed(columnAngle(index + 1)))
+      Array.from({ length: numQubits }, (_, qubit) =>
+        rz(qubit, Angle.unnamed(RzColumnAngle(qubit)))
       )
     );
 
@@ -164,45 +159,37 @@ function buildTwineQft(numQubits: number): Circuit {
   const rounds = new Circuit();
   const step = (gate: Gate) => rounds.appendMoment(new Moment([gate]));
 
-  for (let round = 1; round < numQubits; round++) {
-    for (let k = 1; k <= numQubits - round; k++) {
-      step(cnot(qubit(k), qubit(k + 1)));
-      step(cnot(qubit(k + 1), qubit(k)));
-      step(rz(qubit(k), Angle.unnamed(Math.PI / 2 ** (k + 1))));
-      // The Hadamard opening the next round. After the last round the closing
-      // one takes over, so that round needs none.
-      if (k === 1 && round < numQubits - 1) {
-        step(rx(qubit(1), Angle.unnamed(-quarterTurn)));
+  for (let round = 0; round < numQubits - 1; round++) {
+    for (let qubit = 0; qubit < numQubits - 1 - round; qubit++) {
+      step(cnot(qubit, qubit + 1));
+      step(cnot(qubit + 1, qubit));
+      step(rz(qubit, Angle.unnamed(Math.PI / 2 ** (qubit + 2))));
+      if (qubit === 0 && round < numQubits - 2) {
+        step(rx(0, Angle.unnamed(-quarterTurn)));
       }
     }
   }
 
   rounds.parallelizeGates();
 
-  // The decoding chain, as late as the rounds allow. Its last CNOT needs a
-  // moment of its own -- the rounds end on an `Rz` on wire 1, which it follows
-  // -- and each earlier link sits one moment ahead of its successor, which is
-  // exactly the free diagonal the rounds leave behind. `addGate` throws rather
-  // than silently misplacing a link if that ever stops being true.
+  // The decoding chain of CNOT gates.
   const body = [...rounds.moments(), new Moment()];
-  for (let link = 1; link < numQubits; link++) {
-    const wire = numQubits - link;
-    body[body.length - numQubits + link].addGate(cnot(qubit(wire), qubit(wire + 1)));
+  for (let control = lastQubit; control >= 1; control--) {
+    body[body.length - control].addGate(cnot(control - 1, control));
   }
 
   const circuit = new Circuit();
-  // Opening Hadamard: its trailing Rz is wire 1's entry in the column, which is
-  // why the column comes third and the twine starts against a full one.
-  circuit.appendMoment(new Moment([rz(qubit(1), Angle.unnamed(quarterTurn))]));
-  circuit.appendMoment(new Moment([rx(qubit(1), Angle.unnamed(quarterTurn))]));
-  circuit.appendMoment(endColumn());
+  // Opening Hadamard: its trailing Rz is q0's entry in the Rz column.
+  circuit.appendMoment(new Moment([rz(0, Angle.unnamed(quarterTurn))]));
+  circuit.appendMoment(new Moment([rx(0, Angle.unnamed(quarterTurn))]));
+  circuit.appendMoment(RzColumn());
   for (const moment of body) {
     circuit.appendMoment(moment);
   }
-  // Closing Hadamard, the mirror image: the column supplies its leading Rz.
-  circuit.appendMoment(endColumn());
-  circuit.appendMoment(new Moment([rx(qubit(1), Angle.unnamed(quarterTurn))]));
-  circuit.appendMoment(new Moment([rz(qubit(1), Angle.unnamed(quarterTurn))]));
+  // Closing Hadamard.
+  circuit.appendMoment(RzColumn());
+  circuit.appendMoment(new Moment([rx(0, Angle.unnamed(quarterTurn))]));
+  circuit.appendMoment(new Moment([rz(0, Angle.unnamed(quarterTurn))]));
 
   return circuit;
 }

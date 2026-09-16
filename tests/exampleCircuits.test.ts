@@ -147,11 +147,13 @@ describe('twineQft', () => {
     }
   });
 
-  it('implements the inverse quantum Fourier transform up to a global phase', () => {
-    // The example follows the papers' sign convention, R_z(theta) = exp(+i Z theta / 2),
-    // where OpenQASM takes the opposite sign -- so read as QASM it is QFT-dagger,
-    // mapping |x> to the superposition with phases exp(-2 pi i x y / N). Wire 1 of
-    // the figure is q0, which carries the most significant bit.
+  it('maps |x> to the phases exp(-2 pi i x y / N) up to a global phase', () => {
+    // Angles are QASM angles, R_z(alpha) = exp(-i alpha Z / 2), negated against the
+    // ones the paper's figure prints so that the circuit performs the figure's
+    // unitary. That is the forward QFT under the classical DFT's sign convention and
+    // the inverse one under the exp(+2 pi i x y / N) convention, so the phase is
+    // asserted directly rather than named. Wire 1 of the figure is q0, the most
+    // significant bit.
     const weight = (qubit: number) => 1 << (numQubits - 1 - qubit);
     const value = (basis: number) => {
       let total = 0;
