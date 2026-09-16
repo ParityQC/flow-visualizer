@@ -1,4 +1,5 @@
-// ParityQC © 2026. See the LICENSE file in the top level directory for details.
+// SPDX-License-Identifier: GPL-2.0-or-later
+// ParityQC © 2026. See LICENSE.txt in the top level directory for details.
 /**
  * Parses a deliberately small subset of OpenQASM 3 back into a `Circuit`.
  *
