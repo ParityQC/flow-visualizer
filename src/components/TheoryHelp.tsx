@@ -202,7 +202,7 @@ export const TheoryHelp: React.FC = () => (
       <p>
         Note that the Hadamard gates are shown decomposed as{' '}
         <InlineMath math="R_z(\frac{\pi}{2})R_x(\frac{\pi}{2})R_z(\frac{\pi}{2})" />, and that the{' '}
-        <InlineMath math="R_x(-\frac{\pi}{2})" /> are not written as <InlineMath math="S^\dagger" />{' '}
+        <InlineMath math="R_x(\frac{\pi}{2})" /> are not written as <InlineMath math="S" />{' '}
         gates, in order to exclude them from the tracking in the flow labels. This helps to see the
         pattern in the labels of the parity twine chains. In the implemented logical rotations this
         results — after the Hadamard gate — in the needed <InlineMath math="Z" />
@@ -217,7 +217,7 @@ export const TheoryHelp: React.FC = () => (
         Note that the last four CNOT gates decode the qubits to nearly the identity: the trivial
         labels from the beginning are retrieved, but in reverse order. The Clifford circuit at the
         end of the logical circuit is therefore non-trivial, but it is just a permutation of the
-        qubits. The signs of the rotations are adjusted to the OpenQASM convention.
+        qubits. 
       </p>
     </div>
   </ModalButton>

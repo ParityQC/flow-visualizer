@@ -133,7 +133,7 @@ export const oneDHeisenbergAuxiliary = new Circuit([
 ]);
 
 /**
- * QFT on a nearest-neighbour line, after Fig. 14(a) of arXiv:2501.14020, which
+ * QFT on a nearest-neighbor line, after Fig. 14(a) of arXiv:2501.14020, which
  * draws it for six qubits.
  */
 function buildTwineQft(numQubits: number): Circuit {
@@ -144,7 +144,7 @@ function buildTwineQft(numQubits: number): Circuit {
   const RzColumnAngle = (qubit: number) =>
     qubit === 0
       ? quarterTurn
-      : Math.PI / 2 ** (qubit + 1) - quarterTurn - (qubit === lastQubit ? 0 : quarterTurn);
+      : - Math.PI / 2 ** (qubit + 1) + quarterTurn + (qubit === lastQubit ? 0 : quarterTurn);
 
   /** The Rz column standing at either end, one gate per qubit, one moment. */
   const RzColumn = () =>
@@ -163,9 +163,9 @@ function buildTwineQft(numQubits: number): Circuit {
     for (let qubit = 0; qubit < numQubits - 1 - round; qubit++) {
       step(cnot(qubit, qubit + 1));
       step(cnot(qubit + 1, qubit));
-      step(rz(qubit, Angle.unnamed(Math.PI / 2 ** (qubit + 2))));
+      step(rz(qubit, Angle.unnamed(-Math.PI / 2 ** (qubit + 2))));
       if (qubit === 0 && round < numQubits - 2) {
-        step(rx(0, Angle.unnamed(-quarterTurn)));
+        step(rx(0, Angle.unnamed(quarterTurn)));
       }
     }
   }
