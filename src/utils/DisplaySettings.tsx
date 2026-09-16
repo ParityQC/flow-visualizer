@@ -1,4 +1,5 @@
-// ParityQC © 2026. See the LICENSE file in the top level directory for details.
+// SPDX-License-Identifier: GPL-2.0-or-later
+// ParityQC © 2026. See LICENSE.txt in the top level directory for details.
 /* eslint-disable react-refresh/only-export-components */
 /**
  * React context for circuit display settings: label visibility (toggle X/Z

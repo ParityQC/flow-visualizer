@@ -1,0 +1,24 @@
+Parity Flow Visualizer
+======================
+
+This file records copyright ownership for this repository.  The license terms
+are in LICENSE.txt; each source file carries its own notice.
+
+
+Copyright holders
+-----------------
+
+Copyright (C) 2026 Parity Quantum Computing GmbH (ParityQC)
+
+Unless a file states otherwise, all files in this repository are copyright
+Parity Quantum Computing GmbH and licensed under version 2 of the GNU
+General Public License, or (at your option) any later version.
+
+SPDX-License-Identifier: GPL-2.0-or-later
+
+Contact
+-------
+
+Parity Quantum Computing GmbH
+Rennweg 1 / Top 314 / 6020 Innsbruck, Austria
+info@parityqc.com / www.parityqc.com

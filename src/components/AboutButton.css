@@ -1,6 +1,10 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /* ParityQC © 2026. See LICENSE.txt in the top level directory for details. */
-.help-modal {
-  max-width: 600px;
+.about-modal {
+  max-width: 440px;
   max-height: 80vh;
+}
+
+.about-modal a {
+  color: var(--color-text-link);
 }

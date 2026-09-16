@@ -1,4 +1,5 @@
-// ParityQC © 2026. See the LICENSE file in the top level directory for details.
+// SPDX-License-Identifier: GPL-2.0-or-later
+// ParityQC © 2026. See LICENSE.txt in the top level directory for details.
 /**
  * Top-level stateful component. Owns the `Circuit` and orchestrates
  * drag-and-drop, two-step controlled/two-qubit placement, the QASM
@@ -24,6 +25,7 @@ import logo from '../assets/parityqc_4c_pos.png';
 import { QasmDisplay } from './QasmDisplay';
 import { instantiateTargetType, TargetType } from '../models/Targets';
 import HelpButton from './HelpButton';
+import AboutButton from './AboutButton';
 import { useDisplaySettings } from '../utils/DisplaySettings';
 import { SettingsMenu } from './SettingsMenu';
 import { CircuitSelector } from './CircuitSelector';
@@ -321,6 +323,7 @@ export function CircuitBuilder({ initialCircuit }: { initialCircuit?: Circuit } 
             <SettingsMenu />
             <TheoryHelp />
             <HelpButton />
+            <AboutButton />
             <a href="https://parityqc.com" target="_blank" rel="noopener noreferrer">
               <img className="corner-logo" src={logo} alt="ParityQC" />
             </a>
