@@ -9,6 +9,7 @@ import React from 'react';
 import FlowFormalism from '../assets/FlowFormalism.png';
 import LabelUpdates from '../assets/LabelUpdates.png';
 import CnotLabels from '../assets/CnotLabels.png';
+import TwineQft from '../assets/TwineQft.png';
 import { InlineMath } from './InlineMath';
 import { ModalButton } from './Modal';
 import { X_LABEL_COLOR, Z_LABEL_COLOR } from '../styles/katexColors';
@@ -174,6 +175,49 @@ export const TheoryHelp: React.FC = () => (
         Note: the figure above is reproduced from the paper, which uses the opposite sign convention{' '}
         <InlineMath math="R_P(\alpha) = \exp(+iP\alpha/2)" />. Reading a logical rotation off the
         labels works the same either way — only the sign in the exponentials differs.
+      </p>
+
+      <h4 className="math-help-heading">The Parity Twine QFT</h4>
+      <p>
+        The flow formalism is a core step in the development of the parity twine quantum Fourier
+        transform (Twine QFT) (
+        <a href="https://arxiv.org/abs/2408.10907v2" target="_blank" rel="noreferrer">
+          arXiv:2408.10907
+        </a>
+        ,{' '}
+        <a href="https://arxiv.org/abs/2604.12465" target="_blank" rel="noreferrer">
+          arXiv:2604.12465
+        </a>
+        ) and the{' '}
+        <a
+          href="https://quantum.cloud.ibm.com/functions?id=parityqc-parity-twine-optimizer"
+          target="_blank"
+          rel="noreferrer"
+        >
+          twine optimizer
+        </a>
+        . You will find the Twine QFT under <em>Load Example Circuit</em>:
+      </p>
+      <img className="math-help-twine-img" src={TwineQft} alt="Twine QFT example circuit" />
+      <p>
+        Note that the Hadamard gates are shown decomposed as{' '}
+        <InlineMath math="R_z(\frac{\pi}{2})R_x(\frac{\pi}{2})R_z(\frac{\pi}{2})" />, and that the{' '}
+        <InlineMath math="R_x(-\frac{\pi}{2})" /> are not written as <InlineMath math="S^\dagger" />{' '}
+        gates, in order to exclude them from the tracking in the flow labels. This helps to see the
+        pattern in the labels of the parity twine chains. In the implemented logical rotations this
+        results — after the Hadamard gate — in the needed <InlineMath math="Z" />
+        -rotations first on the single qubits <InlineMath math="Z_1, Z_2, \ldots" /> and afterwards
+        all <InlineMath math="Z" />
+        -rotations on two-body terms <InlineMath math="Z_0Z_1, Z_0Z_2, \ldots" /> (plus interwoven{' '}
+        <InlineMath math="S" />
+        -gates, plus the final layer of <InlineMath math="Z" />
+        -rotations and a Hadamard).
+      </p>
+      <p>
+        Note that the last four CNOT gates decode the qubits to nearly the identity: the trivial
+        labels from the beginning are retrieved, but in reverse order. The Clifford circuit at the
+        end of the logical circuit is therefore non-trivial, but it is just a permutation of the
+        qubits. The signs of the rotations are adjusted to the OpenQASM convention.
       </p>
     </div>
   </ModalButton>
