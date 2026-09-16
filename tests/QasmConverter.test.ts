@@ -92,7 +92,6 @@ describe('circuitToQasm — rotation angles', () => {
   }
 
   it('emits a valued angle as a float literal and declares nothing', () => {
-    // Explicitly decimal: the default is 'pi', which would write this as pi/4.
     const qasm = circuitToQasm(rotationCircuit(new Angle('theta_1', Math.PI / 4)), 'decimal');
 
     expect(qasm).toContain('rz(0.7853981633974483) q[0];');
