@@ -5,11 +5,17 @@ the [parity flow formalism](https://doi.org/10.1103/6xlb-l92j). Drag and drop
 gates onto the circuit grid to let logical Pauli labels propagate through each
 moment.
 
+It is a side project alongside ParityQC's core work, which you will find at
+<https://parityqc.com/products>. The visualizer carries no support or stability
+commitments. Issues and pull requests are welcome; responses are best-effort.
+
 ## Credits
 
 The original prototype implementation was provided by Maximilian Markl during
 his internship at [ParityQC](https://parityqc.com) (2025/2026), supervised by
 Anette Messinger, Katharina Ludwig, Valentin Stauber, and Reinhard Stahn.
+
+Subsequently the work was extended using AI assistance.
 
 ## Development
 
