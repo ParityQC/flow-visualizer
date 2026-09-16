@@ -12,9 +12,9 @@ Copyright (C) 2026 Parity Quantum Computing GmbH (ParityQC)
 
 Unless a file states otherwise, all files in this repository are copyright
 Parity Quantum Computing GmbH and licensed under version 2 of the GNU
-General Public License.
+General Public License, or (at your option) any later version.
 
-SPDX-License-Identifier: GPL-2.0-only
+SPDX-License-Identifier: GPL-2.0-or-later
 
 Contact
 -------

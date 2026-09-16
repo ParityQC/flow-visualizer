@@ -24,9 +24,9 @@ export const AboutButton: React.FC = () => (
       This program is free software, licensed under version 2 of the{' '}
       <a href={LICENSE_URL} target="_blank" rel="noopener noreferrer">
         GNU General Public License
-      </a>
-      . It comes with ABSOLUTELY NO WARRANTY, and you are welcome to redistribute it under the
-      conditions the license sets out.
+      </a>{' '}
+      or, at your option, any later version. It comes with ABSOLUTELY NO WARRANTY, and you are
+      welcome to redistribute it under the conditions the license sets out.
     </p>
 
     <p>
