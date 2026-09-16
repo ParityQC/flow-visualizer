@@ -136,41 +136,59 @@ export const oneDHeisenbergAuxiliary = new Circuit([
  * QFT on a nearest-neighbour line, after Fig. 14(a) of arXiv:2501.14020, which
  * draws it for six qubits.
  *
- * The figure's wire `w` (1 at the bottom) is qubit `numQubits - w` here, so the
- * twine still runs upwards across the grid.
+ * Qubit `q(w - 1)` is the figure's wire `w`, so wire 1 -- the one the twine is
+ * driven from -- is `q0`. That turns the twine triangle upside down relative to
+ * the figure, but it numbers the qubits the way the papers do, and it is what
+ * makes the logical rotations come out in a readable order: the single-qubit
+ * rotations first, then the two-body terms with `Z0`.
  *
  * Round `r` walks a parity label up the chain: the pair `CX(k+1 -> k)`,
  * `CX(k -> k+1)` leaves wire `k` carrying the parity of qubit `r` with the qubit
  * `k` steps along it, so the controlled phase between those two qubits is the
- * single `Rz(-pi/2^(k+1))` sitting right there. Each round is one shorter than
+ * single `Rz(pi/2^(k+1))` sitting right there. Each round is one shorter than
  * the last, and together they cover all `n(n-1)/2` controlled phases.
  *
- * Every Hadamard here is an `Rx(pi/2)` on the bottom wire, written out rather
- * than dropped in as an `H`: the app tracks `H` as a Clifford and folds it into
- * the labels, while it leaves a rotation alone, so spelling it out keeps CNOTs
- * as the only label-moving gates and every label a plain parity word. The two
- * `Rz(pi/2)` that `H = i Rz(pi/2) Rx(pi/2) Rz(pi/2)` needs on either side are
- * diagonal, so they travel out to the `Rz` columns at the two ends.
+ * Every Hadamard here is an `Rx` on wire 1, written out rather than dropped in
+ * as an `H`: the app tracks `H` as a Clifford and folds it into the labels,
+ * while it leaves a rotation alone, so spelling it out keeps CNOTs as the only
+ * label-moving gates and every label a plain parity word. The two `Rz` that
+ * `H = i Rz(pi/2) Rx(pi/2) Rz(pi/2)` needs on either side are diagonal, so they
+ * travel out to the `Rz` columns at the two ends.
  *
  * Those columns also collect the one-qubit halves of the controlled phases,
- * which are diagonal as well: the halves from a qubit's partners below it land
- * in the opening column, the ones from above in the closing column. So a column
- * entry on wire `w` reads `pi/2 - pi/2^w` collected plus `pi/2` for a Hadamard
- * half. Wire 1 collects nothing and carries only the half; wire `n` is the one
- * slot at each end with no half to carry, because the Hadamards at the very
- * edges of the circuit have to spend their outer `Rz(pi/2)` on a moment of
- * their own -- an `Rz` on wire 1 does not commute past the CNOT that targets it.
+ * which are diagonal as well: for qubit `m`, the halves shared with the qubits
+ * ahead of it in the chain land in the opening column, the ones behind it in
+ * the closing column. Wire `n` is
+ * the one slot at each end with no Hadamard half to carry, because the two
+ * Hadamards at the very edges of the circuit have to spend their outer `Rz` on
+ * a moment of their own -- an `Rz` on wire 1 does not commute past the CNOT
+ * that targets it.
  *
- * The closing CNOT ladder divides the leftover single-qubit label back out of
- * every wire. What is left is the register in reverse order -- exactly the bit
- * reversal the QFT ends on.
+ * Angles follow the sign convention of the papers, which take
+ * `R_z(theta) = exp(+i Z theta / 2)` where OpenQASM takes the opposite sign.
+ * Read as QASM, the circuit is therefore the *inverse* QFT -- and the two edge
+ * Hadamards are written with positive angles because `H` is its own inverse, so
+ * the decomposition's sign does not matter there.
+ *
+ * The closing CNOT chain decodes the leftover single-qubit label back out of
+ * every wire, which leaves the register in reverse order -- exactly the bit
+ * reversal the QFT ends on. It is placed as late as its dependencies allow, so
+ * that it reads as one diagonal run into the closing column.
  */
 function buildTwineQft(numQubits: number): Circuit {
-  const qubit = (wire: number) => numQubits - wire;
+  const qubit = (wire: number) => wire - 1;
   const quarterTurn = Math.PI / 2;
 
+  /**
+   * Wire `wire`'s entry in either end column: the collected one-qubit halves of
+   * the controlled phases, plus the `Rz` half of the wire's Hadamard. Wire 1
+   * carries no collected phases and belongs to an edge Hadamard, so it is that
+   * Hadamard's positive `Rz` alone.
+   */
   const columnAngle = (wire: number) =>
-    Math.PI / 2 - Math.PI / 2 ** wire + (wire === numQubits ? 0 : Math.PI / 2);
+    wire === 1
+      ? quarterTurn
+      : Math.PI / 2 ** wire - quarterTurn - (wire === numQubits ? 0 : quarterTurn);
 
   /** The `Rz` column standing at either end, one gate per wire, one moment. */
   const endColumn = () =>
@@ -180,39 +198,47 @@ function buildTwineQft(numQubits: number): Circuit {
       )
     );
 
-  // The twine itself, compacted on its own so that the end columns stay put.
-  const body = new Circuit();
-  const step = (gate: Gate) => body.appendMoment(new Moment([gate]));
+  // The rounds, compacted on their own so that nothing placed afterwards gets
+  // dragged forward into them.
+  const rounds = new Circuit();
+  const step = (gate: Gate) => rounds.appendMoment(new Moment([gate]));
 
   for (let round = 1; round < numQubits; round++) {
     for (let k = 1; k <= numQubits - round; k++) {
       step(cnot(qubit(k), qubit(k + 1)));
       step(cnot(qubit(k + 1), qubit(k)));
-      step(rz(qubit(k), Angle.unnamed(-Math.PI / 2 ** (k + 1))));
+      step(rz(qubit(k), Angle.unnamed(Math.PI / 2 ** (k + 1))));
       // The Hadamard opening the next round. After the last round the closing
       // one takes over, so that round needs none.
       if (k === 1 && round < numQubits - 1) {
-        step(rx(qubit(1), Angle.unnamed(quarterTurn)));
+        step(rx(qubit(1), Angle.unnamed(-quarterTurn)));
       }
     }
   }
 
-  for (let wire = numQubits - 1; wire >= 1; wire--) {
-    step(cnot(qubit(wire), qubit(wire + 1)));
+  rounds.parallelizeGates();
+
+  // The decoding chain, as late as the rounds allow. Its last CNOT needs a
+  // moment of its own -- the rounds end on an `Rz` on wire 1, which it follows
+  // -- and each earlier link sits one moment ahead of its successor, which is
+  // exactly the free diagonal the rounds leave behind. `addGate` throws rather
+  // than silently misplacing a link if that ever stops being true.
+  const body = [...rounds.moments(), new Moment()];
+  for (let link = 1; link < numQubits; link++) {
+    const wire = numQubits - link;
+    body[body.length - numQubits + link].addGate(cnot(qubit(wire), qubit(wire + 1)));
   }
 
-  body.parallelizeGates();
-
   const circuit = new Circuit();
-  // Opening Hadamard: its trailing Rz(pi/2) is wire 1's entry in the column,
-  // which is why the column comes third and the twine starts against a full one.
+  // Opening Hadamard: its trailing Rz is wire 1's entry in the column, which is
+  // why the column comes third and the twine starts against a full one.
   circuit.appendMoment(new Moment([rz(qubit(1), Angle.unnamed(quarterTurn))]));
   circuit.appendMoment(new Moment([rx(qubit(1), Angle.unnamed(quarterTurn))]));
   circuit.appendMoment(endColumn());
-  for (const moment of body.moments()) {
+  for (const moment of body) {
     circuit.appendMoment(moment);
   }
-  // Closing Hadamard, the mirror image: the column supplies its leading Rz(pi/2).
+  // Closing Hadamard, the mirror image: the column supplies its leading Rz.
   circuit.appendMoment(endColumn());
   circuit.appendMoment(new Moment([rx(qubit(1), Angle.unnamed(quarterTurn))]));
   circuit.appendMoment(new Moment([rz(qubit(1), Angle.unnamed(quarterTurn))]));

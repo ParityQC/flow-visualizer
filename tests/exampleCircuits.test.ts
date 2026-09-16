@@ -5,9 +5,8 @@ import { twineQft } from '../src/utils/exampleCircuits';
 
 /**
  * A state vector over `numQubits` qubits, as separate real and imaginary parts.
- * Qubit `q` is bit `q` of the basis index, so the bottom row of the circuit grid
- * carries the most significant bit -- which is the figure's wire 1, the qubit the
- * QFT Hadamards first.
+ * Qubit `q` is bit `q` of the basis index. Which qubit counts as the most
+ * significant bit is a reading imposed afterwards, not a property of the state.
  */
 interface State {
   re: Float64Array;
@@ -97,6 +96,7 @@ function simulate(circuit: Circuit, numQubits: number, basis: number): State {
 describe('twineQft', () => {
   const numQubits = 5;
   const dim = 1 << numQubits;
+  const moments = [...twineQft.moments()];
 
   it('spans exactly five qubits', () => {
     expect(twineQft.usedQubits()).toEqual([0, 1, 2, 3, 4]);
@@ -104,7 +104,7 @@ describe('twineQft', () => {
 
   it('is built from CNOTs and rotations only', () => {
     const counts = new Map<string, number>();
-    for (const moment of twineQft.moments()) {
+    for (const moment of moments) {
       for (const gate of moment.gates()) {
         const name = gate.isControlled() ? `C${gate.targetType.name}` : gate.targetType.name;
         counts.set(name, (counts.get(name) ?? 0) + 1);
@@ -113,7 +113,7 @@ describe('twineQft', () => {
     const pairs = (numQubits * (numQubits - 1)) / 2;
     expect(counts).toEqual(
       new Map([
-        // Two CNOTs per label step, one step per controlled phase, then the ladder.
+        // Two CNOTs per label step, one step per controlled phase, then the chain.
         ['CX', 2 * pairs + (numQubits - 1)],
         // One Hadamard per qubit, none of them left as a Clifford `H`.
         ['Rx', numQubits],
@@ -125,29 +125,52 @@ describe('twineQft', () => {
   });
 
   it('keeps each end column in a single moment', () => {
-    const moments = [...twineQft.moments()];
-    // Third from the front and third from the back; the Hadamards on wire 1
-    // (the bottom qubit) take the two moments outside each of them.
+    // Third from the front and third from the back; the Hadamard on q0 takes the
+    // two moments outside each of them.
     for (const column of [moments[2], moments[moments.length - 3]]) {
       expect([...column.qubits()].sort((a, b) => a - b)).toEqual([0, 1, 2, 3, 4]);
       expect([...column.gates()].every((gate) => gate.targetType.name === 'Rz')).toBe(true);
     }
   });
 
-  it('implements the quantum Fourier transform up to a global phase', () => {
-    // The QFT maps |x> to the uniform superposition with phases exp(2 pi i x y / N),
-    // so the circuit may differ from it only by one phase shared by every entry.
-    let phase: [number, number] | null = null;
+  it('runs the decoding chain straight into the closing column', () => {
+    // As late as the dependencies allow: one link per moment, the last of them
+    // in the moment just before the column, so the chain reads as one diagonal.
+    const closingColumn = moments.length - 3;
+    for (let link = 1; link < numQubits; link++) {
+      const moment = moments[closingColumn - numQubits + link];
+      const control = numQubits - link;
+      const gate = moment.getGate(control);
+      expect(gate?.controls).toEqual([control]);
+      expect(gate?.targets).toEqual([control - 1]);
+    }
+  });
 
-    for (let x = 0; x < dim; x++) {
-      const state = simulate(twineQft, numQubits, x);
-      for (let y = 0; y < dim; y++) {
-        const angle = (2 * Math.PI * x * y) / dim;
-        const [qftRe, qftIm] = [Math.cos(angle) / Math.sqrt(dim), Math.sin(angle) / Math.sqrt(dim)];
-        // state[y] / qft[y], which is well defined since |qft[y]| = 1 / sqrt(N).
+  it('implements the inverse quantum Fourier transform up to a global phase', () => {
+    // The example follows the papers' sign convention, R_z(theta) = exp(+i Z theta / 2),
+    // where OpenQASM takes the opposite sign -- so read as QASM it is QFT-dagger,
+    // mapping |x> to the superposition with phases exp(-2 pi i x y / N). Wire 1 of
+    // the figure is q0, which carries the most significant bit.
+    const weight = (qubit: number) => 1 << (numQubits - 1 - qubit);
+    const value = (basis: number) => {
+      let total = 0;
+      for (let qubit = 0; qubit < numQubits; qubit++) {
+        if (basis & (1 << qubit)) total += weight(qubit);
+      }
+      return total;
+    };
+
+    let phase: [number, number] | null = null;
+    for (let basis = 0; basis < dim; basis++) {
+      const state = simulate(twineQft, numQubits, basis);
+      const x = value(basis);
+      for (let out = 0; out < dim; out++) {
+        const angle = (-2 * Math.PI * x * value(out)) / dim;
+        const [re, im] = [Math.cos(angle) / Math.sqrt(dim), Math.sin(angle) / Math.sqrt(dim)];
+        // state[out] / expected[out], well defined since |expected| = 1 / sqrt(N).
         const ratio: [number, number] = [
-          (state.re[y] * qftRe + state.im[y] * qftIm) * dim,
-          (state.im[y] * qftRe - state.re[y] * qftIm) * dim,
+          (state.re[out] * re + state.im[out] * im) * dim,
+          (state.im[out] * re - state.re[out] * im) * dim,
         ];
         phase ??= ratio;
         expect(Math.hypot(ratio[0] - phase[0], ratio[1] - phase[1])).toBeLessThan(1e-9);
