@@ -119,5 +119,5 @@
     "isolatedModules": true /* Enforces a set of rules to ensure every single file can be converted from TypeScript to JavaScript in isolation, without needing to check other files.*/,
     "noEmit": true /*Tells the TypeScript compiler (tsc) "Your only job is to check my types for errors. Do not create any JavaScript files."*/
   },
-  "include": ["src"]
+  "include": ["src", "tests", "vite.config.ts", "vitest.setup.ts"]
 }

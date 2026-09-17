@@ -41,7 +41,7 @@ export default tseslint.config(
         ...globals.browser,
       },
       parserOptions: {
-        project: './tsconfig.json',
+        project: './tsconfig.eslint.json',
       },
     },
     settings: {
