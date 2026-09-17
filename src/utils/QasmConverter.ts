@@ -8,13 +8,11 @@ import { Angle, AngleDisplayMode, formatAngleExpression } from '../models/Angle'
 import { Gate } from '../models/Gates';
 
 /**
- * @param angleDisplay how rotation angles are written. In `'pi'` mode it emits
- * things like `rz(pi/2)` if the value is a simple fraction of pi.
+ * @param angleDisplay how rotation angles are written. Defaults to `'pi'`, the
+ * same default the UI starts on, so a value that is a simple fraction of pi is
+ * emitted as `rz(pi/2)` rather than as a float.
  */
-export function circuitToQasm(
-  circuit: Circuit,
-  angleDisplay: AngleDisplayMode = 'decimal'
-): string {
+export function circuitToQasm(circuit: Circuit, angleDisplay: AngleDisplayMode = 'pi'): string {
   // A copy, so rendering the panel cannot mutate the circuit mid-render. The
   // pass is idempotent, so it is a no-op for a circuit that is already named.
   const named = circuit.clone();

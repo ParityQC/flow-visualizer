@@ -131,3 +131,67 @@ export const oneDHeisenbergAuxiliary = new Circuit([
   new Moment([cnot(1, 3)]),
   new Moment([cnot(2, 1), sdg(3)]),
 ]);
+
+/**
+ * QFT on a nearest-neighbor line, after Fig. 14(a) of arXiv:2501.14020, which
+ * draws it for six qubits.
+ */
+function buildTwineQft(numQubits: number): Circuit {
+  const quarterTurn = Math.PI / 2;
+  const lastQubit = numQubits - 1;
+
+  /** The angles of the rotations in the Rz column at either end. */
+  const RzColumnAngle = (qubit: number) =>
+    qubit === 0
+      ? quarterTurn
+      : - Math.PI / 2 ** (qubit + 1) + quarterTurn + (qubit === lastQubit ? 0 : quarterTurn);
+
+  /** The Rz column standing at either end, one gate per qubit, one moment. */
+  const RzColumn = () =>
+    new Moment(
+      Array.from({ length: numQubits }, (_, qubit) =>
+        rz(qubit, Angle.unnamed(RzColumnAngle(qubit)))
+      )
+    );
+
+  // The rounds, compacted on their own so that nothing placed afterwards gets
+  // dragged forward into them.
+  const rounds = new Circuit();
+  const step = (gate: Gate) => rounds.appendMoment(new Moment([gate]));
+
+  for (let round = 0; round < numQubits - 1; round++) {
+    for (let qubit = 0; qubit < numQubits - 1 - round; qubit++) {
+      step(cnot(qubit, qubit + 1));
+      step(cnot(qubit + 1, qubit));
+      step(rz(qubit, Angle.unnamed(-Math.PI / 2 ** (qubit + 2))));
+      if (qubit === 0 && round < numQubits - 2) {
+        step(rx(0, Angle.unnamed(quarterTurn)));
+      }
+    }
+  }
+
+  rounds.parallelizeGates();
+
+  // The decoding chain of CNOT gates.
+  const body = [...rounds.moments(), new Moment()];
+  for (let control = lastQubit; control >= 1; control--) {
+    body[body.length - control].addGate(cnot(control - 1, control));
+  }
+
+  const circuit = new Circuit();
+  // Opening Hadamard: its trailing Rz is q0's entry in the Rz column.
+  circuit.appendMoment(new Moment([rz(0, Angle.unnamed(quarterTurn))]));
+  circuit.appendMoment(new Moment([rx(0, Angle.unnamed(quarterTurn))]));
+  circuit.appendMoment(RzColumn());
+  for (const moment of body) {
+    circuit.appendMoment(moment);
+  }
+  // Closing Hadamard.
+  circuit.appendMoment(RzColumn());
+  circuit.appendMoment(new Moment([rx(0, Angle.unnamed(quarterTurn))]));
+  circuit.appendMoment(new Moment([rz(0, Angle.unnamed(quarterTurn))]));
+
+  return circuit;
+}
+
+export const twineQft = buildTwineQft(5);

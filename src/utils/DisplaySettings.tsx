@@ -49,7 +49,7 @@ export function DisplaySettingsProvider({ children }: { children: ReactNode }) {
 
   const [momentWidth, setMomentWidth] = useState<number>(defaultMomentWidth);
 
-  const [angleDisplay, setAngleDisplay] = useState<AngleDisplayMode>('symbolic');
+  const [angleDisplay, setAngleDisplay] = useState<AngleDisplayMode>('pi');
 
   const togglePhysX = useCallback(() => {
     setState((prev) => ({
