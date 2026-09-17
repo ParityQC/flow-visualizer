@@ -236,6 +236,7 @@ describe('circuitToQasm — error path', () => {
   it('throws on a gate type that does not match any QASM emission branch', () => {
     class UnknownTargetType implements TargetType {
       readonly name = 'WEIRD';
+      readonly latexName = 'WEIRD';
       readonly numTargets = 3;
       readonly numParams = 0;
       clone(): TargetType {
