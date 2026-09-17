@@ -47,6 +47,7 @@ npm run build           # production build
 npm run lint            # ESLint
 npm run format          # Prettier (write)
 npm run format:check    # Prettier (check only)
+npm run check:headers   # license headers present in all source files
 npx vitest run          # tests (single run)
 npm test                # tests (watch mode)
 ```

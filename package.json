@@ -19,6 +19,7 @@
     "test": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "check:headers": "node scripts/check-headers.mjs",
     "format:file": "prettier --write"
   },
   "dependencies": {
