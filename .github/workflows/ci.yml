@@ -35,6 +35,9 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
+      - name: Check license headers
+        run: npm run check:headers
+
       - name: Typecheck
         run: npm run typecheck
 
