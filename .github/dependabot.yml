@@ -7,8 +7,33 @@ updates:
     schedule:
       interval: weekly
     groups:
+      # eslint and @eslint/js are released in lockstep, and typescript-eslint
+      # constrains typescript through a peer range. Bumping any of them alone
+      # might break the lint step.
+      lint-and-types:
+        patterns:
+          - 'eslint'
+          - '@eslint/*'
+          - 'typescript'
+          - 'typescript-eslint'
+          - '@typescript-eslint/*'
+          - 'eslint-plugin-*'
       minor-and-patch:
         update-types: ['minor', 'patch']
+    # A major in this toolchain is an ecosystem-wide event, not a routine bump:
+    ignore:
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@eslint/*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'typescript-eslint'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@typescript-eslint/*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'eslint-plugin-*'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
