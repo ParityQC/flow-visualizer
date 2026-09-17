@@ -10,7 +10,9 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded PR runs are cancelled, but a run on main may be deploying to
+  # Pages and must be left to finish.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
   contents: read
@@ -46,3 +48,48 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  # Publishes the site to GitHub Pages, but only for a push to main and only
+  # once every check above has passed.
+  deploy:
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write # to publish the site
+      id-token: write # to prove the deployment came from this workflow
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # Keep in sync with .devcontainer/devcontainer.json
+          node-version: '24.16.0'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v6
+
+      # index.html references its assets from the site root, so the build has to
+      # know where the site lives. base_path is "/flow-visualizer" for a project
+      # page and "" for a custom domain, so the trailing slash covers both.
+      - name: Build
+        run: npm run build -- --base=${{ steps.pages.outputs.base_path }}/
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./dist
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
