@@ -144,7 +144,7 @@ function buildTwineQft(numQubits: number): Circuit {
   const RzColumnAngle = (qubit: number) =>
     qubit === 0
       ? quarterTurn
-      : - Math.PI / 2 ** (qubit + 1) + quarterTurn + (qubit === lastQubit ? 0 : quarterTurn);
+      : -Math.PI / 2 ** (qubit + 1) + quarterTurn + (qubit === lastQubit ? 0 : quarterTurn);
 
   /** The Rz column standing at either end, one gate per qubit, one moment. */
   const RzColumn = () =>
