@@ -9,6 +9,7 @@
     "type": "git",
     "url": "https://github.com/ParityQC/flow-visualizer"
   },
+  "homepage": "https://parityqc.github.io/flow-visualizer/",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

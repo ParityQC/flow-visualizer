@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/ParityQC/flow-visualizer/actions/workflows/ci.yml/badge.svg)](https://github.com/ParityQC/flow-visualizer/actions/workflows/ci.yml)
 
+**[Open the app](https://parityqc.github.io/flow-visualizer/)** in your browser.
+
 A web-based GUI for building Clifford+rotation quantum circuits and visualizing
 the [parity flow formalism](https://doi.org/10.1103/6xlb-l92j). Drag and drop
 gates onto the circuit grid to let logical Pauli labels propagate through each
