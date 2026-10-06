@@ -108,7 +108,7 @@ export const twineChain = new Circuit([
   new Moment([cnot(3, 2)]),
   new Moment([cnot(2, 3)]),
   new Moment([cnot(4, 3)]),
-  new Moment([cnot(3, 4)]),  
+  new Moment([cnot(3, 4)]),
 ]);
 
 export const oneDHeisenberg = new Circuit([
