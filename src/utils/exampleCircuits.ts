@@ -101,14 +101,14 @@ export const testCircuit = new Circuit([
 ]);
 
 export const twineChain = new Circuit([
-  new Moment([cnot(1, 0)]),
   new Moment([cnot(0, 1)]),
-  new Moment([cnot(2, 1)]),
+  new Moment([cnot(1, 0)]),
   new Moment([cnot(1, 2)]),
-  new Moment([cnot(3, 2)]),
+  new Moment([cnot(2, 1)]),
   new Moment([cnot(2, 3)]),
-  new Moment([cnot(4, 3)]),
+  new Moment([cnot(3, 2)]),
   new Moment([cnot(3, 4)]),
+  new Moment([cnot(4, 3)]),
 ]);
 
 export const oneDHeisenberg = new Circuit([
