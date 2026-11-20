@@ -142,8 +142,7 @@ export const TheoryHelp: React.FC = () => (
       <ul>
         <li>
           <InlineMath>X_i</InlineMath> and <InlineMath>Z_i</InlineMath> anticommute:{' '}
-          <InlineMath math={`${xc('⟨1⟩')}${zc('1')}`} />
-          = <InlineMath math="-" />
+          <InlineMath math={`${xc('⟨1⟩')}${zc('1')}`} />= <InlineMath math="-" />
           <InlineMath math={`${zc('1')}${xc('⟨1⟩')}`} />
         </li>
         <li>
